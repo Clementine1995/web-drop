@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="https://cdn.bootcss.com/three.js/90/three.js"></script>
+</head>
+<body>
+    <div id="container"></div>
+</body>
+<script>
+    let scene = new THREE.Scene();
+    let camera = new THREE.PerspectiveCamera(60,window.innerWidth/window.innerHeight,1,1000);
+    camera.position.set(0, 0, 10);
+    var renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth,window.innerHeight);
+    document.getElementById('container').appendChild(renderer.domElement);
+    let cubeGeometry = new THREE.BoxGeometry(1,1,1);
+    let cubeMaterial = new THREE.MeshBasicMaterial({
+        color:0xff0000
+    });
+    let cube = new THREE.Mesh(cubeGeometry,cubeMaterial);
+    scene.add(cube);
+    renderer.render(scene,camera);
+</script>
+</html>

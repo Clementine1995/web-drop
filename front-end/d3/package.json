@@ -1,0 +1,17 @@
+{
+  "name": "d3-demo",
+  "version": "1.0.0",
+  "description": "A d3 learn project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "d3.js"
+  ],
+  "dependencies": {
+    "d3": "^5.5.0"
+  },
+  "author": "",
+  "license": "ISC"
+}
