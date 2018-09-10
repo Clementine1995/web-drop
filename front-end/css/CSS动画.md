@@ -295,6 +295,65 @@ skew(30deg, 10deg) 如下图：
 
 ![斜切2](http://7vik63.com1.z0.glb.clouddn.com/wp-content/uploads/2013/11/0bfc4a49f06867291c61e0e0e7c801f5_m.jpg)
 
+#### perspective 透视
+
+指定3D的视距。默认值是none表示无3D效果，即2D扁平化。perspective只能设px值(em也可以)，指定观察者距离z=0平面的距离，为元素及其内容应用透视变换。当值为0或负值时，无透视变换。不能设%百分比。值越小表示用户眼睛距离屏幕越近，相当于创建一个较大的3D舞台。反之，值越大表示用户眼睛距离屏幕越远，相当于创建一个较小的3D舞台。
+
+语法：`perspective: none|length|inherit|initial|unset;`
+
+借用W3C的图配合translateZ来帮助理解视距。
+
+![视距](https://upload-images.jianshu.io/upload_images/1959053-8a2f99e7daa03d53.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/450)
+
+图中d就是perspective视距，Z就是translateZ轴的位移。Z轴正向位移时，3D舞台将放大。反之，Z轴负向位移时，3D舞台将缩小。上图Z是d的一半，因此3D舞台上的元素将是原来的2倍。下图Z同样是d的一半，但由于是负值，所以3D舞台上的元素将缩小三分之一。
+
+perspective()与perspective属性区别
+
+1. 前者perspective()函数指定只针对当前变形元素，需要和transform其他函数一起使用，仅表示当前变形元素的视距。
+2. 后者perspective属性指定用于3D舞台，即3D舞台的视距，里面的子元素共享这个视距
+
+##### perspective-origin
+
+设置视距的基点，看W3C的图就能明白
+
+![视距基点](https://upload-images.jianshu.io/upload_images/1959053-e0e076eda979e4b2.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/450)
+
+基点默认值是50% 50%即center，表示视距基点在中心点不进行任何位移。你可以让基点在XY轴上进行位移，产生上图那样的效果。注意该属性同样应该定义在父元素上，适用于整个3D舞台。它需要和perspective属性结合着一起用。效果如下图：
+
+![效果图](https://upload-images.jianshu.io/upload_images/1959053-8d45944cfc482f8c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/350)
+
+##### backface-visibility
+
+用于是否可以看见3D舞台背面，默认值visible表示背面可见，可以设成hidden让背面不可见。通常当旋转时，如果不希望背面显示出来，该属性就很有用，设成hidden即可。
+
+![效果图1](https://upload-images.jianshu.io/upload_images/1959053-7ad9c5e3b6d70c92.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/594)
+
+```css
+  .stage{ float: left; margin: 5px; perspective: 200px; }
+  .container { transform-style: preserve-3d; }
+  .image { backface-visibility: hidden; }
+  .front { position: absolute; z-index: 1; }
+  .back { transform: rotateY(180deg); }
+  .stage:nth-child(1) .container{ transform: rotateY(0deg); }
+  .stage:nth-child(2) .container{ transform: rotateY(30deg); }
+  .stage:nth-child(3) .container{ transform: rotateY(60deg); }
+  .stage:nth-child(4) .container{ transform: rotateY(90deg); }
+  .stage:nth-child(5) .container{ transform: rotateY(120deg);
+  .stage:nth-child(6) .container{ transform: rotateY(150deg); }
+  .stage:nth-child(7) .container{ transform: rotateY(180deg); }
+
+  <div class="stage"> //为节约篇幅该DOM请无脑复制7个
+    <div class="container">
+      <img class="image front" src="head75.png" />
+      <img class="image back" src="bg75.png" />
+    </div>
+  </div>
+```
+
+DOM结构中就能看出，是两张图片（一正一反）叠在了一起。由于变形元素img设了backface-visibility: hidden;，当Y轴旋转超过90度时（Y轴旋转正好90度时，正中间图4为一片空白），正面的图片将不可见，底下的背面图片显示出来了。如果将img的backface-visibility属性去掉（默认为visibility），效果如下图。Y轴旋转超过90度时，将显示正面的图片的背部（所谓背部对屏幕来说其实就是图片矩阵的X轴值取反）：
+
+![效果图2](https://upload-images.jianshu.io/upload_images/1959053-01e8299fe34665b3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/593)
+
 #### 综合应用
 
 + 平行四边形
@@ -369,7 +428,7 @@ skew(30deg, 10deg) 如下图：
 
     -moz-transform: skew(45deg);
     -ms-transform: skew(45deg);
-    -webkit-transform: skew(45deg); 
+    -webkit-transform: skew(45deg);
   }
 ```
 
@@ -379,7 +438,7 @@ skew(30deg, 10deg) 如下图：
 
 ```css
   dom结构：
-  <div class="btn">home</div> 
+  <div class="btn">home</div>
 
   样式设计：
   .btn{
@@ -603,7 +662,7 @@ skew(30deg, 10deg) 如下图：
     top: 0;
     right: 0;
     background: linear-gradient(-30deg, transparent 30px, rgba(0, 0, 0, .7) 0);
-    transform: rotate(-120deg); 
+    transform: rotate(-120deg);
    }
 ```
 
