@@ -274,9 +274,9 @@ scaleZ(): 指定Z轴的缩放倍数;
 
 图中可看出，元素相对于x轴发生了反转，但是缩放效果并没有受影响。
 
-#### skew 斜切
+#### skew 斜切（倾斜）
 
-对象进行2D空间斜切。常与 transform-origin 一起使用。
+对象进行2D空间斜切。常与 transform-origin 一起使用。skew,其实使用的频率不是很高,当然也没有最低，但是往往，一直都不知道他的变化规则。所以使用起来有点摸不着头脑，动画上的使用,也就没那么优先考虑。
 
 使用规则：
 
@@ -285,6 +285,14 @@ skew(): 第一个参数对应X轴[必须], 第二个参数对应Y轴[当不设�
 skewX(): 指定X轴的斜切;
 skewY(): 指定Y轴的斜切;
 ```
+
+skewX(30deg) 如下图：
+
+![斜切1](http://7vik63.com1.z0.glb.clouddn.com/wp-content/uploads/2013/11/8da73888f08c712cd2b86af3e02b5d0b_m.jpg)
+
+skew(30deg, 10deg) 如下图：
+
+![斜切2](http://7vik63.com1.z0.glb.clouddn.com/wp-content/uploads/2013/11/0bfc4a49f06867291c61e0e0e7c801f5_m.jpg)
 
 #### 综合应用
 
