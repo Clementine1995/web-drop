@@ -1,14 +1,18 @@
 # CSS动画相关知识
 
 >内容参考自[CSS Transform属性及应用](https://github.com/junruchen/junruchen.github.io/wiki/CSS-Transform%E5%B1%9E%E6%80%A7%E5%8F%8A%E5%BA%94%E7%94%A8)
+
 >内容参考自[CSS动画：animation、transition、transform、translate傻傻分不清](https://juejin.im/post/5b137e6e51882513ac201dfb)
 
 ## 容易混淆的几个css属性
 
-animation  动画~关键帧，往复性。用于设置动画属性，它是一个简写的属性，包含6个属性
-transition  过渡~ 属性，触发动作，一过性。
-transform 变换~ 复杂的变换参数。用于元素进行旋转、缩放、移动或倾斜。
-translate（移动）translate只是transform的一个属性值，即移动。
+animation  动画。关键帧，往复性。用于设置动画属性，它是一个简写的属性，包含6个属性
+
+transition  过渡。属性，触发动作，一过性。
+
+transform 变换。复杂的变换参数。用于元素进行旋转、缩放、移动或倾斜。
+
+translate 移动。translate只是transform的一个属性值，即移动。
 
 ## transition
 
@@ -262,6 +266,7 @@ scaleZ(): 指定Z轴的缩放倍数;
 ```
 
 效果图：
+
 ![效果图](https://camo.githubusercontent.com/954441d71fdcca651c70b32bd7fd458f9c521e2e/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d623462353833376530343933373639622e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f343030)
 
 图中可看出，元素相对于x轴发生了反转，但是缩放效果并没有受影响。
@@ -318,6 +323,7 @@ skewY(): 指定Y轴的斜切;
 ```
 
 确实实现了平行四边形的效果，但是里面的内容也被斜切了，并不完美。
+
 ![2.png](https://camo.githubusercontent.com/c4166152b175aa5d9b613e8253abddd3426aa93e/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d633861313563623739656435313265322e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f31323430)
 
 下面介绍两种方向来实现平行四边形，且内容不会受影响。
@@ -328,8 +334,8 @@ skewY(): 指定Y轴的斜切;
 
 ```css
   dom结构：
-  <div class=".box">
-    <div class="btn">home</div> 
+  <div class="box">
+    <div class="btn">home</div>
   </div>
 
   样式设计：
