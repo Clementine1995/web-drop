@@ -1,7 +1,6 @@
 # CSS动画相关知识
 
 >内容参考自[CSS Transform属性及应用](https://github.com/junruchen/junruchen.github.io/wiki/CSS-Transform%E5%B1%9E%E6%80%A7%E5%8F%8A%E5%BA%94%E7%94%A8)
-
 >内容参考自[CSS动画：animation、transition、transform、translate傻傻分不清](https://juejin.im/post/5b137e6e51882513ac201dfb)
 
 ## 容易混淆的几个css属性
@@ -276,7 +275,7 @@ scaleZ(): 指定Z轴的缩放倍数;
 
 #### skew 斜切（倾斜）
 
-对象进行2D空间斜切。常与 transform-origin 一起使用。skew,其实使用的频率不是很高,当然也没有最低，但是往往，一直都不知道他的变化规则。所以使用起来有点摸不着头脑，动画上的使用,也就没那么优先考虑。
+对象进行2D空间斜切。常与 transform-origin 一起使用。skew,其实使用的频率不是很高,当然也没有最低，但是往往，一直都不知道他的变化规则。所以使用起来有点摸不着头脑，动画上的使用,也就没那么优先考虑。y轴顺时针转为正，X轴逆时针转为正。
 
 使用规则：
 
@@ -285,6 +284,8 @@ skew(): 第一个参数对应X轴[必须], 第二个参数对应Y轴[当不设�
 skewX(): 指定X轴的斜切;
 skewY(): 指定Y轴的斜切;
 ```
+
+需要注意的是：skew(45deg,45deg)时，会使元素不可见，本来xy轴就有90°差距，再分别旋转45°，相当于180°了，而两个轴旋转角度同为正或负且绝对值超过90°时，元素会发生反转。
 
 skewX(30deg) 如下图：
 
