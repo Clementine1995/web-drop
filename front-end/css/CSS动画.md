@@ -1,6 +1,7 @@
 # CSS动画相关知识
 
 >内容参考自[CSS Transform属性及应用](https://github.com/junruchen/junruchen.github.io/wiki/CSS-Transform%E5%B1%9E%E6%80%A7%E5%8F%8A%E5%BA%94%E7%94%A8)
+>内容参考自[CSS动画：animation、transition、transform、translate傻傻分不清](https://juejin.im/post/5b137e6e51882513ac201dfb)
 
 ## 容易混淆的几个css属性
 
@@ -260,6 +261,11 @@ scaleZ(): 指定Z轴的缩放倍数;
   }
 ```
 
+效果图：
+![效果图](https://camo.githubusercontent.com/954441d71fdcca651c70b32bd7fd458f9c521e2e/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d623462353833376530343933373639622e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f343030)
+
+图中可看出，元素相对于x轴发生了反转，但是缩放效果并没有受影响。
+
 #### skew 斜切
 
 对象进行2D空间斜切。常与 transform-origin 一起使用。
@@ -278,3 +284,313 @@ skewY(): 指定Y轴的斜切;
 + 梯形
 + 菱形
 + 折角
+
+##### 平行四边形
+
+原理：使用skew斜切来实现。
+
+先看效果图：
+
+![平行四边形](https://camo.githubusercontent.com/382cc4cb85502868f9e48748d6f61649434fb73f/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d656137613732653934356264316664652e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f31323430)
+
+看到效果图，最先想到的是对元素使用skew斜切效果。
+
+简单使用斜切代码：
+
+```css
+  dom结构：
+  <div class="btn">Home</div>
+
+  样式设计：
+  .btn{
+    width: 150px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    background-color: #fb3;
+
+    transform: skew(-45deg);
+
+    -moz-transform: skew(-45deg);
+    -ms-transform: skew(-45deg);
+    -webkit-transform: skew(-45deg);
+  }
+```
+
+确实实现了平行四边形的效果，但是里面的内容也被斜切了，并不完美。
+![2.png](https://camo.githubusercontent.com/c4166152b175aa5d9b613e8253abddd3426aa93e/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d633861313563623739656435313265322e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f31323430)
+
+下面介绍两种方向来实现平行四边形，且内容不会受影响。
+
+第一种是比较常见的，嵌套一层结构，父元素进行斜切，子元素抵消掉斜切。
+
+代码：
+
+```css
+  dom结构：
+  <div class=".box">
+    <div class="btn">home</div> 
+  </div>
+
+  样式设计：
+  .box{
+    width: 150px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    background-color: #fb3;
+
+    transform: skew(-45deg);
+
+    -moz-transform: skew(-45deg);
+    -ms-transform: skew(-45deg);
+    -webkit-transform: skew(-45deg);
+  }
+  .btn{
+    transform: skew(45deg);
+
+    -moz-transform: skew(45deg);
+    -ms-transform: skew(45deg);
+    -webkit-transform: skew(45deg); 
+  }
+```
+
+第二种方法是使用伪元素，将斜切背景应用在伪元素上。
+
+代码：
+
+```css
+  dom结构：
+  <div class="btn">home</div> 
+
+  样式设计：
+  .btn{
+    position: relative;
+    width: 150px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+  }
+  .btn:after{
+    position:absolute;
+    content: '';
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: #fb3;
+
+    z-index: -1; /* 保证背景不会覆盖住文字 */
+
+    transform: skew(-45deg);
+
+    -moz-transform: skew(-45deg);
+    -ms-transform: skew(-45deg);
+    -webkit-transform: skew(-45deg);
+  }
+```
+
+##### 梯形
+
+梯形的实现相对平行四边形来说要复杂一些，需要借助perspective()透视来实现。
+
+先看效果图：
+
+![梯形](https://camo.githubusercontent.com/778995534007037564a167c83d2b187fdf066453/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d346235313831356630373538656463332e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f31323430)
+
+代码：
+
+```css
+  dom结构：
+  <div class="box">home</div>
+
+  基本样式
+  .box {
+      position: relative;
+      width: 200px;
+      height: 60px;
+      margin: 50px;
+      line-height: 60px;
+      text-align: center;
+  }
+```
+
+下面来说明一下如何实现梯形效果：
+
+和平行四边形的原理一样，梯形的背景仍要写在伪元素上，以防止字体变形。
+
+代码如下：
+
+```css
+  .box:after {
+    position: absolute;
+    content: '';
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+    background-color: #fb3;
+    transform: perspective(20px) rotatex(5deg);
+
+    -moz-transform: perspective(20px) rotatex(5deg);
+    -ms-transform: perspective(20px) rotatex(5deg);
+    -webkit-transform: perspective(20px) rotatex(5deg);
+  }
+```
+
+为更好的查看效果，可以给box加上半透明的背景，效果图：
+
+![梯形1](https://camo.githubusercontent.com/07786d095573ed227ef038bb470b5da459ce3bc8/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d383736303339613366643931616238392e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f31323430)
+
+旋转是以元素的中心线进行旋转的，所以要修改一下旋转原点，增加以下代码：
+
+```css
+    transform-origin: bottom;
+    －moz-transform-origin: bottom;
+    -ms-transform-origin: bottom;
+    -webkit-transform-origin: bottom;
+```
+
+在看效果图：
+
+![梯形2](https://camo.githubusercontent.com/2b0b0839eb3c9cdefb68a6686c0e798b2b4cc72c/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d626532353333373734316162656436312e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f31323430)
+
+这时可以发现，元素的高度已经严重缩水了，这时候可以使用scale进行y轴的缩放，修改transform代码如下：
+
+```css
+    transform: perspective(20px) rotatex(5deg) scaley(1.3);
+    －moz-transform-origin: perspective(20px) rotatex(5deg) scaley(1.3);
+    -ms-transform-origin: perspective(20px) rotatex(5deg) scaley(1.3);
+    -webkit-transform-origin: perspective(20px) rotatex(5deg) scaley(1.3);
+```
+
+效果：
+
+![梯形3](https://camo.githubusercontent.com/cad1c415ac02e58adc764c25b35be3a4dda0b7c8/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d383732383137666230646636633861662e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f31323430)
+
+当然也可以利用修改transform-origin的值实现不同的梯形。
+
+![梯形4](https://camo.githubusercontent.com/15db8953932bd7bc0c37b9a634c5705fc8006c74/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d666564393833313130636465376433372e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f31323430)
+
+代码如下[别忘记兼容性，加上浏览器前缀]：
+
+```css
+    右侧直角
+    transform-origin: right;
+    transform: perspective(20px) rotatex(5deg);
+
+    左侧直角
+    transform-origin: left;
+    transform: perspective(20px) rotatex(5deg);
+```
+
+##### 菱形
+
+菱形的实现有两种，第一种是有rotate结合scale实现，第二种是用clip-path实现。
+
+首先对父级进行旋转 代码：
+
+```css
+  dom结构
+  <div class="box">
+    <img src="img/test.png">
+  </div>
+
+  基本样式设计：
+  .box{
+    width: 200px;
+    height: 200px;
+    border: 1px solid;
+    overflow: hidden;
+
+    transform: rotate(45deg);
+    -mos-transform: rotate(45deg);
+    -mz-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+  }
+  .box img{
+    width: 100%;
+  }
+```
+
+效果图：
+
+![菱形1](https://camo.githubusercontent.com/afcc130cfdd51932b90104056a7eb9cd418927ac/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d656661623431333236643765353962392e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f353030)
+
+现在可以加上scale属性了，更改transform属性为：
+
+```css
+    transform: rotate(-45deg) scale(1.41);
+```
+
+![菱形2](https://camo.githubusercontent.com/a75a726f2a210accd20f72c6fd81e1bd2078f7aa/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d666338646631343865343864343839312e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f353030)
+
+但是这个方法有限制，每次必须要计算scale放大的比例，并且当图片不是正方形时，就没办法实现较好的菱形效果。
+
+第二种方案，使用clip-path实现。不需要嵌套任何元素。
+
+```css
+    clip-path: polygon(0 50%, 50% 0, 100% 50%, 50% 100%);
+```
+
+效果图：
+
+![菱形3](https://camo.githubusercontent.com/765684c723550fe70fcd1744e740f69b460c8af1/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d663631323237633733626538386339372e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f363030)
+
+##### 折角效果
+
+如果是规则的折角图案，如下图所示，可直接用background实现，详情可见文章[背景应用](https://github.com/junruchen/junruchen.github.io/wiki/CSS-Background%E7%A5%9E%E5%A5%87%E7%9A%84%E6%B8%90%E5%8F%98%E8%89%B2)
+
+![折角1](https://camo.githubusercontent.com/fdf8628b96adc9f8a2c3b3d974c7c83ac4b7105f/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d333238353665356637656361356263342e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f363030)
+
+代码就不过多说明了,代码示例：
+
+```css
+    dom结构
+    <div class="box"></div>
+
+    基本样式
+    .box {
+        width: 200px;
+        height: 200px;
+        background-color: #58a; /*hack 回退*/
+        background: linear-gradient(225deg, transparent 20px, rgba(0, 0, 0, .7) 0), linear-gradient(225deg, transparent 20px, yellowgreen 0);
+        background-size: 28px, 100%;
+        background-repeat: no-repeat;
+        background-position: right top, center;
+    }
+```
+
+不同角度的折角实现：
+
+效果图：
+
+![折角2](https://camo.githubusercontent.com/f3320f412e01fc914adf12f9304ae9aaa60cdda9/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d316362366233373235363136313930312e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f363030)
+
+代码：
+
+```css
+  .box{
+    position: relative;
+    background-color: #58a; /*hack 回退*/
+    background: linear-gradient(-150deg, transparent 30px, yellowgreen 0);
+  }
+
+  .box:before {
+    position: absolute;
+    content: '';
+    width: 62px;
+    height: 34px;
+    top: 0;
+    right: 0;
+    background: linear-gradient(-30deg, transparent 30px, rgba(0, 0, 0, .7) 0);
+    transform: rotate(-120deg); 
+   }
+```
+
+仍需要借助渐变色实现背景，然后旋转。
+
+也可以进行更多的优化，如阴影，圆角，效果图如下：
+
+![折角3](https://camo.githubusercontent.com/fb718cf317ca548d73bfc44871aae90a81b7c340/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d666138353639313865323231653431392e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f363030)
