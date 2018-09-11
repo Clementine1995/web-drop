@@ -120,7 +120,7 @@ translate有一个最常见的应用，即当元素宽度高度不固定时，�
 
 代码示例：
 
-```html
+```css
   dom结构
   <div class="box">
     <div class="item">center</div>
@@ -176,29 +176,29 @@ rotateZ(): 指定Z轴的旋转角度;
 ```css
  /* X轴旋转45度 */
     .item1{
-        transform: rotateX(-45deg);
+      transform: rotateX(-45deg);
 
-        -moz-transform: rotateX(-45deg);
-        -ms-transform: rotateX(-45deg);
-        -webkit-transform: rotateX(-45deg);
+      -moz-transform: rotateX(-45deg);
+      -ms-transform: rotateX(-45deg);
+      -webkit-transform: rotateX(-45deg);
     }
 
     /* Y轴旋转45度 */
     .item2{
-        transform: rotateY(-45deg);
+      transform: rotateY(-45deg);
 
-        -moz-transform: rotateY(-45deg);
-        -ms-transform: rotateY(-45deg);
-        -webkit-transform: rotateY(-45deg);
+      -moz-transform: rotateY(-45deg);
+      -ms-transform: rotateY(-45deg);
+      -webkit-transform: rotateY(-45deg);
     }
 
     /* Z轴旋转45度 */
     .item3{
-        transform: rotateZ(-45deg);
+      transform: rotateZ(-45deg);
 
-        -moz-transform: rotateZ(-45deg);
-        -ms-transform: rotateZ(-45deg);
-        -webkit-transform: rotateZ(-45deg);
+      -moz-transform: rotateZ(-45deg);
+      -ms-transform: rotateZ(-45deg);
+      -webkit-transform: rotateZ(-45deg);
     }
 ```
 
@@ -486,12 +486,12 @@ DOM结构中就能看出，是两张图片（一正一反）叠在了一起。�
 
   基本样式
   .box {
-      position: relative;
-      width: 200px;
-      height: 60px;
-      margin: 50px;
-      line-height: 60px;
-      text-align: center;
+    position: relative;
+    width: 200px;
+    height: 60px;
+    margin: 50px;
+    line-height: 60px;
+    text-align: center;
   }
 ```
 
@@ -526,10 +526,10 @@ DOM结构中就能看出，是两张图片（一正一反）叠在了一起。�
 旋转是以元素的中心线进行旋转的，所以要修改一下旋转原点，增加以下代码：
 
 ```css
-    transform-origin: bottom;
-    －moz-transform-origin: bottom;
-    -ms-transform-origin: bottom;
-    -webkit-transform-origin: bottom;
+  transform-origin: bottom;
+  －moz-transform-origin: bottom;
+  -ms-transform-origin: bottom;
+  -webkit-transform-origin: bottom;
 ```
 
 在看效果图：
@@ -539,10 +539,10 @@ DOM结构中就能看出，是两张图片（一正一反）叠在了一起。�
 这时可以发现，元素的高度已经严重缩水了，这时候可以使用scale进行y轴的缩放，修改transform代码如下：
 
 ```css
-    transform: perspective(20px) rotatex(5deg) scaley(1.3);
-    －moz-transform-origin: perspective(20px) rotatex(5deg) scaley(1.3);
-    -ms-transform-origin: perspective(20px) rotatex(5deg) scaley(1.3);
-    -webkit-transform-origin: perspective(20px) rotatex(5deg) scaley(1.3);
+  transform: perspective(20px) rotatex(5deg) scaley(1.3);
+  －moz-transform-origin: perspective(20px) rotatex(5deg) scaley(1.3);
+  -ms-transform-origin: perspective(20px) rotatex(5deg) scaley(1.3);
+  -webkit-transform-origin: perspective(20px) rotatex(5deg) scaley(1.3);
 ```
 
 效果：
@@ -556,13 +556,13 @@ DOM结构中就能看出，是两张图片（一正一反）叠在了一起。�
 代码如下[别忘记兼容性，加上浏览器前缀]：
 
 ```css
-    右侧直角
-    transform-origin: right;
-    transform: perspective(20px) rotatex(5deg);
+  右侧直角
+  transform-origin: right;
+  transform: perspective(20px) rotatex(5deg);
 
-    左侧直角
-    transform-origin: left;
-    transform: perspective(20px) rotatex(5deg);
+  左侧直角
+  transform-origin: left;
+  transform: perspective(20px) rotatex(5deg);
 ```
 
 ##### 菱形
@@ -601,7 +601,7 @@ DOM结构中就能看出，是两张图片（一正一反）叠在了一起。�
 现在可以加上scale属性了，更改transform属性为：
 
 ```css
-    transform: rotate(-45deg) scale(1.41);
+  transform: rotate(-45deg) scale(1.41);
 ```
 
 ![菱形2](https://camo.githubusercontent.com/a75a726f2a210accd20f72c6fd81e1bd2078f7aa/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d666338646631343865343864343839312e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f353030)
@@ -611,7 +611,7 @@ DOM结构中就能看出，是两张图片（一正一反）叠在了一起。�
 第二种方案，使用clip-path实现。不需要嵌套任何元素。
 
 ```css
-    clip-path: polygon(0 50%, 50% 0, 100% 50%, 50% 100%);
+  clip-path: polygon(0 50%, 50% 0, 100% 50%, 50% 100%);
 ```
 
 效果图：
@@ -626,6 +626,21 @@ clip-path属性可以防止部分元素通过定义的剪切区域来显示，�
 裁剪路径是我们用来裁剪元素的路径，它标记了我们需要裁剪的区域。它可以是个简单的形状（比如Web中常见的矩形），也可以是一个复杂的多边形（不规则的多边形）。
 裁剪区域是裁剪路径闭合后所包含的全部区域。
 
+浏览器会裁剪掉裁剪区域以外的区域，不仅是背景及其它类似的内容，也包括 border、text-shadow 等。更赞的是，浏览器不会捕获元素裁剪区域以外的 hover、click 等事件。
+
+clip-path语法：`clip-path: <clip-source> | [ <basic-shape> || <geometry-box> ] | none`
+
+其默认值是none。另外简单介绍clip-path几个属性值：
+
++ clip-source: 可以是内、外部的SVG的clipPath元素的URL引用
++ basic-shape: 使用一些基本的形状函数创建的一个形状。主要包括circle()、ellipse()、inset()和polygon()。具体的说明可以看CSS Shapes中有关于说明。另外在CSS Shapes 101一文中也有详细介绍。
++ geometry-box: 是可选参数。此参数和basic-shape函数一起使用时，可以为basic-shape的裁剪工作提供参考盒子。如果geometry-box由自身指定，那么它会使用指定盒子形状作为裁剪的路径，包括任何(由border-radius提供的)的角的形状。
+
+注意：
+
+1. 使用clip-path要从同一个方向绘制，如果顺时针绘制就一律顺时针，逆时针就一律逆时针，因为polygon是一个连续线段，若线段彼此有交集，裁剪区域就会有相减的情况发生，当然如果你特意需要这样的效果除外。
+2. 如果绘制时采用比例的方式绘制，长宽就必须要先行设定，不然有可能绘制出来的长宽和我们想像的就会有差距，使用像素绘制就不会有这样的现象。
+
 ##### 折角效果
 
 如果是规则的折角图案，如下图所示，可直接用background实现，详情可见文章[背景应用](https://github.com/junruchen/junruchen.github.io/wiki/CSS-Background%E7%A5%9E%E5%A5%87%E7%9A%84%E6%B8%90%E5%8F%98%E8%89%B2)
@@ -635,19 +650,19 @@ clip-path属性可以防止部分元素通过定义的剪切区域来显示，�
 代码就不过多说明了,代码示例：
 
 ```css
-    dom结构
-    <div class="box"></div>
+  dom结构
+  <div class="box"></div>
 
-    基本样式
-    .box {
-        width: 200px;
-        height: 200px;
-        background-color: #58a; /*hack 回退*/
-        background: linear-gradient(225deg, transparent 20px, rgba(0, 0, 0, .7) 0), linear-gradient(225deg, transparent 20px, yellowgreen 0);
-        background-size: 28px, 100%;
-        background-repeat: no-repeat;
-        background-position: right top, center;
-    }
+  基本样式
+  .box {
+    width: 200px;
+    height: 200px;
+    background-color: #58a; /*hack 回退*/
+    background: linear-gradient(225deg, transparent 20px, rgba(0, 0, 0, .7) 0), linear-gradient(225deg, transparent 20px, yellowgreen 0);
+    background-size: 28px, 100%;
+    background-repeat: no-repeat;
+    background-position: right top, center;
+  }
 ```
 
 不同角度的折角实现：
@@ -682,4 +697,3 @@ clip-path属性可以防止部分元素通过定义的剪切区域来显示，�
 也可以进行更多的优化，如阴影，圆角，效果图如下：
 
 ![折角3](https://camo.githubusercontent.com/fb718cf317ca548d73bfc44871aae90a81b7c340/687474703a2f2f75706c6f61642d696d616765732e6a69616e7368752e696f2f75706c6f61645f696d616765732f313530303331352d666138353639313865323231653431392e706e673f696d6167654d6f6772322f6175746f2d6f7269656e742f7374726970253743696d61676556696577322f322f772f363030)
-
