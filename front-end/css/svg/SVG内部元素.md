@@ -124,7 +124,6 @@
 /* 图二 多边形，将起点与终点连接 */
 <svg width="200" height="200">
   <polygon points="50,10 80,90 10,30 90,30 20,90" stroke="#fb3" stroke-width="3" fill="transparent"></polygon>
-</svg>
 ```
 
 参数说明：
@@ -201,8 +200,8 @@
 
 ```html
 <svg width="500" height="500">
-    <path d="M50,50 A60 30 0 1,0 150,50 Z" stroke="#fb3" stroke-width="4px" fill="transparent"></path>
-  </svg>
+  <path d="M50,50 A60 30 0 1,0 150,50 Z" stroke="#fb3" stroke-width="4px" fill="transparent"></path>
+</svg>
 ```
 
 分析：起点坐标（50，50），终点坐标（150，50），角度为0。角度弧线大小 large-arc-flag为1，选择大弧度，根据下面分析图，即选择红色的弧线，又绘制方向sweep-flag为0，为逆时针，即从起点沿逆时针防线绘制到终点，所以红色弧线位于下方。
@@ -372,8 +371,7 @@ clipPath元素主要用来剪裁元素，clipPath元素定义范围外的内容�
 
 ```html
 <svg height="30" width="200">
-  <a xlink:href="https://github.com/junruchen/junruchen.github.io/wiki/SVG基础"
-target="_blank">
+  <a xlink:href="https://github.com/junruchen/junruchen.github.io/wiki/SVG基础" target="_blank">
     <text x="100" y="100" fill="#ffbb33">SVG基础</text>
   </a>
 </svg>
@@ -394,7 +392,7 @@ target="_blank">
 ```html
 <svg width="200" height="200">
   <defs>
-    <marker 
+    <marker
       id="markerDemo1"
       viewBox="0 0 12 12"
       refX= "6"
@@ -407,8 +405,8 @@ target="_blank">
     </marker>
   </defs>
 
-  <line 
-    x1="10" y1="10" 
+  <line
+    x1="10" y1="10"
     x2="160" y2="160"
     stroke="blue" stroke-width="2"
     marker-end="url(#markerDemo1)"></line>
@@ -443,7 +441,7 @@ target="_blank">
 ```html
 <svg width="200" height="200">
   <defs>
-    <marker 
+    <marker
       id="markerDemo2"
       viewBox="0 0 12 12"
       refX= "6"
@@ -456,8 +454,8 @@ target="_blank">
     </marker>
   </defs>
 
-  <path 
-    d="M20,70 T80,100 T160,80 T300,120 T200,90"     
+  <path
+    d="M20,70 T80,100 T160,80 T300,120 T200,90"
     stroke="blue" stroke-width="2" fill="transparent"
     marker-start="url(#markerDemo2)"
     marker-mid="url(#markerDemo2)"
@@ -526,10 +524,8 @@ target="_blank">
 <svg height="120" width="120">
   <defs>
     <filter id="f1" x="0" y="0" width="200%" height="200%">
-      <feOffset result="offOut" in="SourceGraphic" dx="20" 
-dy="20" />
-      <feBlend in="SourceGraphic" in2="offOut" 
-mode="normal" />
+      <feOffset result="offOut" in="SourceGraphic" dx="20" dy="20" />
+      <feBlend in="SourceGraphic" in2="offOut" mode="normal" />
     </filter>
   </defs>
   <rect width="90" height="90" stroke="green" stroke-width="3"
@@ -579,7 +575,7 @@ mode="normal" />
      <linearGradient id="demo1"
                      x1="0%" y1="0%"
                      x2="0%" y2="100%">
-       <stop offset="0%" stop-color="#5588aa" stop-opacity="1" />          
+       <stop offset="0%" stop-color="#5588aa" stop-opacity="1" />
        <stop offset="100%" stop-color="#ffbb33" stop-opacity="1" />
      </linearGradient>
    </defs>
