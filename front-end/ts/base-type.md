@@ -19,7 +19,9 @@ let octalLiteral: number = 0o744;
 
 还可以使用模版字符串，它可以定义多行文本和内嵌表达式
 
-`let name: string = \`Gene\`;`
+```typescript
+let name: string = `Gene`;
+```
 
 ## 数组
 
