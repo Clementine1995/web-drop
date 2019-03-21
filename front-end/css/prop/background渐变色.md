@@ -296,3 +296,180 @@ background: repeating-radial-gradient(rgba(200, 0, 0, 0.5) 0, rgba(200, 0, 0, 0.
 ```
 
 ## 圆锥渐变
+
+>参考自[神奇的 conic-gradient 圆锥渐变](https://www.cnblogs.com/coco1s/p/7079529.html)
+跟上面的两种渐变相似，conic-gradient称为圆锥渐变，给 CSS 世界带来了更多可能。
+
+### 基本用法
+
+```()
+{
+    /* Basic example */
+    background: conic-gradient(deeppink, yellowgreen);
+}
+```
+
+![圆锥渐变基本用法](https://user-images.githubusercontent.com/8554143/27376034-8db14a3e-56a3-11e7-8c8a-a0effd547f85.png)
+
+## 与线性渐变及圆锥渐变的异同
+
+那么它和另外两个渐变的区别在哪里呢？
+
++ linear-gradient 线性渐变的方向是一条直线，可以是任何角度
++ radial-gradient径向渐变是从圆心点以椭圆形状向外扩散
+而从方向上来说，圆锥渐变的方向是这样的：
+
+![conic-gradient渐变方向](https://user-images.githubusercontent.com/8554143/27382897-516784c2-56bb-11e7-995d-b3ca16340acc.gif)
+
+划重点：
+
+从图中可以看到，圆锥渐变的渐变方向和起始点。**起始点是图形中心，然后以顺时针方向绕中心实现渐变效果**。
+
+## 使用 conic-gradient 实现颜色表盘
+
+从上面了解了 `conic-gradient` 最简单的用法，我们使用它实现一个最简单的颜色表盘。
+
+`conic-gradient` 不仅仅只是从一种颜色渐变到另一种颜色，与另外两个渐变一样，可以实现多颜色的过渡渐变。
+
+由此，想到了彩虹，我们可以依次列出 `赤橙黄绿青蓝紫` 七种颜色：
+
+`conic-gradient: (red, orange, yellow, green, teal, blue, purple)`
+上面表示，在圆锥渐变的过程中，颜色从设定的第一个 `red` 开始，渐变到 `orange` ，再到 `yellow` ，一直到最后设定的 `purple` 。并且每一个区间是等分的。
+
+我们再给加上 `border-radius: 50%` ，假设我们的 CSS 如下，
+
+```()
+{
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: conic-gradient(red, orange, yellow, green, teal, blue, purple);
+}
+```
+
+看看效果：
+
+![image](https://user-images.githubusercontent.com/8554143/27414889-87f07334-5736-11e7-9722-5d4899b6b363.png)
+
+wow，已经有了初步形状了。但是，总感觉哪里不大自然。
+
+嗯？问题出在哪里呢？一是颜色不够丰富不够明亮，二是起始处与结尾处衔接不够自然。让我再稍微调整一下。
+
+我们知道，表示颜色的方法，除了 `rgb()` 颜色表示法之外，还有 `hsl()` 表示法。
+
+>hsl() 被定义为色相-饱和度-明度（Hue-saturation-lightness）
+
++ 色相（H）是色彩的基本属性，就是平常所说的颜色名称，如红色、黄色等。
++ 饱和度（S）是指色彩的纯度，越高色彩越纯，低则逐渐变灰，取0-100%的数值。
++ 明度（V），亮度（L），取0-100%。
+这里，我们通过改变色相得到一个较为明亮完整的颜色色系。
+
+也就是采用这样一个过渡 `hsl(0%, 100%, 50%) --> hsl(100%, 100%, 50%)`，中间只改变色相，生成 20 个过渡状态。借助 SCSS ，CSS 语法如下:
+
+```()
+$colors: ();
+$totalStops:20;
+
+@for $i from 0 through $totalStops{
+    $colors: append($colors, hsl($i *(360deg/$totalStops), 100%, 50%), comma);
+}
+.colors {
+    width: 200px;
+    height: 200px;
+    background: conic-gradient($colors);
+    border-radius: 50%;
+}
+```
+
+得到如下效果图，这次的效果很好：
+![image](https://user-images.githubusercontent.com/8554143/27417984-c6966530-574a-11e7-8402-2acaaea8137b.png)
+
+## 配合百分比使用
+
+当然，我们可以更加具体的指定圆锥渐变每一段的比例，配合百分比，可以很轻松的实现饼图。
+
+假设我们有如下 CSS：
+
+```()
+{
+  width: 200px;
+  height: 200px;
+  background: conic-gradient(deeppink 0, deeppink 30%, yellowgreen 30%, yellowgreen 70%, teal 70%, teal 100%);
+  border-radius: 50%;
+}
+```
+
+上图，我们分别指定了 0~30%，30%~70%，70%~100% 三个区间的颜色分别为 deeppink(深红)，yellowgreen(黄绿) 以及 teal(青) ，可以得到如下饼图：
+
+![image](https://user-images.githubusercontent.com/8554143/27433045-70cb75b0-5785-11e7-8627-3a6122464d42.png)
+
+当然，上面只是百分比的第一种写法，还有另一种写法也能实现：
+
+```()
+{
+  background: conic-gradient(deeppink 0 30%, yellowgreen 0 70%, teal 0 100%);
+}
+```
+
+这里表示 ：
+
+1. 0-30% 的区间使用 deeppink
+2. 0-70% 的区间使用 yellowgreen
+3. 0-100% 的区间使用 teal
+而且，先定义的颜色的层叠在后定义的颜色之上。
+
+## 配合 background-size 使用
+
+使用了百分比控制了区间，再配合使用 `background-size` 就可以实现各种贴图啦。
+
+我们首先实现一个基础圆锥渐变图形如下：
+
+```()
+{
+  width: 250px;
+  height: 250px;
+  margin: 50px auto;
+  background: conic-gradient(#000 12.5%, #fff 0 37.5%, #000 0 62.5%, #fff 0 87.5%, #000 0);
+}
+```
+
+效果图：
+
+![image](https://user-images.githubusercontent.com/8554143/27434355-0bf875e2-578b-11e7-8eff-f32df7e9ed3b.png)
+
+再加上 `background-size: 50px 50px;`，也就是：
+
+```()
+{
+  width: 250px;
+  height: 250px;
+  margin: 50px auto;
+  background: conic-gradient(#000 12.5%, #fff 0 37.5%, #000 0 62.5%, #fff 0 87.5%, #000 0);
+  background-size: 50px 50px;
+}
+```
+
+得到：
+
+![image](https://user-images.githubusercontent.com/8554143/27434369-19407d08-578b-11e7-91e2-f8af5a8a9687.png)
+
+## 重复圆锥渐变 repaeting-conic-gradient
+
+与线性渐变及径向渐变一样，圆锥渐变也是存在重复圆锥渐变 `repaet-conic-gradient` 的。
+
+我们假设希望不断重复的片段是 0~30° 的一个片段，它的 CSS 代码是 `conic-gradient(deeppink 0 15deg, yellowgreen 0 30deg)` 。
+
+![image](https://user-images.githubusercontent.com/8554143/27437316-739f5c66-5794-11e7-9547-6a50509cc5f5.png)
+
+那么，使用了 `repaeting-conic-gradient` 之后，会自动填充满整个区域，CSS 代码如下：
+
+```()
+{
+  width: 200px;
+  height: 200px;
+  background: repeating-conic-gradient(deeppink 0 15deg, yellowgreen 0 30deg);
+  border: 1px solid #000;
+}
+```
+
+![image](https://user-images.githubusercontent.com/8554143/27437279-590b69bc-5794-11e7-8c78-f50f8bca9557.png)
