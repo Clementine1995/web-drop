@@ -294,3 +294,5 @@ background-position: 0 0 , 20px 20px;
 ```css
 background: repeating-radial-gradient(rgba(200, 0, 0, 0.5) 0, rgba(200, 0, 0, 0.5) 20px, transparent 0, transparent 40px);
 ```
+
+## 圆锥渐变

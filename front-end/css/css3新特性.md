@@ -116,3 +116,16 @@ background-blend-mode和mix-blend-mode
 ## shapes
 
 ## 新增长度单位（vh、vw、rem）
+
+## CSS变量
+
+```()
+// 声明一个变量：
+:root{
+  --bgColor:#000;
+}
+// 使用变量
+.main{
+  background:var(--bgColor);
+}
+```
