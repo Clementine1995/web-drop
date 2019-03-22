@@ -179,7 +179,7 @@ background: repeating-linear-gradient(#fb3, #fb3 20%, #58a 80%, #58a 100%);
 
 ```css
 图一:
-background: linear-gradient(0, rgba(200, 0, 0, 0.5) 50%, transparent 0), 
+background: linear-gradient(0, rgba(200, 0, 0, 0.5) 50%, transparent 0),
             linear-gradient(90deg, rgba(200, 0, 0, 0.5) 50%, transparent 0);
 background-size: 20px;
 
@@ -189,9 +189,9 @@ background: linear-gradient(0, rgba(200, 0, 0, 0.5) 1px, transparent 0),
 background-size: 20px;
 
 图三:
-background: linear-gradient(0, #fff 1px, transparent 0), 
+background: linear-gradient(0, #fff 1px, transparent 0),
             linear-gradient(90deg, #fff 1px, transparent 0),
-            linear-gradient(0, #fff 4px, transparent 0), 
+            linear-gradient(0, #fff 4px, transparent 0),
             linear-gradient(90deg, #fff 4px, transparent 0), #58a;
 background-size: 20px, 20px, 40px, 40px;
 
@@ -200,16 +200,16 @@ background-size: 20px, 20px, 40px, 40px;
 background: linear-gradient(-125deg, #fff 15px, #58a 0);
 
 图五:
-background: linear-gradient(125deg, #fff 15px, #58a 0), 
+background: linear-gradient(125deg, #fff 15px, #58a 0),
             linear-gradient(-125deg, #fff 15px, #58a 0);
 background-size: 50% 100%;
 background-position: left, right;
 background-repeat: no-repeat;
 
 图六:
-background: linear-gradient(125deg, #fff 15px, #58a 0), 
+background: linear-gradient(125deg, #fff 15px, #58a 0),
             linear-gradient(-125deg, #fff 15px, #58a 0),
-            linear-gradient(45deg, #fff 15px, #58a 0), 
+            linear-gradient(45deg, #fff 15px, #58a 0),
             linear-gradient(-45deg, #fff 15px, #58a 0);
 background-size: 50% 50%;
 background-position: top left, top right, bottom left, bottom right;
