@@ -291,7 +291,7 @@ place-items可以让align-items和justify-items属性写在单个声明中。语
 + start - 网格与网格容器的左边对齐
 + end - 网格与网格容器的右边对齐
 + center - 网格与网格容器的中间对齐
-+ stretch - 调整g rid item 的大小，让宽度填充整个网格容器
++ stretch - 调整 grid item 的大小，让宽度填充整个网格容器
 + space-around - 在 grid item 之间设置均等宽度的空白间隙，其外边缘间隙大小为中间空白间隙宽度的一半
 + space-between - 在 grid item 之间设置均等宽度空白间隙，其外边缘无间隙
 + space-evenly - 在每个 grid item 之间设置均等宽度的空白间隙，包括外边缘

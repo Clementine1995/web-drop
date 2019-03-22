@@ -70,6 +70,8 @@ background:url('test.jpg') no-repeat left,url(logo.png) no-repeat right;
 
 语法：text-overflow: clip|ellipsis|string
 
+### text-overflow
+
 ### 文字阴影
 
 语法：text-shadow:水平阴影，垂直阴影，模糊的距离，以及阴影的颜色。
@@ -129,3 +131,11 @@ background-blend-mode和mix-blend-mode
   background:var(--bgColor);
 }
 ```
+
+### text-decoration
+
+CSS3里面开始支持对文字的更深层次的渲染，具体有三个属性可供设置：
+
+text-fill-color: 设置文字内部填充颜色
+text-stroke-color: 设置文字边界填充颜色
+text-stroke-width: 设置文字边界宽度
