@@ -72,6 +72,8 @@ background:url('test.jpg') no-repeat left,url(logo.png) no-repeat right;
 
 ### text-overflow
 
+### writing-mode
+
 ### 文字阴影
 
 语法：text-shadow:水平阴影，垂直阴影，模糊的距离，以及阴影的颜色。
