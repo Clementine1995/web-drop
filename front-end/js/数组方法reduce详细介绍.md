@@ -1,8 +1,8 @@
 # 数组方法Reduce介绍
 
->[Array.prototype.reduce 实用指南](https://juejin.im/post/5bab8a9c6fb9a05d0e2e6bf0)\n
->[精读《用 Reduce 实现 Promise 串行执行》](https://juejin.im/post/5bd65b98f265da0a91458ee6)\n
->[JS进阶篇--JS数组reduce()方法详解及高级技巧](https://segmentfault.com/a/1190000010731933)\n
+>[Array.prototype.reduce 实用指南](https://juejin.im/post/5bab8a9c6fb9a05d0e2e6bf0)
+[精读《用 Reduce 实现 Promise 串行执行》](https://juejin.im/post/5bd65b98f265da0a91458ee6)
+[JS进阶篇--JS数组reduce()方法详解及高级技巧](https://segmentfault.com/a/1190000010731933)
 
 ## 简单介绍
 
