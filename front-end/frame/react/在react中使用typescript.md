@@ -2,7 +2,7 @@
 
 >[小邵教你玩转Typescript、ts版React全家桶脚手架](https://juejin.im/post/5c04d3f3f265da612e28649c)
 >[TypeScript 在 React 中使用总结](https://juejin.im/post/5bab4d59f265da0aec22629b)
->[优雅的在 react 中使用 TypeScript](https://juejin.im/post/5bed5f03e51d453c9515e69b)
+>[优雅的在 react 中使用 TypeScript](https://juejin.im/postf/5bed5f03e51d453c9515e69b)
 
 ## 在 react 中使用 ts 的几点原则和变化
 
@@ -152,3 +152,244 @@ class App extends Component<{}> {
   // ...
 ```
 
+如何正确的声明高阶组件？
+
+```tsx
+interface IUserCardProps {
+    name: string;
+    avatar: string;
+    bio: string;
+
+    isAdmin?: boolean;
+}
+class UserCard extends Component<IUserCardProps> { /* ... */}
+```
+
+上面的组件要求了三个必传属性参数：name、avatar、bio，isAdmin是可选的。加入此时我们想要声明一个高阶组件，用来给UserCard传递一个额外的布尔值属性visible，我们也需要在UserCard中使用这个值，那么我们就需要在其props的类型里添加这个值：
+
+```tsx
+interface IUserCardProps {
+    name: string;
+    avatar: string;
+    bio: string;
+    visible: boolean;
+
+    isAdmin?: boolean;
+}
+@withVisible
+class UserCard extends Component<IUserCardProps> {
+    render() {
+        // 因为我们用到visible了，所以必须在IUserCardProps里声明出该属性
+        return <div className={this.props.visible ? '' : 'none'}>...</div>
+    }
+}
+
+function withVisiable(WrappedComponent) {
+    return class extends Component {
+        render() {
+            return <WrappedComponent {..this.props}  visiable={true} />
+        }
+    }
+}
+```
+
+但是这样一来，我们在调用UserCard时就会出现问题，因为visible这个属性被标记为了必需，所以TS会给出错误。这个属性是由高阶组件注入的，所以我们肯定是不能要求都再传一下的。
+可能你此时想到了，把visible声明为可选。没错，这个确实就解决了调用组件时visible必传的问题。这确实是个解决问题的办法。但是就像上一个问题里提到的，这种应对办法应该是对付哪些没有类型声明或者声明不正确的高阶组件的。
+所以这个就要求我们能正确的声明高阶组件：
+
+```tsx
+interface IVisible {
+    visible: boolean;
+}
+
+ //排除 IVisible
+function withVisible<Self>(WrappedComponent: React.ComponentType<Self & IVisible>): React.ComponentType<Omit<Self, 'visible'>> {
+    return class extends Component<Self> {
+        render() {
+            return <WrappedComponent {...this.props}  visible={true} />
+        }
+    }
+}
+```
+
+如上，我们声明withVisible这个高阶组件时，利用泛型和类型推导，我们对高阶组件返回的新的组件以及接收的参数组件的props都做出类型声明。
+
+## 事件处理
+
+我们在进行事件注册时经常会在事件处理函数中使用 event 事件对象，例如当使用鼠标事件时我们通过 clientX、clientY 去获取指针的坐标。
+
+大家可以想到直接把 event 设置为 any 类型，但是这样就失去了我们对代码进行静态检查的意义。
+
+```ts
+function handleEvent (event: any) {
+  console.log(event.clientY)
+}
+```
+
+试想下当我们注册一个 Touch 事件，然后错误的通过事件处理函数中的 event 对象去获取其 clientY 属性的值，在这里我们已经将 event 设置为 any 类型，导致 TypeScript 在编译时并不会提示我们错误， 当我们通过 event.clientY 访问时就有问题了，因为  Touch 事件的 event 对象并没有  clientY 这个属性。
+通过 interface 对 event 对象进行类型声明编写的话又十分浪费时间，幸运的是 React 的声明文件提供了 Event 对象的类型声明。
+
+### Event 事件对象类型
+
+常用 Event 事件对象类型：
+
++ ClipboardEvent<T = Element> 剪贴板事件对象
++ DragEvent<T = Element> 拖拽事件对象
++ ChangeEvent<T = Element>  Change 事件对象
++ KeyboardEvent<T = Element> 键盘事件对象
++ MouseEvent<T = Element> 鼠标事件对象
++ TouchEvent<T = Element>  触摸事件对象
++ WheelEvent<T = Element> 滚轮事件对象
++ AnimationEvent<T = Element> 动画事件对象
++ TransitionEvent<T = Element> 过渡事件对象
+
+实例：
+
+```tsx
+import { MouseEvent } from 'react'
+
+interface IProps {
+
+  onClick (event: MouseEvent<HTMLDivElement>): void,
+}
+```
+
+### 事件处理函数类型
+
+当我们定义事件处理函数时有没有更方便定义其函数类型的方式呢？答案是使用 React 声明文件所提供的 EventHandler 类型别名，通过不同事件的 EventHandler 的类型别名来定义事件处理函数的类型。
+EventHandler 类型实现源码 node_modules/@types/react/index.d.ts 。
+
+```ts
+type EventHandler<E extends SyntheticEvent<any>> = { bivarianceHack(event: E): void }["bivarianceHack"];
+type ReactEventHandler<T = Element> = EventHandler<SyntheticEvent<T>>;
+type ClipboardEventHandler<T = Element> = EventHandler<ClipboardEvent<T>>;
+type DragEventHandler<T = Element> = EventHandler<DragEvent<T>>;
+type FocusEventHandler<T = Element> = EventHandler<FocusEvent<T>>;
+type FormEventHandler<T = Element> = EventHandler<FormEvent<T>>;
+type ChangeEventHandler<T = Element> = EventHandler<ChangeEvent<T>>;
+type KeyboardEventHandler<T = Element> = EventHandler<KeyboardEvent<T>>;
+type MouseEventHandler<T = Element> = EventHandler<MouseEvent<T>>;
+type TouchEventHandler<T = Element> = EventHandler<TouchEvent<T>>;
+type PointerEventHandler<T = Element> = EventHandler<PointerEvent<T>>;
+type UIEventHandler<T = Element> = EventHandler<UIEvent<T>>;
+type WheelEventHandler<T = Element> = EventHandler<WheelEvent<T>>;
+type AnimationEventHandler<T = Element> = EventHandler<AnimationEvent<T>>;
+type TransitionEventHandler<T = Element> = EventHandler<TransitionEvent<T>>;
+```
+
+EventHandler 接收 E ，其代表事件处理函数中 event 对象的类型。
+
+bivarianceHack 为事件处理函数的类型定义，函数接收一个 event 对象，并且其类型为接收到的泛型变量 E 的类型, 返回值为 void。
+
+实例：
+
+```ts
+interface IProps {
+  onClick : MouseEventHandler<HTMLDivElement>,
+}
+```
+
+## 使用泛型T来约束Promise以及其他异步库（axios）
+
+在做异步操作时我们经常使用 async 函数，函数调用时会 return 一个 Promise 对象，可以使用 then 方法添加回调函数。
+`Promise<T>` 是一个泛型类型，T 泛型变量用于确定使用 then 方法时接收的第一个回调函数（onfulfilled）的参数类型。
+
+```tsx
+interface IResponse<T> {
+  message: string,
+  result: T,
+  success: boolean,
+}
+async function getResponse (): Promise<IResponse<number[]>> {
+  return {
+    message: '获取成功',
+    result: [1, 2, 3],
+    success: true,
+  }
+}
+getResponse()
+  .then(response => {
+    console.log(response.result)
+  })
+```
+
+我们首先声明 IResponse 的泛型接口用于定义 response 的类型，通过 T 泛型变量来确定 result 的类型。
+然后声明了一个 异步函数 getResponse 并且将函数返回值的类型定义为 Promise<IResponse<number[]>> 。
+最后调用 getResponse 方法会返回一个 promise 类型，通过 then 调用，此时 then 方法接收的第一个回调函数的参数 response 的类型为，{ message: string, result: number[], success: boolean} 。
+
+### 配合 axios 使用
+
+通常情况下，我们会把后端返回数据格式单独放入一个 interface 里：
+
+```ts
+// 请求接口数据
+export interface ResponseData<T = any> {
+  /**
+   * 状态码
+   * @type { number }
+   */
+  code: number;
+
+  /**
+   * 数据
+   * @type { T }
+   */
+  result: T;
+
+  /**
+   * 消息
+   * @type { string }
+   */
+  message: string;
+}
+```
+
+当我们把 API 单独抽离成单个模块时：
+
+```ts
+// 在 axios.ts 文件中对 axios 进行了处理，例如添加通用配置、拦截器等
+import Ax from './axios';
+
+import { ResponseData } from './interface.ts';
+
+export function getUser<T>() {
+  return Ax.get<ResponseData<T>('/somepath')
+    .then(res => res.data)
+    .catch(err => console.error(err));
+}
+```
+
+接着我们写入返回的数据类型 User，这可以让 TypeScript 顺利推断出我们想要的类型：
+
+```ts
+interface User {
+  name: string;
+  age: number;
+}
+
+async function test() {
+  // user 被推断出为
+  // {
+  //  code: number,
+  //  result: { name: string, age: number },
+  //  message: string
+  // }
+  const user = await getUser<User>();
+}
+```
+
+## react-router使用
+
+安装 `npm i react-router-dom @types/react-router-dom` 或者 `yarn add react-router-dom @types/react-router-dom`
+
+使用的时候与不使用ts时基本一致，但是如果要是用withRouter之类的封装时，直接在组件内部使用location、history之类的props时，会报错因为声明时的props上并不存在这些属性，可以使用router官方提供的RouteComponentProps，在上面高阶组件使用时已经写过。
+
+### 代码分割
+
+使用官方推荐的@loadable/component配合@babel/plugin-syntax-dynamic-import，即可实现路由动态加载。
+
+```tsx
+import loadable from '@loadable/component'
+
+const HomeComponent = loadable(() => import('./views/home'))
+```
