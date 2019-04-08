@@ -144,6 +144,40 @@ var countedNames = names.reduce(function (allNames, name) {
 // { 'Alice': 2, 'Bob': 1, 'Tiff': 1, 'Bruce': 1 }
 ```
 
+### 使用reduce实现数组方法map
+
+```js
+const arr1 = [
+  {
+    name: '111',
+    age: 22
+  },
+  {
+    name: '222',
+    age: 33
+  }
+]
+
+console.log(arr1)
+// [ { name: '111', age: 22 }, { name: '222', age: 33 } ]
+
+function handle (cur, index, me) {
+  cur.age += 1
+  return cur
+}
+
+const myMap = (cb, arr) => {
+  if (typeof cb !== 'function') throw 'error'
+  return arr.reduce((acc, cur, index, me) => {
+    let temp = cb(cur, index, me)
+    return acc.concat(temp)
+  }, [])
+}
+
+console.log(myMap(handle, arr1))
+// [ { name: '111', age: 23 }, { name: '222', age: 34 } ]
+```
+
 ### 按属性对object分类
 
 ```js
