@@ -265,9 +265,15 @@ class Columns extends React.Component {
 
 ## 高阶组件
 
+todo
+
 ## 异常捕获边界
 
+todo
+
 ## Refs转发
+
+todo
 
 ## 深入JSX
 
@@ -368,6 +374,8 @@ function App2() {
 
 ## Portals
 
+todo
+
 ## Refs and the DOM
 
 Refs 允许我们访问 DOM 节点或在 render 方法中创建的 React 元素。
@@ -382,7 +390,73 @@ Refs 允许我们访问 DOM 节点或在 render 方法中创建的 React 元素�
 
 [Refs](https://zh-hans.reactjs.org/docs/refs-and-the-dom.html)
 
-
 ## Render Props
 
+render prop 是一个用于告知组件需要渲染什么内容的函数 prop。
+
+```jsx
+<Mouse render={mouse => (
+  <Cat mouse={mouse} />
+)}/>
+
+// 在Mouse中
+render() {
+  return (
+    <div style={{ height: '100%' }} onMouseMove={this.handleMouseMove}>
+
+      {/*
+        Instead of providing a static representation of what <Mouse> renders,
+        use the `render` prop to dynamically determine what to render.
+      */}
+      {this.props.render(this.state)}
+    </div>
+  );
+}
+```
+
+可以使用带有 render prop 的常规组件来实现大多数高阶组件 (HOC)。
+
+```jsx
+// 如果你出于某种原因真的想要 HOC，那么你可以轻松实现
+// 使用具有 render prop 的普通组件创建一个！
+function withMouse(Component) {
+  return class extends React.Component {
+    render() {
+      return (
+        <Mouse render={mouse => (
+          <Component {...this.props} mouse={mouse} />
+        )}/>
+      );
+    }
+  }
+}
+```
+
+事实上， 任何被用于告知组件需要渲染什么内容的函数 prop 在技术上都可以被称为 “render prop”.
+
+```jsx
+<Mouse children={mouse => (
+  <p>鼠标的位置是 {mouse.x}，{mouse.y}</p>
+)}/>
+
+//也可以直接放置到元素的内部！
+<Mouse>
+  {mouse => (
+    <p>鼠标的位置是 {mouse.x}，{mouse.y}</p>
+  )}
+</Mouse>
+```
+
+注意：将 Render Props 与 React.PureComponent 一起使用时， render prop 会抵消使用 React.PureComponent 带来的优势。因为浅比较 props 的时候总会得到 false，并且在这种情况下每一个 render 对于 render prop 将会生成一个新的值。为了绕过这一问题，有时你可以定义一个 prop 作为实例方法。
+
 ## 非受控组件
+
+推荐使用 受控组件 来处理表单数据，这时表单数据由 React 组件来管理，非受控组件表单数据将交由 DOM 节点来处理。
+
+要编写一个非受控组件，而不是为每个状态更新都编写数据处理函数，你可以 使用 ref 来从 DOM 节点中获取表单数据。
+
+如果你还是不清楚在某个特殊场景中应该使用哪种组件，那么 [这篇关于受控和非受控输入组件的文章](https://goshakkk.name/controlled-vs-uncontrolled-inputs-react/) 会很有帮助。
+
+在 React 渲染生命周期时，表单元素上的 value 将会覆盖 DOM 节点中的值，在非受控组件中，你经常希望 React 能赋予组件一个初始值，但是不去控制后续的更新。 在这种情况下, 你可以指定一个 **defaultValue** 属性，而不是 value。
+
+在 React 中，`<input type="file" />` 始终是一个非受控组件
