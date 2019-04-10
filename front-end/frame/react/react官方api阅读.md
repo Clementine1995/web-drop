@@ -284,3 +284,50 @@ function HelloWorldComponent() {
 ### All Supported HTML Attributes
 
 在 React 16 中，任何标准的或自定义的 DOM 属性都是完全支持的。所有的 SVG 属性也完全得到了支持。
+
+## 合成事件
+
+SyntheticEvent 实例将被传递给你的事件处理函数，它是浏览器的原生事件的跨浏览器包装器。除兼容所有浏览器外，它还拥有和浏览器原生事件相同的接口。
+当你需要使用浏览器的底层事件时，只需要使用 `nativeEvent` 属性来获取即可。每个 SyntheticEvent 对象都包含以下属性：
+
+```ts
+boolean bubbles
+boolean cancelable
+DOMEventTarget currentTarget
+boolean defaultPrevented
+number eventPhase
+boolean isTrusted
+DOMEvent nativeEvent
+void preventDefault()
+boolean isDefaultPrevented()
+void stopPropagation()
+boolean isPropagationStopped()
+DOMEventTarget target
+number timeStamp
+string type
+```
+
+出于性能考虑，你不能通过异步访问事件。如果你想异步访问事件属性，你需在事件上调用 event.persist()。
+
+```js
+function onClick(event) {
+  console.log(event); // => nullified object.
+  console.log(event.type); // => "click"
+  const eventType = event.type; // => "click"
+
+  setTimeout(function() {
+    console.log(event.type); // => null
+    console.log(eventType); // => "click"
+  }, 0);
+
+  // 不起作用，this.state.clickEvent 的值将会只包含 null
+  this.setState({clickEvent: event});
+
+  // 你仍然可以导出事件属性
+  this.setState({eventType: event.type});
+}
+```
+
+如需注册捕获阶段的事件处理函数，则应为事件名添加 Capture。例如，处理捕获阶段的点击事件请使用 onClickCapture，而不是 onClick。
+
+具体可以查看[合成事件](https://zh-hans.reactjs.org/docs/events.html)

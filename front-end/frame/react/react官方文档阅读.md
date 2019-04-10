@@ -269,7 +269,11 @@ todo
 
 ## 异常捕获边界
 
-todo
+React16后增加了错误边界，错误边界指的是定义了static getDerivedStateFromError（）或componentDidCatch（）或两个都有的组件，static getDerivedStateFromError（）用于抛错后返回fallback UI，componentDidCatch（）用于打错误日志。
+
+但是它不能捕获事件处理函数中的错误，如果要捕获还是使用try/catch，以及异步代码和ssr的错误。
+
+推荐使用它们来包裹自己的组件，这样用户体验上会更好，只是一块地方报错并显示错误UI，而不至于整个app崩掉。
 
 ## Refs转发
 
