@@ -265,7 +265,12 @@ class Columns extends React.Component {
 
 ## 高阶组件
 
-todo
+a higher-order component is a function that takes a component and returns a new component.
+高阶组件是一个接受一个组件并返回一个新组件的函数，的函数。它是为了复用组件逻辑，在React第三方组件库里很常见，比如Redux中的connect。
+
+HOC是纯函数，没有副作用。
+
+不应该在高阶组件中修改传入组件的原型，并且应该过滤掉一些不相关的属性
 
 ## 异常捕获边界
 
