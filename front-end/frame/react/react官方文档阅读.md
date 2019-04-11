@@ -270,7 +270,32 @@ a higher-order component is a function that takes a component and returns a new 
 
 HOC是纯函数，没有副作用。
 
-不应该在高阶组件中修改传入组件的原型，并且应该过滤掉一些不相关的属性
+不应该在高阶组件中修改传入组件的原型，并且应该过滤掉一些不相关的属性。
+
+当一些函数的输出类型跟输入类型相同时它们就很容易组合在一起，比如connect跟withRouter，它们都接收一个组件参数，并且返回组件，这样就可以组合使用。`withRouter(connect(commentSelector)(WrappedComponent))`
+
+可以给高阶组件返回的组件使用Display Name，来方便调试。
+
+```jsx
+function withSubscription(WrappedComponent) {
+  class WithSubscription extends React.Component {/* ... */}
+  WithSubscription.displayName = `WithSubscription(${getDisplayName(WrappedComponent)})`;
+  return WithSubscription;
+}
+
+function getDisplayName(WrappedComponent) {
+  return WrappedComponent.displayName || WrappedComponent.name || 'Component';
+}
+```
+
+注意事项：
+
++ 不要在Render中使用高阶组件，因为React是根据渲染前后组件是否相同，来决定是否diff比较然后更新的，如果不同会直接卸载，而高阶组件会返回一个新的组件。
++ 原组件上的静态方法应该复制才能在新组件中继续使用。
+  + `Enhance.staticMethod = WrappedComponent.staticMethod;`
+  + 使用hoist-non-react-statics来自动复制非React的静态方法
+  + 还有一种方法就是把静态方法从组件中分离出来，单独导出
++ Refs不会传递，Refs将会指向最外层容器组件的实例而不是原始组件，想要解决的话可以使用Refs分发。
 
 ## 异常捕获边界
 
@@ -282,7 +307,81 @@ React16后增加了错误边界，错误边界指的是定义了static getDerive
 
 ## Refs转发
 
-todo
+Ref forwarding是一种将ref自动传递给组件的子组件的技术。
+
+组件间相互引用的过程中，尽量地不要去依赖对方的DOM结构
+
+```jsx
+const FancyButton = React.forwardRef((props, ref) => (
+  <button ref={ref} className="FancyButton">
+    {props.children}
+  </button>
+));
+
+// 假如你没有通过 React.createRef的赋能，在function component上你是不可以直接挂载ref属性的。
+// 而现在你可以这么做了，并能访问到原生的DOM元素:
+const ref = React.createRef();
+<FancyButton ref={ref}>Click me!</FancyButton>;
+```
+
+下面我们逐步逐步地来解释一下上面所说的是如何发生的：
+
+1. 我们通过调用React.createRef来生成了一个React ref，并且把它赋值给了ref变量。
+2. 我们通过手动赋值给`<FancyButton>`的ref属性进一步将这个React ref传递下去。
+3. 接着，React又将ref传递给React.forwardRef()调用时传递进来的函数(props, ref) => ...。届时，ref将作为这个函数的第二个参数。
+在(props, ref) => ...组件的内部，我们又将这个ref
+4. 传递给了作为UI输出一部分的`<button ref={ref}>`组件。
+5. 当`<button ref={ref}>`组件被真正地挂载到页面的时候，我们就可以在使用ref.current来访问真正的DOM元素button了。
+
+注意：只有通过React.forwardRef定义的组件才能接收ref参数，并且这个方法不限于将ref传给dom组件，传给类组件实例也是可以的。
+
+### 高阶组件里的Forwarding refs
+
+```jsx
+function logProps(Component) {
+  class LogProps extends React.Component {
+    componentDidUpdate(prevProps) {
+      console.log('old props:', prevProps);
+      console.log('new props:', this.props);
+    }
+
+    render() {
+      const {forwardedRef, ...rest} = this.props;
+
+      // Assign the custom prop "forwardedRef" as a ref
+      return <Component ref={forwardedRef} {...rest} />;
+    }
+  }
+
+  // Note the second param "ref" provided by React.forwardRef.
+  // We can pass it along to LogProps as a regular prop, e.g. "forwardedRef"
+  // And it can then be attached to the Component.
+  return React.forwardRef((props, ref) => {
+    return <LogProps {...props} forwardedRef={ref} />;
+  });
+}
+```
+
+### DevTools里面显示一个自定义的名字
+
+```jsx
+function logProps(Component) {
+  class LogProps extends React.Component {
+    // ...
+  }
+
+  function forwardRef(props, ref) {
+    return <LogProps {...props} forwardedRef={ref} />;
+  }
+
+  // Give this component a more helpful display name in DevTools.
+  // e.g. "ForwardRef(logProps(MyComponent))"
+  const name = Component.displayName || Component.name;
+  forwardRef.displayName = `logProps(${name})`;
+
+  return React.forwardRef(forwardRef);
+}
+```
 
 ## 深入JSX
 
@@ -383,7 +482,11 @@ function App2() {
 
 ## Portals
 
-todo
+Portals 提供了一种将子节点渲染到父组件DOM层次以外的 DOM 节点的方式。`ReactDOM.createPortal(child, container)`，第一个参数就是任何一个可渲染的React组件，第二个是DOM元素。
+
+一般的当从render函数返回元素时，会作为子元素挂载到最近父元素的DOM中，Portals可以让你挂载到任意一个有效的DOM中。在编写一些对话框，小提示，悬浮卡的时候很有用。
+
+关于 Portals 事件冒泡：不论portal被具体挂载到何处，它其他行为跟普通组件一致，比如将A组件挂载到了1号dom，但是B组件中引用了A组件，然后将B组件挂载到2号dom，那么事件具体捕获的时候实在2号dom中进行。
 
 ## Refs and the DOM
 
