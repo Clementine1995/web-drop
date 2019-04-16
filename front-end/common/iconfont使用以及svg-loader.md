@@ -219,7 +219,7 @@ Vue.component('svg-icon', svgIcon)
 + 自定义性差，通常导出的svg包含大量的无用信息，例如编辑器源信息、注释等。通常包含其它一些不会影响渲染结果或可以移除的内容。
 + 添加不友善，如果我有一些自定义的svg图标，该如何和原有的 iconfont 整合到一起呢？目前只能将其也上传到 iconfont 和原有的图标放在一个项目库中，之后再重新下载，很繁琐。
 
-### 使用svg-sprite-
+### 使用svg-sprite-loader
 
 svg-sprite-loader是一个 webpack loader ，可以将多个 svg 打包成 svg-sprite 。
 
@@ -274,6 +274,33 @@ import '@/src/icons/qq.svg; //引入图标
 ```
 
 你会发现，这里要想插入某个图标，都得 import，每用一个都要重复一遍这个流程，太麻烦，那么我们就让 src/icons/svg/下的 svg 文件都自动导入吧。
+
+#### vue-cli3 中使用
+
+vue-cli3创建的项目中，不再有webpack.config.js等文件，而是将webpack配置通过vue.config.js暴露出来，主要通过webpack chain来配置，道理是一样的：
+
+```js
+chainWebpack: config => {
+  ...
+  // 原有的svg图像处理loader添加exclude
+  config.module
+    .rule('svg')
+    .exclude.add(resolve('src/icons'))
+    .end()
+  // 添加针对src/icons的svg-sprite-loader配置
+  config.module
+    .rule('icons')
+    .test(/\.svg$/)
+    .include.add(resolve('src/icons'))
+    .end()
+    .use('svg-sprite-loader')
+    .loader('svg-sprite-loader')
+    .options({
+      symbolId: 'icon-[name]'
+    })
+},
+```
+
 
 ### 自动导入
 
