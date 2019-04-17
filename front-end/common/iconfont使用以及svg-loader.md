@@ -223,6 +223,7 @@ Vue.component('svg-icon', svgIcon)
 
 svg-sprite-loader是一个 webpack loader ，可以将多个 svg 打包成 svg-sprite 。
 
+注意：**如果使用了svg-sprite-loader，在css中再使用icons/svg目录下的svg会导致打包报错**
 接下来先介绍如何在 vue-cli2 的基础上进行改造，加入 svg-sprite-loader。
 我们发现vue-cli默认情况下会使用 url-loader 对svg进行处理，会将它放在/img 目录下，所以这时候我们引入svg-sprite-loader 会引发一些冲突。
 
@@ -300,7 +301,6 @@ chainWebpack: config => {
     })
 },
 ```
-
 
 ### 自动导入
 
