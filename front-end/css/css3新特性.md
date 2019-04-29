@@ -121,6 +121,10 @@ background-blend-mode和mix-blend-mode
 
 ## 新增长度单位（vh、vw、rem）
 
+## 新增宽高取值
+
+fill-available、fit-content、max-content、min-content
+
 ## CSS变量
 
 ```()
