@@ -1,6 +1,6 @@
 # 弹性布局Flex
 
->[Flex 布局教程：语法篇](https://juejin.im/post/5ac2329b6fb9a028bf057caf#comment)
+>[Flex 布局教程：语法篇](https://juejin.im/post/5ac2329b6fb9a028bf057caf)
 >[Flex-弹性布局原来如此简单！！](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html)
 
 ## Flex 布局是什么？
@@ -52,7 +52,7 @@ flex-direction属性决定主轴的方向（即项目的排列方向）。
 
 ```css
 .box {
-    flex-direction: row | row-reverse | column | column-reverse;
+  flex-direction: row | row-reverse | column | column-reverse;
 }
 ```
 
@@ -71,7 +71,7 @@ flex-direction属性决定主轴的方向（即项目的排列方向）。
 
 ```css
 .box {
-    flex-wrap: nowrap | wrap | wrap-reverse;
+  flex-wrap: nowrap | wrap | wrap-reverse;
 }
 ```
 
@@ -97,9 +97,11 @@ flex-flow属性是flex-direction属性和flex-wrap属性的简写形式，默认
 
 justify-content属性定义了项目在主轴上的对齐方式及额外空间的分配方式。
 
+```css
 .box  {
-    justify-content: flex-start | flex-end | center | space-between | space-around | space-evenly;
+  justify-content: flex-start | flex-end | center | space-between | space-around | space-evenly;
 }
+```
 
 它可能取6个值，具体对齐方式与轴的方向有关。下面假设主轴为从左到右。
 
@@ -253,3 +255,120 @@ align-self属性允许单个项目有与其他项目不一样的对齐方式，�
 ### justify-self
 
 本以为有可以覆盖align-items属性的align-self，应该也有可以覆盖justify-content的justify-self，可惜没有。。
+
+## Flex上下文中的自动(auto)margin
+
+>参考自[探秘 flex 上下文中神奇的自动 margin](https://juejin.im/post/5ce60afde51d455ca04361b1)
+
+### 如何让 margin: auto 在垂直方向上居中元素？
+
+在传统的`display: block`中，当给块级元素中子元素设置了`margin: auto`，只会让其在水平方向居中
+
+#### BFC 下 margin: auto 垂直方向无法居中元素的原因
+
+>If both 'margin-left' and 'margin-right' are 'auto', their used values are equal. This horizontally centers the element with respect to the edges of the containing block.[—CSS2 Visual formatting model details: 10.3.3](https://www.w3.org/TR/CSS2/visudet.html#Computing_heights_and_margins)
+>
+>If 'margin-top', or 'margin-bottom' are 'auto', their used value is 0.—CSS2 Visual formatting model details: 10.6.3
+
+在块格式化上下文中，如果 margin-left 和 margin-right 都是 auto，则它们的表达值相等，这将使元素相对于包含块的边缘水平居中。( 这里的计算值为元素剩余可用剩余空间的一半)
+而如果 margin-top 和 margin-bottom 都是 auto，则他们的值都为 0，当然也就无法造成垂直方向上的居中。
+
+#### 使用 FFC/GFC 使 margin: auto 在垂直方向上居中元素
+
+为了使单个元素使用 `margin: auto` 在垂直方向上能够居中元素，需要让该元素处于 `FFC`，或者 `GFC` 上下文中。
+
+为何FFC 下 margin: auto 垂直方向可以居中元素？
+
+> Prior to alignment via justify-content and align-self, any positive free space is distributed to auto margins in >that dimension. -[CSS Flexible Box Layout Module Level 1 -- 8.1. Aligning with auto margins](https://www.w3.org/TR/2018/CR-css-flexbox-1-20181119/#auto-margins)
+
+是在 flex 格式化上下文中，设置了 margin: auto 的元素，在通过 justify-content 和 align-self 进行对齐之前，任何正处于空闲的空间都会分配到该方向的自动 margin 中去，因此不止水平方向，垂直方向也会自动去分配剩余空间。
+
+### 使用自动 margin 实现 flex 布局下的 space-between | space-around
+
+实现space-around关键点就是对flex子元素设置`margin: auto`
+
+实现space-between关键点是对flex子元素设置`margin: auto`，然后第一个子元素`margin-left: 0`，最后一个子元素`margin-right: 0`
+
+### 使用自动 margin 实现 flex 下的 align-self: flex-start | flex-end | center
+
+实现`align-self: center`关键点就是对flex子元素设置`margin: auto`，而实现`align-self: flex-start | flex-end`关键点则是分别设置`margin-bottom: auto;margin-top: 0;`和`margin-bottom: 0;margin-top: auto;`。
+
+### 不同方向上的自动 margin
+
+#### 使用 margin-left: auto 实现不规则两端对齐布局
+
+假设我们需要有如下布局：
+
+![不规则两端对齐](https://user-gold-cdn.xitu.io/2019/5/23/16ae29a9ba7b094a?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+DOM 结构如下：
+
+```html
+<ul class="g-nav">
+  <li>导航A</li>
+  <li>导航B</li>
+  <li>导航C</li>
+  <li>导航D</li>
+  <li class="g-login">登陆</li>
+</ul>
+```
+
+只需要对最后一个元素使用 `margin-left: auto`，可以很容易实现这个布局：
+
+```css
+.g-nav {
+  display: flex;
+}
+.g-login {
+  margin-left: auto;
+}
+```
+
+当然，不一定是要运用在第一个或者最后一个元素之上
+
+#### 垂直方向上的多行居中
+
+会有这样的需求，一大段复杂的布局中的某一块，高度或者宽度不固定，需要相对于它所在的剩余空间居中：
+
+![垂直方向上的多行居中](https://user-gold-cdn.xitu.io/2019/5/23/16ae29a9bafac980?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+这里有 5 行文案，我们需要其中的第三、第四行相对于剩余空间进行垂直居中。只需要在需要垂直居中的第一个元素上进行 `margin-top: auto`，最后一个元素上进行 `margin-bottom: auto` 即可。当然，这里将任意需要垂直居中剩余空间的元素用一个 `div` 包裹起来，对该 div 进行 `margin: auto 0` 也是可以的。
+
+#### 使用 margin-top: auto 实现粘性 footer 布局
+
+要求：页面存在一个 footer 页脚部分，如果整个页面的内容高度小于视窗的高度，则 footer 固定在视窗底部，如果整个页面的内容高度大于视窗的高度，则 footer 正常流排布（也就是需要滚动到底部才能看到 footer），算是粘性布局的一种。
+
+![使用 margin-top: auto 实现粘性 footer 布局](https://user-gold-cdn.xitu.io/2019/5/23/16ae29a9c4276f0d?imageslim)
+
+这个需求如果能够使用 `flex` 的话，使用 `justify-content: space-between` 可以很好的解决，同理使用 `margin-top: auto` 也非常容易完成
+
+### 注意的点
+
++ 块格式化上下文中 `margin-top` 和 `margin-bottom` 的值如果是 `auto`，则他们的值都为 `0`
++ flex 格式化上下文中，在通过 `justify-content` 和 `align-self` 进行对齐之前，任何正处于空闲的空间都会分配到该方向的自动 `margin` 中去
++ 单个方向上的自动 `margin` 也非常有用，它的计算值为该方向上的剩余空间
++ 使用了自动 `margin` 的 `flex` 子项目，它们父元素设置的 `justify-content` 以及它们本身的 `align-self` 将不再生效
+
+## 应用
+
+### 移动端实现顶部吸顶，底部吸底，中间自适应
+
+```html
+<style>
+.wrapper{
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.content{
+  flex: 1;
+  /* margin: auto 0; */
+  overflow-y: auto;
+}
+</style>
+<div class="wrapper">
+  <header>这里是头部</header>
+  <div class="content">这里是内容</div>
+  <footer>这里是底部</footer>
+</div>
+```
