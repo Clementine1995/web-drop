@@ -1,6 +1,6 @@
 # History API
 
->[Manipulating the browser history
+>参考自[Manipulating the browser history
 ](https://developer.mozilla.org/zh-CN/docs/Web/API/History_API)
 
 DOM window 对象通过 history 对象提供了对浏览器的会话历史的访问，从HTML5开始提供了对history栈中内容的操作。
