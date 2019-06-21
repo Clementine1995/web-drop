@@ -153,7 +153,7 @@ Hook 就是 JavaScript 函数，但是使用它们会有两个额外的规则：
 + 只能在函数最外层调用 Hook。不要在循环、条件判断或者子函数中调用。
 + 只能在 React 的函数组件中调用 Hook。不要在其他 JavaScript 函数中调用。
 
-### 自定义 Hook
+### 自定义 Hook简介
 
 自定义 Hook 可以让你在不增加组件的情况下达到重用一些状态逻辑的目的。
 
@@ -288,3 +288,395 @@ function Example() {
 
 #### 使用 class 的示例
 
+在 React 的 class 组件中，render 函数是不应该有任何副作用的。一般把副作用操作放到 componentDidMount 和 componentDidUpdate 函数中。
+
+```jsx
+componentDidMount() {
+    document.title = `You clicked ${this.state.count} times`;
+  }
+
+  componentDidUpdate() {
+    document.title = `You clicked ${this.state.count} times`;
+  }
+```
+
+可以看到这里我们需要在两个生命周期函数中编写重复的代码。
+
+#### 使用Hook的示例
+
+```jsx
+function Example() {
+  ...
+  useEffect(() => {
+    document.title = `You clicked ${count} times`;
+  });
+  ...
+}
+```
+
++ useEffect告诉 React 组件需要在渲染后执行某些操作。React 会保存你传递的函数，并且在执行 DOM 更新之后调用它。
++ useEffect 放在组件内部让我们可以在 effect 中直接访问 count state 变量（或其他 props）。
++ 第一次渲染之后和每次更新之后都会执行useEffect。
+
+每次我们重新渲染，都会生成新的 effect，替换掉之前的。某种意义上讲，effect 更像是渲染结果的一部分 —— 每个 effect “属于”一次特定的渲染。
+
+注意：与 componentDidMount 或 componentDidUpdate 不同，使用 useEffect 调度的 effect 不会阻塞浏览器更新屏幕，这让你的应用看起来响应更快。大多数情况下，effect 不需要同步地执行。在个别情况下（例如测量布局），有单独的 useLayoutEffect Hook 供你使用，其 API 与 useEffect 相同。
+
+### 需要清除的 effect
+
+有一些副作用是需要清除的。例如订阅外部数据源。这种情况下，清除工作是非常重要的，可以防止引起内存泄露
+
+#### 使用 Class 的示例
+
+在 React class 中，你通常会在 componentDidMount 中设置订阅，并在 componentWillUnmount 中清除它。
+
+```js
+componentDidMount() {
+    ChatAPI.subscribeToFriendStatus(
+      this.props.friend.id,
+      this.handleStatusChange
+    );
+  }
+
+  componentWillUnmount() {
+    ChatAPI.unsubscribeFromFriendStatus(
+      this.props.friend.id,
+      this.handleStatusChange
+    );
+  }
+
+  handleStatusChange(status) {
+    this.setState({
+      isOnline: status.isOnline
+    });
+  }
+```
+
+#### 使用 Hook 的示例
+
+如果你的 effect 返回一个函数，React 将会在执行清除操作时调用它
+
+```jsx
+useEffect(() => {
+    function handleStatusChange(status) {
+      setIsOnline(status.isOnline);
+    }
+
+    ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+    // Specify how to clean up after this effect:
+    return function cleanup() {
+      ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+    };
+  });
+```
+
++ 每个 effect 都可以返回一个清除函数。
++ React 会在组件卸载的时候执行清除操作。
+
+### 使用 Effect 的提示
+
+#### 使用多个 Effect 实现关注点分离
+
+一个值的设置逻辑是可能被分割到 componentDidMount 和 componentDidUpdate 中的，另一个逻辑可能被分割到 componentDidMount 和 componentWillUnmount 中的。这样 componentDidMount 中同时包含了两个不同功能的代码。
+
+Hook 允许我们按照代码的用途分离他们， 而不是像生命周期函数那样。React 将按照 effect 声明的顺序依次调用组件中的每一个 effect。
+
+#### 解释: 为什么每次更新的时候都要运行 Effect
+
+忘记正确地处理 componentDidUpdate 是 React 应用中常见的 bug 来源。
+
+并不需要特定的代码来处理更新逻辑，因为 useEffect 默认就会处理。它会在调用一个新的 effect 之前对前一个 effect 进行清理。
+
+下面就是上面按时间列出一个可能会产生的订阅和取消订阅操作调用序列：
+
+```jsx
+// Mount with { friend: { id: 100 } } props
+ChatAPI.subscribeToFriendStatus(100, handleStatusChange);     // 运行第一个 effect
+
+// Update with { friend: { id: 200 } } props
+ChatAPI.unsubscribeFromFriendStatus(100, handleStatusChange); // 清除上一个 effect
+ChatAPI.subscribeToFriendStatus(200, handleStatusChange);     // 运行下一个 effect
+
+// Update with { friend: { id: 300 } } props
+ChatAPI.unsubscribeFromFriendStatus(200, handleStatusChange); // 清除上一个 effect
+ChatAPI.subscribeToFriendStatus(300, handleStatusChange);     // 运行下一个 effect
+
+// Unmount
+ChatAPI.unsubscribeFromFriendStatus(300, handleStatusChange); // 清除最后一个 effect
+```
+
+#### 提示: 通过跳过 Effect 进行性能优化
+
+在某些情况下，每次渲染后都执行清理或者执行 effect 可能会导致性能问题。在 class 组件中，我们可以通过在 componentDidUpdate 中添加对 prevProps 或 prevState 的比较逻辑解决：
+
+```jsx
+componentDidUpdate(prevProps, prevState) {
+  if (prevState.count !== this.state.count) {
+    document.title = `You clicked ${this.state.count} times`;
+  }
+}
+```
+
+所以在 useEffect 的 Hook API中，如果某些特定值在两次重渲染之间没有发生变化，你可以通知 React 跳过对 effect 的调用，只要传递数组作为 useEffect 的第二个可选参数即可：
+
+```jsx
+useEffect(() => {
+  document.title = `You clicked ${count} times`;
+}, [count]); // 仅在 count 更改时更新
+```
+
+注意：如果数组中有多个元素，即使只有一个元素发生变化，React 也会执行 effect。
+
+对于有清除操作的 effect 同样适用：
+
+```jsx
+useEffect(() => {
+  function handleStatusChange(status) {
+    setIsOnline(status.isOnline);
+  }
+
+  ChatAPI.subscribeToFriendStatus(props.friend.id, handleStatusChange);
+  return () => {
+    ChatAPI.unsubscribeFromFriendStatus(props.friend.id, handleStatusChange);
+  };
+}, [props.friend.id]); // 仅在 props.friend.id 发生变化时，重新订阅
+```
+
+注意：
+
++ 如果你要使用此优化方式，请确保数组中包含了所有外部作用域中会随时间变化并且在 effect 中使用的变量，否则你的代码会引用到先前渲染中的旧变量。
++ 如果想执行只运行一次的 effect（仅在组件挂载和卸载时执行），可以传递一个空数组（[]）作为第二个参数。这就告诉 React 你的 effect 不依赖于 props 或 state 中的任何值，所以它永远都不需要重复执行。
++ 如果你传入了一个空数组（[]），effect 内部的 props 和 state 就会一直拥有其初始值。尽管传入 [] 作为第二个参数更接近大家更熟悉的 componentDidMount 和 componentWillUnmount 思维模式，但我们有更好的方式来避免过于频繁的重复调用 effect。
+
+## Hook 规则
+
+### 只在最顶层使用 Hook
+
+不要在循环，条件或嵌套函数中调用 Hook， 确保总是在你的 React 函数的最顶层调用他们。遵守这条规则，你就能确保 Hook 在每一次渲染中都按照同样的顺序被调用。这让 React 能够在多次的 useState 和 useEffect 调用之间保持 hook 状态的正确。
+
+### 只在 React 函数中调用 Hook
+
+不要在普通的 JavaScript 函数中调用 Hook。你可以：
+
++ ✅ 在 React 的函数组件中调用 Hook
++ ✅ 在自定义 Hook 中调用其他 Hook
+
+可以使用 `eslint-plugin-react-hooks` 的插件来执行这两条规则，具体可以查看npm官网。
+
+### Hook的一些说明
+
+React 靠的是 Hook 调用的顺序来知道哪个 state 对应哪个 useState。
+只要 Hook 的调用顺序在多次渲染之间保持一致，React 就能正确地将内部 state 和对应的 Hook 进行关联。
+
+如果将Hook放在条件语句中，顺序可能会发生改变，导致后面的 Hook 调用都被提前执行，产生bug，这就是为什么 Hook 需要在我们组件的最顶层调用。
+
+## 自定义 Hook
+
+### 提取自定义 Hook
+
+当我们想在两个函数之间共享逻辑时，我们会把它提取到第三个函数中。而组件和 Hook 都是函数，所以也同样适用这种方式。
+
+自定义 Hook 是一个函数，其名称以 “use” 开头，函数内部可以调用其他的 Hook。 例如，下面的 useFriendStatus 是我们第一个自定义的 Hook:
+
+```jsx
+import React, { useState, useEffect } from 'react';
+
+function useFriendStatus(friendID) {
+  const [isOnline, setIsOnline] = useState(null);
+
+  useEffect(() => {
+    function handleStatusChange(status) {
+      setIsOnline(status.isOnline);
+    }
+
+    ChatAPI.subscribeToFriendStatus(friendID, handleStatusChange);
+    return () => {
+      ChatAPI.unsubscribeFromFriendStatus(friendID, handleStatusChange);
+    };
+  });
+
+  return isOnline;
+}
+```
+
+与组件中一致，请确保只在自定义 Hook 的顶层无条件地调用其他 Hook。与 React 组件不同的是，自定义 Hook 不需要具有特殊的标识。我们可以自由的决定它的参数是什么，以及它应该返回什么（如果需要的话）。换句话说，它就像一个正常的函数。但是它的名字应该始终以 use 开头。
+
+### 使用自定义 Hook
+
+我们一开始的目标是在 FriendStatus 和 FriendListItem 组件中去除重复的逻辑，即：这两个组件都想知道好友是否在线。
+
+现在我们已经把这个逻辑提取到 useFriendStatus 的自定义 Hook 中，然后就可以使用它了：
+
+```jsx
+function FriendStatus(props) {
+  const isOnline = useFriendStatus(props.friend.id);
+
+  if (isOnline === null) {
+    return 'Loading...';
+  }
+  return isOnline ? 'Online' : 'Offline';
+}
+
+function FriendListItem(props) {
+  const isOnline = useFriendStatus(props.friend.id);
+
+  return (
+    <li style={{ color: isOnline ? 'green' : 'black' }}>
+      {props.friend.name}
+    </li>
+  );
+}
+```
+
++ 自定义 Hook 必须以 “use” 开头
++ 在两个组件中使用相同的 Hook 不会共享 state
++ 每次调用 Hook，它都会获取独立的 state。
+
+#### 提示：在多个 Hook 之间传递信息
+
+由于 Hook 本身就是函数，因此我们可以在它们之间传递信息。
+
+我们将使用聊天程序中的另一个组件来说明这一点。这是一个聊天消息接收者的选择器，它会显示当前选定的好友是否在线:
+
+```jsx
+const friendList = [
+  { id: 1, name: 'Phoebe' },
+  { id: 2, name: 'Rachel' },
+  { id: 3, name: 'Ross' },
+];
+
+function ChatRecipientPicker() {
+  const [recipientID, setRecipientID] = useState(1);
+  const isRecipientOnline = useFriendStatus(recipientID);
+
+  return (
+    <>
+      <Circle color={isRecipientOnline ? 'green' : 'red'} />
+      <select
+        value={recipientID}
+        onChange={e => setRecipientID(Number(e.target.value))}
+      >
+        {friendList.map(friend => (
+          <option key={friend.id} value={friend.id}>
+            {friend.name}
+          </option>
+        ))}
+      </select>
+    </>
+  );
+}
+```
+
+我们将当前选择的好友 ID 保存在 recipientID 状态变量中，并在用户从 `<select>` 中选择其他好友时更新这个 state。
+
+由于 useState 为我们提供了 recipientID 状态变量的最新值，因此我们可以将它作为参数传递给自定义的 useFriendStatus Hook：
+
+```js
+  const [recipientID, setRecipientID] = useState(1);
+  const isRecipientOnline = useFriendStatus(recipientID);
+```
+
+如此可以让我们知道当前选中的好友是否在线。当我们选择不同的好友并更新 recipientID 状态变量时，useFriendStatusHook 将会取消订阅之前选中的好友，并订阅新选中的好友状态。
+
+### useYourImagination()
+
+尽量避免过早地增加抽象逻辑。既然函数组件能够做的更多，那么代码库中函数组件的代码行数可能会剧增。这属于正常现象 —— 不必立即将它们拆分为 Hook。
+
+例如，有个复杂的组件，其中包含了大量以特殊的方式来管理的内部状态。useState 并不会使得集中更新逻辑变得容易，因此你可能更愿意使用 redux 中的 reducer 来编写。
+
+编写一个 useReducer 的 Hook，使用 reducer 的方式来管理组件的内部 state 呢？其简化版本可能如下所示：
+
+```jsx
+function useReducer(reducer, initialState) {
+  const [state, setState] = useState(initialState);
+
+  function dispatch(action) {
+    const nextState = reducer(state, action);
+    setState(nextState);
+  }
+
+  return [state, dispatch];
+}
+// 在组件中使用它，让 reducer 驱动它管理 state：
+
+function Todos() {
+  const [todos, dispatch] = useReducer(todosReducer, []);
+
+  function handleAddClick(text) {
+    dispatch({ type: 'add', text });
+  }
+
+  // ...
+}
+```
+
+在复杂组件中使用 reducer 管理内部 state 的需求很常见，我们已经将 useReducer 的 Hook 内置到 React 中。你可以在 Hook API 索引中找到它使用，搭配其他内置的 Hook 一起使用。
+
+## Hook API
+
+[Hook API](https://zh-hans.reactjs.org/docs/hooks-reference.html)
+
+## FAQ
+
+[Hook FAQ](https://zh-hans.reactjs.org/docs/hooks-faq.html)
+
+### 从 Class 迁移到 Hook
+
+生命周期方法要如何对应到 Hook？
+
++ constructor：函数组件不需要构造函数。你可以通过调用 useState 来初始化 state。如果计算的代价比较昂贵，你可以传一个函数给 useState。
++ getDerivedStateFromProps：改为 在渲染时 安排一次更新。
++ shouldComponentUpdate：详见React.memo.
++ render：这是函数组件体本身。
++ componentDidMount, componentDidUpdate, componentWillUnmount：useEffect Hook 可以表达所有这些(包括 不那么 常见 的场景)的组合。
++ componentDidCatch and getDerivedStateFromError：目前还没有这些方法的 Hook 等价写法，但很快会加上。
+
+我该如何使用 Hook 进行数据获取？
+
+该 [demo](https://codesandbox.io/s/jvvkoo8pq3) 会帮助你开始理解,欲了解更多，请查阅 [此文章](https://www.robinwieruch.de/react-hooks-fetch-data/) 来了解如何使用 Hook 进行数据获取。
+
+### 我应该使用单个还是多个 state 变量
+
+我们推荐把 state 切分成多个 state 变量，每个变量包含的不同值会在同时发生变化。
+
+把独立的 state 变量拆分开还有另外的好处。这使得后期把一些相关的逻辑抽取到一个自定义 Hook 变得容易，比如说:
+
+```jsx
+function Box() {
+  const position = useWindowPosition();
+  const [size, setSize] = useState({ width: 100, height: 100 });
+  // ...
+}
+
+function useWindowPosition() {
+  const [position, setPosition] = useState({ left: 0, top: 0 });
+  useEffect(() => {
+    // ...
+  }, []);
+  return position;
+}
+```
+
+如果 state 的逻辑开始变得复杂，我们推荐 用 reducer 来管理它，或使用自定义 Hook。
+
+### 如何获取上一轮的 props 或 state
+
+关键在于useEffect最后执行，usePrevious执行时先返回ref.current，第一次会返回undefined，然后再通过useEffect赋值。
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0);
+  const prevCount = usePrevious(count);
+  return <h1>Now: {count}, before: {prevCount}</h1>;
+}
+
+function usePrevious(value) {
+  const ref = useRef();
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
+}
+```
+
+### 为什么我会在我的函数中看到陈旧的 props 和 state
