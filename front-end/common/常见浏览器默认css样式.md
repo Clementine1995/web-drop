@@ -7,4 +7,19 @@
 + a标签的:visited伪类，是否访问过某网站是由浏览器记住的，:link、:visited、:hover、:actived的顺序可以让着四个效果都显示出来，想要去掉a标签的下划线使用`text-decoration:none`
 + ul无序列表标签，默认会在li项的前面加上圆点，如果需要去掉的话需要使用`list-style:none`来清除。
 
+## Safari浏览器，对于显示不全的内容鼠标经过会自动加上了title显示了内容，怎么去掉
+
+```css
+.ellipsis {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.ellipsis::before{
+  content: '';
+  display: block;
+}
+```
+
 todo~
