@@ -393,3 +393,46 @@ import loadable from '@loadable/component'
 
 const HomeComponent = loadable(() => import('./views/home'))
 ```
+
+### 防止 xss 攻击
+
+input，textarea 等标签，不要直接把 html 文本直接渲染在页面上,使用 xssb 等过滤之后再输出到标签上;
+
+```jsx
+import { html2text } from 'xss';
+render(){
+  <div
+  dangerouslySetInnerHTML={{
+    __html: html2text(htmlContent)
+  }}
+/>
+}
+```
+
+### 使用私有属性取代state状态
+
+对于一些不需要控制ui的状态属性，我们可以直接绑到this上， 即私有属性，没有必要弄到this.state上，不然会触发渲染机制，造成性能浪费 例如请求翻页数据的时候,我们都会有个变量。
+
+```js
+// bad
+state: IState = {
+  pageNo:1,
+  pageSize:10
+};
+
+// good
+queryParams:Record<string,any> = {
+  pageNo:1,
+  pageSize:10
+}
+```
+
+### a标签安全问题
+
+使用a标签打开一个新窗口过程中的安全问题。新页面中可以使用window.opener来控制原始页面。如果新老页面同域，那么在新页面中可以任意操作原始页面。如果是不同域，新页面中依然可以通过window.opener.location，访问到原始页面的location对象
+在带有target="_blank"的a标签中，加上rel="noopener"属性。如果使用window.open的方式打开页面，将opener对象置为空。
+
+```js
+var newWindow = window.open();
+newWindow.opener = null;
+```
