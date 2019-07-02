@@ -9,6 +9,7 @@
 </head>
 
 <body>
+  <canvas id="canvas" width="400" height="300"></canvas>
   <script type="shader-source" id="vertexShader">
     precision mediump float;
     attribute vec2 a_Position;
@@ -31,7 +32,7 @@
         gl_FragColor = color;
     }
   </script>
-  <canvas id="canvas" width="400" height="300"></canvas>
+  
   <script src="webgl-helper.js"></script>
   <script>
     var canvas = getCanvas('#canvas');
@@ -64,14 +65,15 @@
 
     gl.enableVertexAttribArray(a_Position);
     var buffer = gl.createBuffer();
-
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    
 
     gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0)
 
     // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-
-    canvas.addEventListener('mouseup', e => {
+    gl.clearColor(0, 0, 0, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    canvas.addEventListener('click', e => {
       var x = e.pageX;
       var y = e.pageY;
       positions.push(x);
@@ -85,8 +87,7 @@
         render(gl);
       }
     });
-    gl.clearColor(0, 0, 0, 1.0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    
     //渲染函数
     function render(gl) {
       
@@ -96,7 +97,7 @@
       //从顶点数组的开始位置取顶点数据
       var drawOffset = 0;
       //因为我们要绘制 N 个点，所以执行 N 次顶点绘制操作。
-      gl.drawArrays(gl.Lines, 0, positions.length / 2);
+      gl.drawArrays(gl.LINES, 0, positions.length / 2);
     }
   </script>
 </body>
