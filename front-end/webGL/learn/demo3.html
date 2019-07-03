@@ -97,7 +97,7 @@
       //从顶点数组的开始位置取顶点数据
       var drawOffset = 0;
       //因为我们要绘制 N 个点，所以执行 N 次顶点绘制操作。
-      gl.drawArrays(gl.LINES, 0, positions.length / 2);
+      gl.drawArrays(gl.LINE_LOOP, 0, positions.length / 2);
     }
   </script>
 </body>

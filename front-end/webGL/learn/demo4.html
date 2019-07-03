@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<title>绘制线段</title>
 	<style type="text/css">
-		.option{
+		.option {
 			position: fixed;
 			top: 20px;
 			right: 20px;
@@ -12,100 +13,135 @@
 		}
 	</style>
 </head>
+
 <body>
-	<canvas id="canvas"></canvas>
-	<div class="option">
-	<input type ="radio" name ="line_type" checked="true" id="LINES" value="LINES"/><label for="LINES">基本线段</label>
-	<input type ="radio" name ="line_type" id="LINE_STRIP" value="LINE_STRIP"/><label for="LINE_STRIP">带状线段</label>
-	<input type ="radio" name ="line_type" id="LINE_LOOP" value="LINE_LOOP"/><label for="LINE_LOOP">闭合线段</label>
-	</div>
+	<canvas id="canvas" width="600" height="500"></canvas>
 	<script type="shader-source" id="vertexShader">
-		//浮点数设置为中等精度
-		precision mediump float;
-		//接收 JavaScript 传递过来的点的坐标（X, Y）
-		attribute vec2 a_Position;
-		// 接收canvas的尺寸。
-		attribute vec2 a_Screen_Size;
-		void main(){
-			// 将 canvas 的坐标值 转换为 [-1.0, 1.0]的范围。
-			vec2 position = (a_Position / a_Screen_Size) * 2.0 - 1.0;
-			// canvas的 Y 轴坐标方向和 设备坐标系的相反。
-			position = position * vec2(1.0, -1.0);
-			// 最终的顶点坐标。
-			gl_Position = vec4(position, 0.0, 1.0);
-			gl_PointSize = 5.0;
-		}
+    precision mediump float;
+    attribute vec2 a_Position;
+    attribute vec2 a_Screen_Size;
+    attribute vec4 a_Color;
+    varying vec4 v_Color;
+    void main(){
+      vec2 position = (a_Position / a_Screen_Size) * 2.0 - 1.0;
+      position = position * vec2(1.0,-1.0);
+      gl_Position = vec4(position, 0, 1);
+      v_Color = a_Color;
+    }
 	</script>
 	<script type="shader-source" id="fragmentShader">
-		//浮点数设置为中等精度
-		precision mediump float;
-		//全局变量，用来接收 JavaScript传递过来的颜色。
-		uniform vec4 u_Color;
-		void main(){
-			// 将颜色处理成 GLSL 允许的范围[0， 1]。
-			vec4 color = u_Color / vec4(255, 255, 255, 1);
-			// 点的最终颜色。
-			gl_FragColor = color;
-		}
+    precision mediump float;
+    varying vec4 v_Color;
+    void main(){
+      vec4 color = v_Color / vec4(255, 255, 255, 1);
+      gl_FragColor = color;
+   }
 	</script>
 	<script src="webgl-helper.js"></script>
 	<script>
-		let currentType = 'LINES';
-		//获取canvas
-		let canvas = getCanvas('#canvas');
-		//设置canvas尺寸为满屏
-		resizeCanvas(canvas);
-		//获取绘图上下文
-		let gl = getContext(canvas);
+		var canvas = getCanvas('#canvas');
+		var gl = getContext(canvas);
+		// 获取顶点着色器源码
+		var vertexShader = createShaderFromScript(gl, gl.VERTEX_SHADER, 'vertexShader');
+		//创建片元着色器
+		var fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, 'fragmentShader');
 		//创建着色器程序
-		let program = createSimpleProgramFromScript(gl, 'vertexShader', 'fragmentShader');
-		//使用该着色器程序
+		var program = createProgram(gl, vertexShader, fragmentShader);
+		//告诉 WebGL 运行哪个着色器程序
 		gl.useProgram(program);
-		// 随机生成一个颜色。
-		let color = randomColor();
-		// 找到着色器中的全局变量 u_Color;
-		let u_Color = gl.getUniformLocation(program, 'u_Color');
-		// 将随机颜色传递给给全局变量
-		gl.uniform4f(u_Color, color.r, color.g, color.b, color.a);
-		// 获取 canvas 尺寸。
+
+
+		
 		let a_Screen_Size = gl.getAttribLocation(program, 'a_Screen_Size');
-		// 将 canvas 尺寸传递给顶点着色器。
 		gl.vertexAttrib2f(a_Screen_Size, canvas.width, canvas.height);
+		//顶点坐标数组
 		let positions = [];
+		//顶点颜色数组
+		let colors = [];
 		let a_Position = gl.getAttribLocation(program, 'a_Position');
+		let a_Color = gl.getAttribLocation(program, 'a_Color');
+		// //创建坐标缓冲区
+		// let positionBuffer = createBuffer(gl, a_Position, {
+		// 	size : 2
+		// });
+		// //创建颜色缓冲区
+		// let colorBuffer = createBuffer(gl, a_Color, {
+		// 	size : 4
+		// });
+		// //设置清除背景颜色为黑色。
+		// gl.clearColor(0, 0, 0, 1);
+		// canvas.addEventListener('click', e => {
+		// 	var x = e.pageX;
+		// 	var y = e.pageY;
+		// 	positions.push(x, y);
+		// 	//随机一种颜色
+		// 	var color = randomColor();
+		// 	//将随机颜色的 rgba 值添加到顶点的颜色数组中。
+		// 	colors.push(color.r, color.g, color.b, color.a);
+		// 	//顶点的数量是 3 的整数倍时，执行绘制操作。
+		// 	if (positions.length % 6 == 0) {
+		// 		gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+		// 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.DYNAMIC_DRAW);
+		// 		gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+		// 		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.DYNAMIC_DRAW);
+		// 		render(gl);
+		// 	}
+		// })
+		// gl.clear(gl.COLOR_BUFFER_BIT);
+		// function render(gl) {
+		// 	//用设置的清空画布颜色清空画布。
+		// 	gl.clear(gl.COLOR_BUFFER_BIT);
+		// 	if (positions.length <= 0) {
+		// 		return;
+		// 	}
+		// 	//绘制图元设置为三角形。
+		// 	var primitiveType = gl.TRIANGLES;
+		// 	//因为我们要绘制三个点，所以执行三次顶点绘制操作。
+		// 	gl.drawArrays(primitiveType, 0, positions.length / 2);
+		// }
 		
+		let positions2 = []
+
 		gl.enableVertexAttribArray(a_Position);
-		let buffer = gl.createBuffer();
+		gl.enableVertexAttribArray(a_Color);
+
+		var buffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-		gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
-		
-		
-		//设置清屏颜色为黑色。
+
+		gl.vertexAttribPointer(
+      a_Color, 4, gl.FLOAT, false, 24, 8);
+      
+		gl.vertexAttribPointer(
+      a_Position, 2, gl.FLOAT, false, 24, 0);
 		gl.clearColor(0, 0, 0, 1);
-		canvas.addEventListener("click", e=>{
-			positions.push(e.pageX, e.pageY);
-			if(positions.length  > 0) {
-				gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
-				
+		canvas.addEventListener('click', e => {
+			var x = e.pageX;
+			var y = e.pageY;
+			positions2.push(x, y);
+			//随机一种颜色
+			var color = randomColor();
+			//将随机颜色的 rgba 值添加到顶点的颜色数组中。
+			positions2.push(color.r, color.g, color.b, color.a);
+			//顶点的数量是 3 的整数倍时，执行绘制操作。
+			if (positions2.length % 18 == 0) {
+				gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions2), gl.STATIC_DRAW);
 				render(gl);
 			}
 		})
-		$$('[name="line_type"]').forEach(function(item){
-			item.addEventListener('input',function(){
-				positions = [];
-				currentType = this.value;
-				render(gl);
-			})
-		})
-		/*渲染*/
-		function render(gl){
+		gl.clear(gl.COLOR_BUFFER_BIT);
+		function render(gl) {
+			//用设置的清空画布颜色清空画布。
 			gl.clear(gl.COLOR_BUFFER_BIT);
-			if(positions.length > 0){
-				gl.drawArrays(gl[currentType], 0, positions.length / 2);
+			if (positions2.length <= 0) {
+				return;
 			}
+			//绘制图元设置为三角形。
+			var primitiveType = gl.TRIANGLES;
+			//因为我们要绘制三个点，所以执行三次顶点绘制操作。
+			gl.drawArrays(primitiveType, 0, positions2.length / 6);
 		}
-		render(gl);
+
 	</script>
 </body>
+
 </html>

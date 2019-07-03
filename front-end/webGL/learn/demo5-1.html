@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>绘制线段</title>
+  <style type="text/css">
+    .option {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      color: #FFF;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas" width="600" height="500"></canvas>
+  <script type="shader-source" id="vertexShader">
+    precision mediump float;
+    attribute vec2 a_Position;
+    attribute vec2 a_Screen_Size;
+    attribute vec4 a_Color;
+    varying vec4 v_Color;
+    void main(){
+      vec2 position = (a_Position / a_Screen_Size) * 2.0 - 1.0;
+      position = position * vec2(1.0,-1.0);
+      gl_Position = vec4(position, 0, 1);
+      v_Color = a_Color;
+    }
+	</script>
+  <script type="shader-source" id="fragmentShader">
+    precision mediump float;
+    varying vec4 v_Color;
+    void main(){
+      vec4 color = v_Color / vec4(255, 255, 255, 1);
+      gl_FragColor = color;
+   }
+	</script>
+  <script src="webgl-helper.js"></script>
+  <script>
+    var canvas = getCanvas('#canvas');
+    var gl = getContext(canvas);
+    // 获取顶点着色器源码
+    var vertexShader = createShaderFromScript(gl, gl.VERTEX_SHADER, 'vertexShader');
+    //创建片元着色器
+    var fragmentShader = createShaderFromScript(gl, gl.FRAGMENT_SHADER, 'fragmentShader');
+    //创建着色器程序
+    var program = createProgram(gl, vertexShader, fragmentShader);
+    //告诉 WebGL 运行哪个着色器程序
+    gl.useProgram(program);
+
+    let a_Screen_Size = gl.getAttribLocation(program, 'a_Screen_Size');
+    gl.vertexAttrib2f(a_Screen_Size, canvas.width, canvas.height);
+    //顶点颜色数组
+    let a_Position = gl.getAttribLocation(program, 'a_Position');
+    let a_Color = gl.getAttribLocation(program, 'a_Color');
+
+    gl.enableVertexAttribArray(a_Position)
+
+    gl.enableVertexAttribArray(a_Color)
+
+    var positions = [
+      30, 30, 255, 0, 0, 1, //V0
+      30, 300, 255, 0, 0, 1, //V1
+      300, 300, 255, 0, 0, 1, //V2
+      30, 30, 0, 255, 0, 1, //V0
+      300, 300, 0, 255, 0, 1, //V2
+      300, 30, 0, 255, 0, 1 //V3
+    ]
+
+    var buffer = gl.createBuffer()
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
+
+    gl.vertexAttribPointer(
+      a_Color, 4, gl.FLOAT, false, 24, 8);
+
+    gl.vertexAttribPointer(
+      a_Position, 2, gl.FLOAT, false, 24, 0);
+
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT)
+
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW)
+
+    gl.drawArrays(gl.TRIANGLES, 0, positions.length / 6)
+
+  </script>
+</body>
+
+</html>

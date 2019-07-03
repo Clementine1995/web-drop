@@ -1,4 +1,5 @@
 var random = Math.random;
+
 function randomColor() {
   return {
     r: random() * 255,
@@ -110,4 +111,27 @@ function createProgram(gl, vertexShader, fragmentShader) {
   let errorLog = gl.getProgramInfoLog(program);
   gl.deleteProgram(program);
   throw errorLog;
+}
+
+
+function createBuffer(gl, attribute, vertexAttribPointer) {
+  let {
+    size,
+    type,
+    normalize,
+    stride,
+    offset
+  } = vertexAttribPointer;
+  gl.enableVertexAttribArray(attribute);
+  let buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.vertexAttribPointer(
+    attribute,
+    size,
+    type || gl.FLOAT,
+    normalize || false,
+    stride || 0,
+    offset || 0
+  );
+  return buffer;
 }
