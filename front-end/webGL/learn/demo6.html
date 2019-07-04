@@ -15,42 +15,35 @@
 </head>
 
 <body>
-  <canvas id="canvas" width="1000" height="800"></canvas>
+  <canvas id="canvas" width="800" height="600"></canvas>
   <script type="shader-source" id="vertexShader">
+    //浮点数设置为中等精度
     precision mediump float;
-    // 接收顶点坐标 (x, y)
     attribute vec2 a_Position;
-    // 接收 canvas 尺寸(width, height)
-    attribute vec2 a_Screen_Size;
-    // 接收JavaScript传递过来的顶点 uv 坐标。
+    uniform vec2 u_Screen_Size;
+    varying vec2 v_Uv;
     attribute vec2 a_Uv;
-    // 将接收的uv坐标传递给片元着色器
-    varying vec2 v_Uv;
     void main(){
-      vec2 position = (a_Position / a_Screen_Size) * 2.0 - 1.0;
-      position = position * vec2(1.0,-1.0);
-      gl_Position = vec4(position, 0, 1);
-      // 将接收到的uv坐标传递给片元着色器
-      v_Uv = a_Uv;
+        vec2 position = (a_Position / u_Screen_Size) * 2.0 - 1.0;
+        position = position * vec2(1.0, -1.0);
+        gl_Position = vec4(position, 0, 1);
+        v_Uv = a_Uv;
     }
-	</script>
+  </script>
   <script type="shader-source" id="fragmentShader">
+    //浮点数设置为中等精度
     precision mediump float;
-    // 接收顶点着色器传递过来的 uv 值。
     varying vec2 v_Uv;
-    // 接收 JavaScript 传递过来的纹理
-    uniform sampler2D texture;
+    uniform sampler2D u_Texture;
     void main(){
-      // 提取纹理对应uv坐标上的颜色，赋值给当前片元（像素）。
-        gl_FragColor = texture2D(texture, vec2(v_Uv.x, v_Uv.y));
+        // 点的最终颜色。
+        gl_FragColor = texture2D(u_Texture, vec2(v_Uv.x, v_Uv.y));
     }
-	</script>
+  </script>
   <script src="webgl-helper.js"></script>
   <script>
     //获取canvas
     let canvas = getCanvas("#canvas");
-    //设置canvas尺寸为满屏
-    resizeCanvas(canvas);
     //获取绘图上下文
     let gl = getContext(canvas);
     //创建着色器程序
@@ -59,19 +52,34 @@
       "vertexShader",
       "fragmentShader"
     );
-
     //使用该着色器程序
     gl.useProgram(program);
-
-    var positions = [
-      30, 30, 0, 0, //V0
-      30, 300, 0, 1, //V1
-      300, 300, 1, 1, //V2
-      30, 30, 0, 0, //V0
-      300, 300, 1, 1, //V2
-      300, 30, 1, 0 //V3
-    ]
-
+    let positions = [
+      30,
+      30,
+      0,
+      0,
+      30,
+      300,
+      0,
+      1,
+      300,
+      300,
+      1,
+      1,
+      30,
+      30,
+      0,
+      0,
+      300,
+      300,
+      1,
+      1,
+      300,
+      30,
+      1,
+      0
+    ];
     // 随机生成一个颜色。
     var color = randomColor();
     // 找到着色器中的全局变量 u_Color;
@@ -82,6 +90,33 @@
     var a_Uv = gl.getAttribLocation(program, "a_Uv");
     gl.enableVertexAttribArray(a_Position);
     gl.enableVertexAttribArray(a_Uv);
+    // 创建缓冲区
+    var buffer = gl.createBuffer();
+    // 绑定缓冲区为当前缓冲
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    // 设置 a_Position 属性从缓冲区读取数据方式
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 16, 0);
+    // 设置 a_Uv 属性从缓冲区读取数据方式
+    gl.vertexAttribPointer(a_Uv, 2, gl.FLOAT, false, 16, 8);
+    // 向缓冲区传递数据
+    gl.bufferData(
+      gl.ARRAY_BUFFER,
+      new Float32Array(positions),
+      gl.STATIC_DRAW
+    );
+    //设置清屏颜色为黑色。
+    gl.clearColor(0, 0, 0, 1);
+
+    function render() {
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      if (positions.length <= 0) {
+        return;
+      }
+      gl.drawArrays(gl.TRIANGLES, 0, positions.length / 4);
+    }
+    loadTexture(gl, 'test1.png', u_Texture, function () {
+      render();
+    })
   </script>
 </body>
 
