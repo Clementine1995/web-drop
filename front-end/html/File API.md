@@ -156,6 +156,24 @@ function previewFile() {
 </script>
 ```
 
+或者：
+
+```html
+<input id="upload" type="file" />
+<img id="preview" src="" alt="预览"/>
+<script>
+const upload = document.querySelector("#upload");
+const preview = document.querySelector("#preview");
+
+upload.onchange = function() {
+  const file = upload.files[0]; //File对象
+  const src = URL.createObjectURL(file);
+  preview.src = src;
+};
+
+</script>
+```
+
 #### FileReader.readAsText()
 
 readAsText 方法可以将 Blob 或者 File 对象转根据特殊的编码格式转化为内容(字符串形式)

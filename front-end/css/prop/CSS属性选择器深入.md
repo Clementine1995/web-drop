@@ -122,6 +122,7 @@ div::before {
 ```html
 <p class="title" popTitle="文字弹出">这是一段描述性文字</p>
 <p class="title" popTitle="标题A">这是一段描述性文字</p>
+<style>
 p[popTitle]:hover::before {
     content: attr(popTitle);
     position: absolute;
@@ -129,6 +130,7 @@ p[popTitle]:hover::before {
     border: 1px solid #000;
     ...
 }
+</style>
 ```
 
 对比一下，第一个是原生自带的 title 属性，下面两个是使用属性选择器配合伪元素模拟的提示：
@@ -151,6 +153,7 @@ p[popTitle]:hover::before {
 <div class="g-wrap" desc1="商品描述AAA" desc2="商品描述BBB">
     <img src="https://xx.baidu.com/timg?xxx" >
 </div>
+<style>
 [desc1]::before,
 [desc2]::after {
     position: absolute;
@@ -169,6 +172,7 @@ p[popTitle]:hover::before {
 [desc2]:hover::after{
     opacity: 1;
 }
+</style>
 ```
 
 看看效果：
@@ -183,6 +187,7 @@ p[popTitle]:hover::before {
 
 ```html
 <a href="https://www.xxx.com/logo.png" download="logo">logo</a>
+<style>
 [download] {
     position: relative;
     color: hotpink;
@@ -193,6 +198,7 @@ p[popTitle]:hover::before {
     position: absolute;
     ...
 }
+</style>
 ```
 
 当我们 hover 到这个链接的时候，就会这样，提示用户，这是一个可以下载的按钮：
@@ -203,7 +209,7 @@ p[popTitle]:hover::before {
 
 也可以对一些可下载资源进行视觉上 icon 的提示。
 
-```
+```html
 <ul>
     <li><a href="xxx.doc">Word File</a></li>
     <li><a href="xxx.ppt">PPT File</a></li>
@@ -211,6 +217,7 @@ p[popTitle]:hover::before {
     <li><a href="xxx.MP3">MP3 File</a></li>
     <li><a href="xxx.avi">AVI File</a></li>
 </ul>
+<style>
 a[href$=".doc" i]::before {
     content: "doc";
     background: #a9c4f5;
@@ -231,6 +238,7 @@ a[href$=".avi" i]::before {
     content: "avi";
     background: #5f8ffc;
 }
+</style>
 ```
 
 ![image](https://user-images.githubusercontent.com/8554143/59603461-07956b00-90f9-11e9-99c2-dae460560fdb.png)
