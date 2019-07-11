@@ -447,3 +447,7 @@ if ('serviceWorker' in navigator) {
 在 Fetch 规范中，将导航请求简洁地定义为：导航请求是目的地为“document”的请求。通俗地说，每当在浏览器的地址栏中输入网址、与 window.location 交互，或者从一个网页访问指向另一网页的链接时，就会执行导航请求。在页面上放置 `<iframe>` 也会产生针对 `<iframe>` 的 src 的导航请求。在浏览器会话中，针对单页面应用的初始请求仍为导航。
 
 传统的缓存最佳做法依赖于 HTTP Cache-Control 标头而非 Service Worker，并且要求每次导航都访问网络，以确保所有子资源网址均为最新。 提高网页性能的诀窍在于获得积极缓存子资源的所有裨益，而不需要执行依赖于网络的导航请求。 现在利用根据您网站的特定架构定制且配置正确的 Service Worker，可以实现这个目标。
+
+## 缓存策略
+
+[缓存策略](https://developers.google.com/web/fundamentals/instant-and-offline/offline-cookbook/)
