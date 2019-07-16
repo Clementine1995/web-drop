@@ -436,3 +436,131 @@ queryParams:Record<string,any> = {
 var newWindow = window.open();
 newWindow.opener = null;
 ```
+
+## 使用Ref
+
+### TypeScript 中传递引用
+
+先看正常情况下，对原生 DOM 元素的引用。示例：
+
+```js
+class App extends Component<{}, {}> {
+  private inputRef = React.createRef();
+
+  componentDidMount() {
+    /** 🚨 Object is possibly 'null' */
+    this.inputRef.current.focus();
+  }
+
+  render() {
+    return (
+      <div className="App">
+        {/* 🚨 Type '{}' is missing the following properties from type 'HTMLInputElement':... */}
+        <input type="text" ref={this.inputRef} />
+      </div>
+    );
+  }
+}
+```
+
+像上面那样创建并使用存在两个问题。
+
+一个是提示我们的引用无法赋值到 `<input>` 的 ref 属性上，类型不兼容。引用需要与它真实所指代的元素类型相符，这正是 TypeScript 类型检查为我们添加的约束。这个约束的好处是，我们在使用引用的时候，就知道这个引用真实的元素类型，TypeScript 会自动提示可用的方法和属性，同时防止调用该元素身上没有的属性和方法。这里修正的方法很简单，查看 React.createRef() 的方法签名，会发现它是个泛型方法，支持传递类型参数。
+
+```js
+function createRef<T>(): RefObject<T>;
+```
+
+所以上面创建引用时，显式指定它的类型。
+
+```js
+private inputRef = React.createRef<HTMLInputElement>();
+```
+
+第二个问题是即使在 componentDidMount 生命周期中使用，TypeScript 仍然提示 current 的值有可能为空。上面讨论过，其实此时我们知道它不可能为空的。但因为 TypeScript 无法理解 componentDidMount，所以它不知道此时引用其实是可以安全使用的。解决办法当然是加上判空的逻辑。
+
+```js
+  componentDidMount() {
+    if(this.inputRef.current){
+      this.inputRef.current.focus();
+    }
+  }
+```
+
+还可通过变量后添加 ! 操作符告诉 TypeScript 该变量此时非空。
+
+```js
+componentDidMount() {
+  this.inputRef.current!.focus();
+}
+```
+
+修复后完整的代码如下：
+
+```js
+class App extends Component<{}, {}> {
+  private inputRef = React.createRef<HTMLInputElement>();
+
+  componentDidMount() {
+    this.inputRef.current!.focus();
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <input type="text" ref={this.inputRef} />
+      </div>
+    );
+  }
+}
+```
+
+### React + TypeScript 组件引用的传递
+
+继续到组件的情况，当需要引用的元素在另一个组件内部时，还是通过 React.forwardRef()。
+
+这是该方法的签名：
+
+function forwardRef<T, P = {}>(Component: RefForwardingComponent<T, P>): ForwardRefExoticComponent<PropsWithoutRef<P> & RefAttributes<T>>;
+可以看到，方法接收两个类型参数，T 为需要引用的元素类型，我们示例中是 HTMLInputElement，P 为组件的 props 类型。
+
+所以添加引用传递后，FancyInput 组件在 TypeScript 中的版本应该长这样：
+
+```js
+const FancyInput = React.forwardRef<HTMLInputElement, {}>((props, ref) => {
+  return <input type="text" ref={ref} className="fancy-input" />;
+});
+```
+
+使用组件：
+
+```js
+class App extends Component<{}, {}> {
+  private inputRef = React.createRef<HTMLInputElement>();
+
+  componentDidMount() {
+    this.inputRef.current!.focus();
+  }
+
+  render() {
+    return (
+      <div className="App">
+        <FancyInput ref={this.inputRef} />
+      </div>
+    );
+  }
+}
+```
+
+### 无状态组件中使用
+
+```js
+function TestComp(props){
+  let refDom;
+  return (<div>
+    <div ref={(node) => refDom = node}>
+        ...
+    </div>
+  </div>)
+}
+```
