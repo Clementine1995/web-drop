@@ -112,3 +112,34 @@ contain: size意思是其子元素不影响父元素的大小，它被推断或�
 这个值打开该元素的布局控制。这确保所包含元素对布局目的完全不透明；外部不能影响其内部布局，反之亦然。
 
 布局通常是文档的范围，与DOM结构大小规模成比例，因此，如果你改变一个元素的left属性(作为示例)，那么DOM中的每个元素可能需要进行检查。这里使containment可能把元素数量减少到极少数，而不是整个文档，节省了浏览器大量的不必要工作和显著提高性能。
+
+## object-fit
+
+object-fit CSS 属性指定可替换元素的内容应该如何适应到其使用的高度和宽度确定的框。通过使用 object-position 属性来切换被替换元素的内容对象在元素框内的对齐方式。
+
+语法：`object-fit: fill | contain | cover | none | scale-down`
+
++ contain：被替换的内容将被缩放，以在填充元素的内容框时保持其宽高比。 整个对象在填充盒子的同时保留其长宽比，因此如果宽高比与框的宽高比不匹配，该对象将被添加“黑边”。
++ cover：被替换的内容在保持其宽高比的同时填充元素的整个内容框。如果对象的宽高比与内容框不相匹配，该对象将被剪裁以适应内容框。
++ fill：被替换的内容正好填充元素的内容框。整个对象将完全填充此框。如果对象的宽高比与内容框不相匹配，那么该对象将被拉伸以适应内容框。
++ none：被替换的内容将保持其原有的尺寸。
++ scale-down：内容的尺寸与 none 或 contain 中的一个相同，取决于它们两个之间谁得到的对象尺寸会更小一些。
+
+## object-position
+
+CSS 属性 object-position 规定了可替换元素的内容，在这里我们称其为对象，在其内容框中的位置。可替换元素的内容框中未被对象所覆盖的部分，则会显示该元素的背景（background）。
+
+语法：
+
+```css
+/* <position> values */
+/* <position>使用 1 到 4 个值来定义该元素在它所处的二维平面中的定位。可以使用相对或绝对偏移。 */
+object-position: center top;
+object-position: 100px 50px;
+
+/* Global values */
+object-position: inherit;
+object-position: initial;
+object-position: unset;
+```
+
