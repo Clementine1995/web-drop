@@ -80,7 +80,7 @@ public readonly state: Readonly<IState> = {
 
 ### 声明函数式组件
 
-在 React 的声明文件中 已经定义了一个 SFC 类型，使用这个类型可以避免我们重复定义 children、 propTypes、 contextTypes、 defaultProps、displayName 的类型。使用 SFC 进行无状态组件开发：
+在 React 的声明文件中 已经定义了一个 SFC 类型，使用这个类型可以避免我们重复定义 children、 propTypes、 contextTypes、 defaultProps、displayName 的类型。使用 SFC 进行无状态组件开发，`type SFC<P>`其中已经定义了children类型。：
 
 ```tsx
 import { SFC } from 'react'
@@ -89,6 +89,7 @@ import * as React from 'react'
 interface IProps {
   onClick (event: MouseEvent<HTMLDivElement>): void,
 }
+// 当我们需要传递 Props 时，只用定义一个 Props 接口，然后给 props 指明类型：
 const Button: SFC<IProps> = ({onClick, children}) => {
   return (
     <div onClick={onClick}>
@@ -103,7 +104,7 @@ export default Button
 
 因为react中的高阶组件本质上是个高阶函数的调用，所以高阶组件的使用，我们既可以使用函数式方法调用，也可以使用装饰器。但是在TS中，编译器会对装饰器作用的值做签名一致性检查，而我们在高阶组件中一般都会返回新的组件，并且对被作用的组件的props进行修改（添加、删除）等。这些会导致签名一致性校验失败，TS会给出错误提示。这带来两个问题：
 
-#### 第一，是否还能使用装饰器语法调用高阶组件？
+#### 第一，是否还能使用装饰器语法调用高阶组件呢
 
 这个答案也得分情况：如果这个高阶组件正确声明了其函数签名，那么应该使用函数式调用，比如 withRouter：
 
@@ -471,20 +472,20 @@ class App extends Component<{}, {}> {
 function createRef<T>(): RefObject<T>;
 ```
 
-所以上面创建引用时，显式指定它的类型。
+在createRef这里需要一个泛型，这个泛型就是需要ref组件的类型，因为这个是input组件，所以类型是HTMLInputElement，当然如果是div组件的话那么这个类型就是HTMLDivElement。
 
-```js
+```ts
 private inputRef = React.createRef<HTMLInputElement>();
 ```
 
 第二个问题是即使在 componentDidMount 生命周期中使用，TypeScript 仍然提示 current 的值有可能为空。上面讨论过，其实此时我们知道它不可能为空的。但因为 TypeScript 无法理解 componentDidMount，所以它不知道此时引用其实是可以安全使用的。解决办法当然是加上判空的逻辑。
 
-```js
-  componentDidMount() {
-    if(this.inputRef.current){
-      this.inputRef.current.focus();
-    }
+```jsx
+componentDidMount() {
+  if(this.inputRef.current){
+    this.inputRef.current.focus();
   }
+}
 ```
 
 还可通过变量后添加 ! 操作符告诉 TypeScript 该变量此时非空。
