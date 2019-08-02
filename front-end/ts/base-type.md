@@ -33,6 +33,25 @@ let name: string = `Gene`;
 
 `let list: Array<number> = [1, 2, 3];`
 
+还有第三种是借助于接口来实现
+
+```ts
+// arrayInterface.ts
+interface ArrayNumber {
+  [index: number]: number
+}
+
+let arrayNumberInterface: ArrayNumber = [1, 1, 2, 3, 5];
+```
+
+对于类数组的处理：
+
+```ts
+function arrayArguments2(){
+  let args: IArguments = arguments;
+}
+```
+
 ## 元组 Tuple
 
 元组类型允许表示一个已知元素数量和类型的数组，各元素的类型不必相同。

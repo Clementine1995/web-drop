@@ -3,48 +3,64 @@
 ## 泛型定义
 
 ```typescript
-	function identity(arg: number): number {
-    return arg;
-	}
-	function identity(arg: any): any {
-    return arg;
-	}
+function identity(arg: number): number {
+  return arg;
+}
+function identity(arg: any): any {
+  return arg;
+}
 ```
 
 可能有很多...可以使用泛型代表这一类函数，T叫做类型变量，帮助我们捕获用户传入的类型
 
 ```typescript
-	function identity<T>(arg: T): T {
-		return arg;
-	}
+function identity<T>(arg: T): T {
+  return arg;
+}
 ```
 
 定义了泛型函数后，可以用两种方法使用。 明确的指定了T是string类型，或者利用类型推论
 
 ```typescript
-	let output = identity<string>("myString");
-	let output = identity("myString");
+  let output = identity<string>("myString");
+  let output = identity("myString");
 ```
 
 ## 使用泛型变量
 
 ```typescript
-	function loggingIdentity<T>(arg: T): T {
-    console.log(arg.length);  // Error: T doesn't have .length
-    return arg;
-	}
+function loggingIdentity<T>(arg: T): T {
+  console.log(arg.length);  // Error: T doesn't have .length
+  return arg;
+}
 ```
 
 编译器会报错说我们使用了arg的.length属性，但是没有地方指明arg具有这个属性
 
 ```typescript
-	function loggingIdentity<T>(arg: T[]): T[] {
-    console.log(arg.length);  // Array has a .length, so no more error
-    return arg;
-	}
+function loggingIdentity<T>(arg: T[]): T[] {
+  console.log(arg.length);  // Array has a .length, so no more error
+  return arg;
+}
 ```
 
 这可以让我们把泛型变量T当做类型的一部分使用，而不是整个类型，增加了灵活性。
+
+或者利用接口
+
+```ts
+interface Length {
+    length: number;
+}
+
+function same6<T extends Length>(arg: T): T {
+    console.log(arg.length);
+    return arg;
+}
+console.log(same6(18));
+console.log(same6('十八'));
+console.log(same6(['pr', '30', 'boy']));
+```
 
 ## 泛型类型
 
