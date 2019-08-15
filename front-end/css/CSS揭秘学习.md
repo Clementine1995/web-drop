@@ -86,3 +86,146 @@ background-size: 100% 30px;
 background: linear-gradient(#fb3 33.3%,#58a 0, #58a 66.6%, yellowgreen 0);
 background-size: 100% 45px;
 ```
+
+如果想要垂直条纹，只需要将 `background-size` 改为 30px 100% ，并且渐变方向改为 to right，默认为to bottom。
+
+斜向条纹，这里先以45deg的角度为例，如果想要指定条纹的宽度，则需要指定背景图size为 2x * 根2，x就是想要的宽度。
+
+```css
+background: linear-gradient(45deg, #fb3 25%, #58a 0, #58a 50%, #fb3 0, #fb3 75%, #58a 0);
+background-size: 30px 30px;
+```
+
+如果想要实现更好的斜向条纹，比如60deg之类的，则需要使用 repeating-linear-gradient()
+
+### 连续的图像边框
+
+有时我们想把一幅图案或图片应用为边框，而不是背景。你可能会想到：border-image，但它的原理基本上就是九宫格伸缩法：把图片切割成九块，然后把它们应用到元素边框相应的边和角。而我们希望出现在拐角处的图片区域是随着元素宽高和边框厚度的变化而变化，用 border-image 是做不到的。
+
+最简单的办法是使用两个 HTML 元素：一个元素用来把我们的图片设为背景，另一个元素用来存放内容，并设置纯白背景，然后覆盖在前者之上。
+
+在引入了对 CSS 渐变和背景的扩展，使得我们只用一个元素就能达成完全一样的效果。主要的思路就是在石雕背景图片之上，再叠加一层纯白的实色背景。为了让下层的图片背景透过边框区域显示出来，我们需要给两层背景指定不同的 background-clip 值。还要注意的是，我们只能在多重背景的最底层设置背景色，因此需要用一道从白色过渡到白色的 CSS 渐变来模拟出纯白实色背景的效果。
+
+同时还需要注意 background-origin 的默认值是 padding-box，因此，图片的显示尺寸不仅取决于 padding box 的尺寸，而且被放置在了 padding box 的原点（左上角）。我们看到的实际上就是背景图片以平铺的方式蔓延到 border box 区域的效果。为了修正这个问题，只需把 background-origin 也设置为 border-box 就可以了
+
+```css
+padding: 1em;
+border: 1em solid transparent;
+background: linear-gradient(white, white), url(stone-art.jpg);
+background-size: cover;
+background-clip: padding-box, border-box;
+background-origin: border-box;
+```
+
+流动边框：
+
+```css
+@keyframes ants { to { background-position: 100% } }
+.marching-ants {
+  padding: 1em;
+  width: 200px;
+  height: 200px;
+  border: 1px solid transparent;
+  background:
+  linear-gradient(white, white) padding-box,
+  repeating-linear-gradient(-45deg,
+  black 0, black 25%, white 0, white 50%
+  ) 0 / .6em .6em;
+  animation: ants 12s linear infinite;
+}
+```
+
+## 形状
+
+### 自适应的椭圆
+
+只要设置 border-radius: 50%; 即可。
+
+#### 半椭圆
+
+border-radius: 50% / 100% 100% 0 0;
+
+#### 四分之一椭圆
+
+border-radius: 100% 0 0 0;
+
+### 平行四边形
+
+可以通过 skew() 的变形属性来对这个矩形进行斜向拉伸，但是，这导致它的内容也发生了斜向变形，这很不好看，而且难读。有没有办法只让容器的形状倾斜，而保持其内容不变呢？
+
+#### 嵌套元素方案
+
+对内容再应用一次反向的 skew() 变形，从而抵消容器的变形效果，最终产生我们所期望的结果。不幸的是，这意味着我们将不得不使用一层额外的 HTML 元素来包裹内容，比如用一个 div，注意变形对行内元素是不会生效的。
+
+```html
+<a href="#yolo" class="button">
+ <div>Click me</div>
+</a>
+.button { transform: skewX(-45deg); }
+.button > div { transform: skewX(45deg); }
+```
+
+#### 伪元素方案
+
+另一种思路是把所有样式（背景、边框等）应用到伪元素上，然后再对伪元素进行变形。这个技巧不仅对 skew() 变形来说很有用，还适用于其他任何变形样式，当我们想变形一个元素而不想变形它的内容时就可以用到它。
+
+```css
+.button {
+ position: relative;
+ /* 其他的文字颜色、内边距等样式…… */
+}
+.button::before {
+ content: ''; /* 用伪元素来生成一个矩形 */
+ position: absolute;
+ top: 0; right: 0; bottom: 0; left: 0;
+ z-index: -1;
+ background: #58a;
+ transform: skew(45deg);
+}
+```
+
+### 菱形图片
+
+#### 基于变形的方案
+
+需要把图片用一个 `<div>` 包裹起来，然后对其应用相反的 rotate() 变形样式。
+
+```html
+<div class="picture">
+ <img src="adam-catlace.jpg" alt="..." />
+</div>
+.picture {
+ width: 400px;
+ transform: rotate(45deg);
+ overflow: hidden;
+}
+.picture > img {
+ max-width: 100%;
+ transform: rotate(-45deg);
+}
+```
+
+但是这样并没达到想要的效果，因为这会生成一个八边形。主要问题在于 max-width: 100% 这条声明。100% 会被解析为容器（.picture）的边长。但是，我们想让图片的宽度与容器的对角线相等，而不是与边长相等。需要把maxwidth 的值设置为变长的根2倍，也可以使用scale() 变形样式来把这个图片放大，推荐使用这种方式
+
+```css
+.picture {
+ width: 400px;
+ transform: rotate(45deg);
+ overflow: hidden;
+}
+.picture > img {
+ max-width: 100%;
+ transform: rotate(-45deg) scale(1.42);
+}
+```
+
+#### 裁切路径方案
+
+具体可以查看裁剪相关的内容
+
+```css
+clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+```
+
+### 切角效果
+
