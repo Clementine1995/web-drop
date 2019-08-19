@@ -1,11 +1,11 @@
 # 栅格布局
 
 >参考自[CSS Grid 系列(上)-Grid布局完整指南](https://segmentfault.com/a/1190000012889793?utm_source=tag-newest)
-
+>
 >参考自[未来布局之星Grid](https://juejin.im/post/59c722b35188257a125d7960#heading-18)
-
+>
 >参考自[Grid 布局发车啦](https://juejin.im/post/5a96d3795188257a5a4ce688)
-
+>
 >参考自[写给自己看的display: grid布局教程](https://www.zhangxinxu.com/wordpress/2018/11/display-grid-css-css3/)
 
 CSS 网格布局(Grid Layout) 是CSS中最强大的布局系统。 这是一个二维系统，这意味着它可以同时处理列和行，不像 flexbox 那样主要是一维系统。
@@ -106,8 +106,8 @@ grid-template-columns: repeat(3, 200px);    // 三列200px
 ```css
 // 给网格线指定名字
 .box {
-    grid-template-columns: [first] 40px [line2] 50px [line3] auto [col4-start] 50px [five] 40px [end];
-    grid-template-rows: [row1-start] 25% [row1-end] 100px [third-line] auto [last-line];
+  grid-template-columns: [first] 40px [line2] 50px [line3] auto [col4-start] 50px [five] 40px [end];
+  grid-template-rows: [row1-start] 25% [row1-end] 100px [third-line] auto [last-line];
 }
 ```
 
@@ -512,8 +512,8 @@ grid-auto-rows: <track-size> ...;
 .item-a {
   grid-column-start: 2;
   grid-column-end: five;
-  grid-row-start: row1-start
-  grid-row-end: 3
+  grid-row-start: row1-start;
+  grid-row-end: 3;
 }
 ```
 
@@ -523,8 +523,8 @@ grid-auto-rows: <track-size> ...;
 .item-b {
   grid-column-start: 1;
   grid-column-end: span col4-start;
-  grid-row-start: 2
-  grid-row-end: span 2
+  grid-row-start: 2;
+  grid-row-end: span 2;
 }
 ```
 
@@ -554,7 +554,7 @@ grid-row: <start-line> / <end-line> | <start-line> / span <value>;
 
 ```css
 .item-d {
-  grid-area: header
+  grid-area: header;
 }
 ```
 
@@ -562,7 +562,7 @@ grid-row: <start-line> / <end-line> | <start-line> / span <value>;
 
 ```css
 .item-d {
-  grid-area: 1 / col4-start / last-line / 6
+  grid-area: 1 / col4-start / last-line / 6;
 }
 ```
 
@@ -631,7 +631,7 @@ place-items可以让align-self和justify-self属性写在单个声明中。语�
 
 ```css
 .container {
-    place-items: <align-self> / <justify-self>;
+  place-items: <align-self> / <justify-self>;
 }
 ```
 
