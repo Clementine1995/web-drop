@@ -58,6 +58,7 @@ const addTen = useCallback((initValue: number) => {
 ## useRef
 
 useRef 有两种比较典型的使用场景：
+
 场景一： 和 hook 之前的 ref 类似，用来关联一个 Dom节点或者 class component 实例，从而可以直接操作 Dom节点 或者class component 的方法。 通常会给 ref 的 readonly 属性 current 初始化为 null，直到 ref 关联到组件上。 通常我们需要指定 useRef 的类型，参考如下:
 
 ```tsx
@@ -67,7 +68,7 @@ const RRDTextInput = () => {
 }
 ```
 
-场景二：使用 ref 替代 class component 中的实例属性，这种场景我们可以从初始化值中推断出类型，current 也是可修改的。
+场景二：使用 ref 替代 class component 中的实例属性（变量保存），这种场景我们可以从初始化值中推断出类型，current 也是可修改的。
 
 ```tsx
 // 推断 current 是 number 类型
