@@ -187,6 +187,47 @@ CSS 属性 text-align-last 描述的是一段文本中最后一行在被强制�
 
 ## resize
 
+resize CSS 属性允许你控制一个元素的可调整大小性。注意：如果一个block元素的 overflow 属性被设置成了visible，那么resize属性对该元素无效。
+
+语法：`resize: none | both | horizontal | vertical | block | inline`
+
+取值
+
++ none：元素不能被用户缩放。
++ both：允许用户在水平和垂直方向上调整元素的大小。
++ horizontal：允许用户在水平方向上调整元素的大小。
++ vertical：允许用户在垂直方向上调整元素的大小。
++ block：依赖于 writing-mode 以及它的 direction 取值，元素显示一种机制，允许用户在块方向上水平或垂直地调整元素的大小。
++ inline：依赖于 writing-mode 以及它的 direction 取值，元素显示一种机制，允许用户在行内方向上水平或垂直地调整元素的大小。
+
+## ::selection
+
+::selection CSS伪元素应用于文档中被用户高亮的部分（比如使用鼠标或其他选择设备选中的部分）。
+
+只有一小部分CSS属性可以用于::selection 选择器：
+
++ color
++ background-color
++ cursor
++ caret-color
++ outline and its longhands
++ text-decoration and its associated properties
++ text-emphasis-color
++ text-shadow
+
+要特别注意的是，background-image 会如同其他属性一样被忽略。
+
 ## caret-color
 
+caret-color 属性用来定义插入光标（caret）的颜色，这里说的插入光标，就是那个在网页的可编辑器区域内，用来指示用户的输入具体会插入到哪里的那个一闪一闪的形似竖杠 | 的东西。
+
+语法：`caret-color: auto | <color>`
+
+取值
+
++ auto：默认颜色，此时浏览器应该用 currentcolor 来作为插入光标的颜色，但浏览器可能还会根据当前的背景色、阴影色等来对该颜色进行适当的调整以确保该插入光标具有良好的可见性。
++ `<color>`：所指定的插入光标的颜色值.
+
 ## mask
+
+[MDN Mask](https://developer.mozilla.org/zh-CN/docs/Web/CSS/mask)
