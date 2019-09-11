@@ -233,3 +233,5 @@ caret-color 属性用来定义插入光标（caret）的颜色，这里说的插
 [MDN Mask](https://developer.mozilla.org/zh-CN/docs/Web/CSS/mask)
 
 ## appearance
+
+[MDN Appearance](https://developer.mozilla.org/zh-CN/docs/Web/CSS/appearance)
