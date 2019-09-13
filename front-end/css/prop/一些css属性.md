@@ -235,3 +235,26 @@ caret-color 属性用来定义插入光标（caret）的颜色，这里说的插
 ## appearance
 
 [MDN Appearance](https://developer.mozilla.org/zh-CN/docs/Web/CSS/appearance)
+
+## :target
+
+:target CSS 伪类 代表一个唯一的页面元素(目标元素)，其id 与当前URL片段匹配.
+
+```css
+/* 选择一个ID与当前URL片段匹配的元素*/
+:target {
+  border: 2px solid black;
+}
+```
+
+例如, 以下URL拥有一个片段 (以#标识的) ，该片段指向一个ID为section2的页面元素:
+
+```html
+http://www.example.com/index.html#section2
+```
+
+若当前URL等于上面的URL，下面的元素可以通过 :target选择器被选中：
+
+```html
+<section id="section2">Example</section>
+```
