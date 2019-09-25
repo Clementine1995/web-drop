@@ -3,7 +3,7 @@
 >[Flex 布局教程：语法篇](https://juejin.im/post/5ac2329b6fb9a028bf057caf)
 >[Flex-弹性布局原来如此简单！！](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html)
 
-## Flex 布局是什么？
+## Flex 布局是什么
 
 Flex布局，可以简便、完整、响应式地实现各种页面布局。目前，它已经得到了所有浏览器的支持。 Flex是 Flexible Box 的缩写，意为"弹性布局"，用来为盒状模型提供最大的灵活性。
 
@@ -25,7 +25,7 @@ flex在演化过程有三个版本，旧版本 display:box | inline-box, 混合�
 
 ## Flex容器属性
 
-### 基本语法：
+### 基本语法
 
 ```css
 .box {
@@ -215,9 +215,15 @@ flex-basis属性定义项目在分配额外空间之前的缺省尺寸。属性�
 
 ```css
 .item {
-  flex-basis: <length> | auto; /* 缺省 auto */
+  flex-basis: <length> | content | auto; /* 缺省 auto */
 }
 ```
+
+取值：
+
++ <'width'>：width 值可以是 `{{cssxref("<length>")}};` 该值也可以是一个相对于其父弹性盒容器主轴尺寸的`{{cssxref("<percentage>", "百分数")}}` 。负值是不被允许的。默认为 0。
++ content：基于 flex 的元素的内容自动调整大小。
++ 还有几个width宽度的取值也可以用fill,max-content,min-content,fit-content.
 
 演示：
 
@@ -225,7 +231,7 @@ flex-basis属性定义项目在分配额外空间之前的缺省尺寸。属性�
 
 ### flex
 
-flex属性是flex-grow, flex-shrink 和flex-basis的简写，默认值为0 1 auto。后两个是可选属性。
+flex属性是flex-grow, flex-shrink 和flex-basis的简写，默认值为initial(0 1 auto)。后两个是可选属性。
 
 ```css
 .item {
@@ -234,6 +240,11 @@ flex属性是flex-grow, flex-shrink 和flex-basis的简写，默认值为0 1 aut
 ```
 
 该属性有两个快捷值：auto (1 1 auto) 和 none (0 0 auto)。
+
++ initial：元素会根据自身宽高设置尺寸。它会缩短自身以适应 flex 容器，但不会伸长并吸收 flex 容器中的额外自由空间来适应 flex 容器 。相当于将属性设置为"flex: 0 1 auto"。
++ auto：元素会根据自身的宽度与高度来确定尺寸，但是会伸长并吸收 flex 容器中额外的自由空间，也会缩短自身来适应 flex 容器。这相当于将属性设置为 "flex: 1 1 auto".
++ none：元素会根据自身宽高来设置尺寸。它是完全非弹性的：既不会缩短，也不会伸长来适应 flex 容器。相当于将属性设置为"flex: 0 0 auto"。
+
 一般推荐使用这种简写的方式，而不是分别定义每一个属性。
 
 ### align-self
@@ -260,7 +271,7 @@ align-self属性允许单个项目有与其他项目不一样的对齐方式，�
 
 >参考自[探秘 flex 上下文中神奇的自动 margin](https://juejin.im/post/5ce60afde51d455ca04361b1)
 
-### 如何让 margin: auto 在垂直方向上居中元素？
+### 如何让 margin: auto 在垂直方向上居中元素
 
 在传统的`display: block`中，当给块级元素中子元素设置了`margin: auto`，只会让其在水平方向居中
 
