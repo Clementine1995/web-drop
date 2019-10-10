@@ -695,3 +695,13 @@ Grid 有一个 `minmax()` 函数可以使用，这个函数接收两个参数，
 ## fit-content()
 
 fit-content()相当于 min('max-content', max('auto', argument));
+
+## 针对典型的栅格布局
+
+```css
+.container {
+    grid-template-columns: repeat(2, 100px 1fr);
+    grid-template-columns: repeat(2, max-content 1fr); //修改标题列宽度为max-content
+    grid-template-columns: repeat(2, fit-content(300px) 1fr); // 假设产品给的最大宽度是300px
+}
+```
