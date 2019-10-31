@@ -522,4 +522,350 @@ text-shadow: 0 0 .1em, 0 0 .3em;
 
 ### 选用合适的鼠标光标
 
+### 扩大可点击区域
 
+扩张热区最简单的办法是为它设置一圈透明边框，因为鼠标对元素边框的交互也会触发鼠标事件，这一点是描边和投影所不及的。
+
+```css
+border: 10px solid transparent;
+/* 简单好用的 background-clip 属性可以把背景限制在原本的区域之内 */
+background-clip: padding-box;
+/* 当你需要给按钮加上真正的边框效果时，可以用内嵌投影来模拟出一道（实色）边框  */
+box-shadow: 0 0 0 1px rgba(0,0,0,.3) inset;
+```
+
+伪元素同样可以代表其宿主元素来响应鼠标交互。只要有任何一个伪元素可供利用，这个方法就可以发挥作用，也不会干 扰其他任何效果。这个基于伪元素的解决方案极为灵活，我们基本上可以把 热区设置为任何想要的尺寸、位置或形状，甚至可以脱离元素原有的位置。
+
+```css
+button {
+  position: relative;
+  /* [其余样式] */
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  bottom: -10px;
+  left: -10px;
+}
+```
+
+### 自定义复选框
+
+tip: 你是否还在为伪类选择 符 :checked 和属性选择符 [checked] 之间的区别感到疑惑？后者是不会根据用户的交互行为进行更新的，因为用户的交互并不会影响到HTML标签上的属性。
+
+我们倒是可以基于复 选框的勾选状态借助组合选择符来给其他元素设置样式。当 `<label>` 元素与复选框关联之后，也可以起到触发开关的作用。
+
+```html
+<style>
+input[type="checkbox"] + label::before {
+  content: '\a0';
+  display: inline-block;
+  vertical-align: .2em;
+  width: .8em;
+  height: .8em;
+  margin-right: .2em;
+  border-radius: .2em;
+  background: silver;
+  text-indent: .15em;
+  line-height: .65;
+
+  /* 原来的复选框仍然是可见的，待会儿我们会将其隐藏。现在需要给复选框的勾选状态加上不同的样式。 */
+  content: '\2713';
+  background: yellowgreen;
+}
+/* 现在，我们需要把原来的复选框以一种不损失可 访问性的方式隐藏起来。这意味着不能使用 display: none，因为那样会 把它从键盘 tab 键切换焦点的队列中完全删除。 */
+input[type="checkbox"] {
+  position: absolute;
+  clip: rect(0,0,0,0);
+}
+
+</style>
+<input type="checkbox" id="awesome" />
+<label for="awesome">Awesome!</label>
+```
+
+这就完成了，我们得到了一个简单定制化的复选框！我们还可以进一步优化，比如在它聚焦或禁用时改变它的样式，你甚至可以用过渡或动画来让各个状态之间的切换更加平滑，或者脑子 一热创建一个拟物化的开关。这方面的可能性真的是无穷无尽。
+
+### 通过阴影来弱化背景
+
+弹出层以及交互式的“快速指南”就是这种效果的典型案例。这个效果最常见的实现方法就是增加一个额外的 HTML 元素用于遮挡背景，然后为它添加如下样式
+
+```css
+.overlay {
+  /* 用于遮挡背景 */
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0,0,0,.8);
+}
+
+.lightbox { /* 需要吸引用户注意的元素 */
+  position: absolute;
+  z-index: 1;
+  /* [其余样式] */
+}
+```
+
+这个方法稳定可 靠，但需要增加一个额外的 HTML 元素，这意味着该效果无法由 CSS 单独 实现。这不是一个很严重的问题，但对我们来说又确实是个麻烦事
+
+#### 通过阴影来弱化背景伪元素方案
+
+```css
+body.dimmed::before {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  background: rgba(0,0,0,.8);
+}
+```
+
+如果把遮罩层交给这个元素自己的 ::before 伪元素来实现，就可以弥补这些不足了。给伪元素设置 z-index: -1; 就可以让它出现在元素的背后。尽管这解决了可移植性的问题，但无法对遮罩层的Z 轴层次进行细粒度的控制。这个方法还有一个问题，伪元素无法绑定独立的 JavaScript 事件处理函数。
+
+#### 通过阴影来弱化背景box-shadow 方案
+
+具体做法就是生成一个巨大的投影，不偏移也不模糊，简单而 拙劣地模拟出遮罩层的效果：
+
+```css
+box-shadow: 0 0 0 999px rgba(0,0,0,.8);
+```
+
+这个初步的解决方案有一个明显的问题，就是它无法在较大的屏幕分 辨率（>2000px）下正常工作，因此，满足我们需求的最小值就是 50vmax。由于投影是同时向四个方向扩展的，这个遮罩层的最终尺寸将是 100vmax 加上元素本身的尺寸。
+
+```css
+box-shadow: 0 0 0 50vmax rgba(0,0,0,.8);
+```
+
+这个技巧非常简洁易用，但它存在两个非常严重的问题，从而制约了其使用场景。
+
++ 当我们滚动页面时，遮罩层的边缘就露出来了，除非给它加上 position: fixed; 相反，推荐有限度地应用这个技巧，比如配合固定定位来使用，或者当页面没有滚 动条时再用。
++ boxshadow 它只能在视觉上起到引导注意力的作用，却无法阻止鼠标交互。
+
+#### ::backdrop 方案
+
+### 通过模糊来弱化背景
+
+我们还是得动用一个额外的 HTML 元素来实现这个效果：需要把页面上除了关键元素之外的一切都包裹起来，这样就可以只对这个容器元素进行模糊处理了
+
+```html
+<main>Bacon Ipsum dolor sit amet...</main>
+<dialog>O HAI, I'm a dialog. Click on me to dismiss.</dialog>
+<!-- 其他对话框都写在这里 -->
+<style>
+main {
+  transition: .6s filter;
+}
+/* 每个弹出框弹出时增加一个类名  */
+main.de-emphasized {
+  filter: blur(3px) contrast(.8) brightness(.8);
+}
+</style>
+```
+
+### 滚动提示
+
+```css
+ul {
+  overflow: auto;
+  width: 10em;
+  height: 8em;
+  padding: .3em .5em;
+  border: 1px solid silver;
+  /* 一层用来生成那条阴影 另一个用来遮挡阴影的白色矩形， */
+  background: linear-gradient(white 30%, transparent),
+    radial-gradient(at 50% 0, rgba(0,0,0,.2), transparent 70%);
+  background-repeat: no-repeat;
+  background-size: 100% 50px, 100% 15px;
+  background-attachment: local, scroll;
+}
+```
+
+### 交互式的图片对比控件
+
+#### CSS resize 方案
+
+这个属性实际上适用于任何元素，只要它的 overflow 属性不是 visible。对几乎所有元素来说，resize 默认都是设置为 none 的，即禁用调整大小的特性。除了 both 之外，这个属性接受的值还有 horizontal 和 vertical，它们可以限制元素调整大小的方向。
+
+```css
+.image-slider {
+ position:relative;
+ display: inline-block;
+}
+.image-slider > div {
+ position: absolute;
+ top: 0; bottom: 0; left: 0;
+ width: 50%;
+ max-width: 100%;overflow: hidden;
+ resize: horizontal;
+}
+.image-slider > div::before {
+ content: '';
+ position: absolute;
+ bottom: 0; right: 0;
+ width: 12px; height: 12px;
+ padding: 5px;
+ background:
+ linear-gradient(-45deg, white 50%, transparent 0);
+ background-clip: content-box;
+ cursor: ew-resize;
+}
+.image-slider img {
+ display: block;
+ user-select: none;
+}
+```
+
+## 结构与布局
+
+### 自适应内部元素
+
+主要用到 width: min-content;
+
+### 根据兄弟元素的数量来设置样式
+
+对于只有一个列表项的特殊场景来说，解决方案显然就是 :only-child，这个伪类选择符就是为这种情况而设计的。举例来说，当列表中只有一个列表项时，我们想把删除按钮隐藏起来了，这个需求是可以由 :only-child 选择符来完成的。实际上，:only-child 等 效 于 :first-child:last-child，。:last-child 其实也是一个快捷写法，相当于 :nth-last-child(1)。
+
+仅当列表项的总数为 4 时才对这些列表项设置样式。
+
+```css
+li:first-child:nth-last-child(4),
+li:first-child:nth-last-child(4) ~ li {
+ /* 当列表正好包含四项时，命中所有列表项 */
+}
+```
+
+### 根据兄弟元素的数量范围来匹配元素
+
+:nth-child() 选择符在这方面非常好用，我们可以用它来命中一个范围，比如“选中第 4 项之后的所有项”这样的需求就完全不在话下。它的参数不仅可以是简单的数字，也可以是像 an+b 这样的表达式（比如 :nth-child(2n+1)）。这里的 n 表示一个变量，理论上的范围是 0 到 + ∞
+
+n+b 这种形式的表达式可以选中从第 b 个开始的所有子元素。举例来说，:nth-child(n+4) 将会选中除了第一、二、三个子元素之外的所有子元素。
+
+利用这个技巧，我们可以在列表项的总数是 4 或更多时选中所有列表项。在这种情况下，我们可以把表达式 n+4 传给 :nth-lastchild()
+
+```css
+li:first-child:nth-last-child(n+4),
+li:first-child:nth-last-child(n+4) ~ li {
+ /* 当列表至少包含四项时，命中所有列表项 */
+}
+```
+
+同理，-n+b 这种形式的表达式可以选中开头的 b 个元素。
+
+当然，我们还可以把这两种技巧组合起来使用，不过代码也会变得更加复杂。假设我们希望在列表包含 2 ～ 6 个列表项时命中所有的列表项，可以这样写：
+
+```css
+li:first-child:nth-last-child(n+2):nth-last-child(-n+6),
+li:first-child:nth-last-child(n+2):nth-last-child(-n+6) ~ li {
+ /* 当列表包含2～6项时，命中所有列表项 */
+}
+```
+
+### 满幅的背景，定宽的内容
+
+在过去的几年间，有一种网页设计手法逐渐流行起来，我将它称作背景宽度满幅，内容宽度固定。这个设计的一些典型特征如下。
+
++ 页面中包含多个大区块，每个区块都占据了整个视口的宽度，区块的背景也各不相同。
++ 内容是定宽的，即使在不同分辨率下的宽度不一样，那也只是因为媒体查询改变了这个固定的宽度值而已。在某些情况下，不同区块的内容也可能具有不同的宽度。
+
+要实现这种设计风格，最常见的方法就是为每个区块准备两层元素：外层用来实现满幅的背景，内层用来实现定宽的内容。后者是通过 margin: auto 实现水平居中的。
+
+难道为了这个效果就一定要添加一层额外的元素？CSS 值与单位（第三版）（`http://w3.org/TR/css-values-3/#calc`）定义了一个 calc() 函数，它允许我们在 CSS 中直接以这种简单的算式来指定属性的值。如果用 calc() 取代原先的 auto，就可以省掉多余的元素。
+
+```css
+footer {
+ padding: 1em;
+ padding: 1em calc(50% - 450px);
+ background: #333;
+}
+```
+
+### 垂直居中
+
+### 紧贴底部的页脚
+
+#### 固定高度的解决方案
+
+```css
+.main {
+  /* 主要是calc 计算出最小高度 */
+ min-height: calc(100vh - 2.5em - 7em);
+ /* 避免内边距或边框搞乱高度的计算： */
+ box-sizing: border-box;
+}
+```
+
+#### 更灵活的解决方案
+
+```css
+body {
+ display: flex;
+ flex-flow: column;
+ min-height: 100vh;
+}
+main { flex: 1; }
+```
+
+## 过渡与动画
+
+### 缓动效果
+
+#### 弹跳动画
+
+不论是在 animation/transition 简写属性中，还是在 animationtiming-function/transition-timing-function 展开式属性中，你都可以把这个默认的调速函数显式指定为 ease 关键字。同时还有 ease-in ,ease-out 等。作为对上述五种预定义曲线的补充，CSS 提供了一个 cubic-bezier()函数，允许我们指定自定义的调速函数。
+
+#### 弹性过渡
+
+可以使用动画
+
+```css
+@keyframes elastic-grow {
+ from { transform: scale(0); }
+ 70% {
+ transform: scale(1.1);
+ animation-timing-function:
+ cubic-bezier(.1,.25,1,.25); /* 反向的ease */
+ }
+}
+input:focus + .callout { animation: elastic-grow .5s; }
+.callout { transform-origin: 1.4em -.4em; }
+```
+
+动画确实更加强大，但在这个场景中，我们所需要的其实只是给这个过渡加入一些弹性的感觉，因此动画在这里显得大材小用了，有一种杀鸡用牛刀的感觉。有没有可能只用过渡就做出这个效果呢？
+
+这个问题的解决方案仍然来自于自定义调速函数 cubic-bezier()。到目前为止，我们只是讨论了曲线的控制锚点处在 0~1 区间内的情况。前面曾经提到过，我们无法在水平方向上超越这个范围，但我们可以在垂直方向上突破 0~1 区间，从而让过渡达到低于 0 或高于 100% 的程度。
+
+```css
+input:not(:focus) + .callout {
+ transform: scale(0) transform;;
+ transition-timing-function: ease;
+ transition: .25s;
+}
+.callout {
+ transform-origin: 1.4em -.4em;
+ transition: .5s cubic-bezier(.25,.1,.3,1.5) transform;;
+}
+```
+
+#### 逐帧动画
+
+与贝塞尔曲线调速函数迥然不同的是，steps() 会根据你指定的步进数量，把整个动画切分为多帧，而且整个动画会在帧与帧之间硬切，不会做任何插值处理。
+
+#### 闪烁效果
+
+#### 状态平滑的动画
+
+举例来说，用户的鼠标可能会触发一个华丽的 :hover 动画，而在动画还没有播完的时候，鼠标就从元素上移走了。在这种情况下，你觉得动画会如何收场呢？
+如果觉得“动画应该停留在当前状态”或者“动画应该平滑地过渡回开始状态”，那你就要大跌眼镜了。在默认情况下，动画只会立即停止播放，并生硬地跳回开始状态。
+
+我们需要把动画加在样式中，但是让它一开始就处于暂停状态，直到 :hover 时再启动动画。这再也不是添加和取消动画的问题了，而只是暂停和继续一个一直存在的动画，因此再也不会有生硬的跳回现象了。用到 animation-play-state 属性。
+
+#### 沿环形路径平移的动画
+
+每个 transform-origin 都是可以被两个translate() 模拟出来的。
