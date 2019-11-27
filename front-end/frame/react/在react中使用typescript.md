@@ -3,6 +3,7 @@
 >[小邵教你玩转Typescript、ts版React全家桶脚手架](https://juejin.im/post/5c04d3f3f265da612e28649c)
 >[TypeScript 在 React 中使用总结](https://juejin.im/post/5bab4d59f265da0aec22629b)
 >[优雅的在 react 中使用 TypeScript](https://juejin.im/postf/5bed5f03e51d453c9515e69b)
+>[React + TypeScript 默认 Props 的处理](https://www.cnblogs.com/Wayou/p/react_typescript_default_props.html)
 
 ## 在 react 中使用 ts 的几点原则和变化
 

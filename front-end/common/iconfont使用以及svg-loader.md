@@ -297,7 +297,9 @@ chainWebpack: config => {
     .use('svg-sprite-loader')
     .loader('svg-sprite-loader')
     .options({
-      symbolId: 'icon-[name]'
+      symbolId: 'icon-[name]',
+      extract: true,  //提取（默认情况下是false，不加这个不会把svg提取到打包后的index.html中）
+      spriteFilename: '/img/[chunkname].svg'
     })
 },
 ```
@@ -332,3 +334,23 @@ import './icons/index'
 ```
 
 之后就可以直接使用了`<svg-icon iconClass="lishi" className="svg-lishi"></svg-icon>`
+
+### svg抽离
+
+默认情况下svg会被打包到app.js中，当svg过多过大时，会导致app.js打包后过大，这个时候就需要单独把这些svg从打包中抽离出来。svg-sprite-loader 提供了抽取模式。
+
+```js
+// vue.config.js 首先引入该插件
+const SpriteLoaderPlugin = require('svg-sprite-loader/plugin')
+
+configureWebpack: config => {
+    config.plugins.push(new SpriteLoaderPlugin({ plainSprite: true }))
+    ...
+}
+// 然后修改index.html，在body最后加入即可
+<% if (htmlWebpackPlugin.files.sprites) { %>
+    <% for (var spriteFileName in htmlWebpackPlugin.files.sprites) { %>
+      <%= htmlWebpackPlugin.files.sprites[spriteFileName] %>
+    <% } %>
+<% } %>
+```
