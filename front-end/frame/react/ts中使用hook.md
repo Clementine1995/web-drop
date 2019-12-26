@@ -55,6 +55,54 @@ const addTen = useCallback((initValue: number) => {
 });
 ```
 
+默认情况，只要父组件状态变了（不管子组件依不依赖该状态），子组件也会重新渲染
+一般的优化：
+
++ 类组件：可以使用 pureComponent ；
++ 函数组件：使用 React.memo ，将函数组件传递给 memo 之后，就会返回一个新的组件，新组件的功能：如果接受到的属性不变，则不重新渲染函数；
+
+但是怎么保证属性不会变呢？这里使用 useState ，每次更新都是独立的，const [number,setNumber] = useState(0) 也就是说每次都会生成一个新的值（哪怕这个值没有变化），即使使用了 React.memo，也还是会重新渲染，可以使用useMemo、useCallback
+
+```tsx
+import React,{useState,memo,useMemo,useCallback} from 'react';
+
+function SubCounter({onClick,data}){
+    console.log('SubCounter render');
+    return (
+        <button onClick={onClick}>{data.number}</button>
+    )
+}
+SubCounter = memo(SubCounter);
+
+let oldData,oldAddClick;
+export  default  function Counter2(){
+    console.log('Counter render');
+    const [name,setName]= useState('计数器');
+    const [number,setNumber] = useState(0);
+    // 父组件更新时，这里的变量和函数每次都会重新创建，那么子组件接受到的属性每次都会认为是新的
+    // 所以子组件也会随之更新，这时候可以用到 useMemo
+    // 有没有后面的依赖项数组很重要，否则还是会重新渲染
+    // 如果后面的依赖项数组没有值的话，即使父组件的 number 值改变了，子组件也不会去更新
+    //const data = useMemo(()=>({number}),[]);
+    const data = useMemo(()=>({number}),[number]);
+    console.log('data===oldData ',data===oldData);
+    oldData = data;
+
+    // 有没有后面的依赖项数组很重要，否则还是会重新渲染
+    const addClick = useCallback(()=>{
+        setNumber(number+1);
+    },[number]);
+    console.log('addClick===oldAddClick ',addClick===oldAddClick);
+    oldAddClick=addClick;
+    return (
+        <>
+            <input type="text" value={name} onChange={(e)=>setName(e.target.value)}/>
+            <SubCounter data={data} onClick={addClick}/>
+        </>
+    )
+}
+```
+
 ## useRef
 
 useRef 有两种比较典型的使用场景：
@@ -191,3 +239,7 @@ const lotteryRef = useRef<PrizeWheelHandles>(null);
 
 lotteryRef.current.startLottery();
 ```
+
+## 自定义hook
+
+在编写自定义 Hook 时，返回值一定要保持引用的一致性。 因为你无法确定外部要如何使用它的返回值。如果返回值被用做其他 Hook 的依赖，并且每次 re-render 时引用不一致（当值相等的情况），就可能会产生 bug。所以如果自定义 Hook 中暴露出来的值是 object、array等，都应该使用 useMemo。而函数应该使用useCallback，以确保当值相同时，引用不发生变化。
