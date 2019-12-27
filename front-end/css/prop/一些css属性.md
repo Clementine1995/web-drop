@@ -258,3 +258,44 @@ http://www.example.com/index.html#section2
 ```html
 <section id="section2">Example</section>
 ```
+
+## media="print"
+
+利用 CSS3 媒体查询的能力，添加 media=print 的样式表，隐藏打印时不希望显示的部分，并调整需要打印部分的显示效果。
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    .other, .main {
+      height: 200px;
+    }
+    .other {
+      background: red;
+    }
+    .main {
+      background: yellow;
+    }
+  </style>
+</head>
+<body>
+  <div class="other"></div>
+  <div class="main"></div>
+  <style media="print">
+    * {
+      -webkit-print-color-adjust: exact !important;
+      /* 加入下面这段 CSS 使得打印时首选“背景图形” */
+      color-adjust: exact !important;
+    }
+    .other {
+      display: none;
+    }
+  </style>
+</body>
+</html>
+```

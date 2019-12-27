@@ -25,6 +25,31 @@ const [owner, setOwner] = useState<People>({name: 'rrd_fe', age: 5});
 const [members, setMembers] = useState<People[]>([]);
 ```
 
+### 避免重复计算
+
+如果initialState为函数，则useState在初始化时会立刻执行该函数和获取函数的返回值，在没有任何返回值得情况下为undefined。这里需要注意的是每次组件re-render都会导致useState中的函数重新计算，这里可以使用闭包函数来解决问题。
+
+```jsx
+// 优化前
+const loop = () => {
+  console.log("calc!");
+  let res = 0;
+  for (let i = 0, len = 1000; i < len; i++) {
+    res += i;
+  }
+  return res;
+};
+
+const [value, setValue] = useState(loop());
+
+// 优化后
+const App = () => {
+  const [value, setValue] = useState(() => {
+    return loop();
+  });
+}
+```
+
 ## useEffect
 
 useEffect 用来在组件完成渲染之后增加副作用(side effect)，可以返回一个函数，用来做一些状态还原、移除listener等 clean up的操作。不需要处理返回值，所以可以不指定他的类型。useLayoutEffect类似。
@@ -122,6 +147,158 @@ const RRDTextInput = () => {
 // 推断 current 是 number 类型
 const age = useRef(2);
 ```
+
+### 场景1
+
+只在组件 mount 之后执行的方法。希望 useEffect 只关心部分 props 或 state 变量的变动，从而重新执行副作用函数，其它 props 或 state 变量只取决于当时的状态。
+
+```jsx
+function App() {
+  const [ count ] = useState(0);
+  useEffect(() => {
+    console.log(count);
+  }, []); // 这里将会有警告，依赖数组中没有count
+}
+
+
+function useMount(mountedFn) {
+  const mountedFnRef = useRef(null);
+  mountedFnRef.current = mountedFn;
+
+  useEffect(() => {
+    mountedFnRef.current();
+  }, [mountedFnRef]);
+}
+
+// 使用后warning解除
+function App() {
+  const [ count ] = useState(0);
+  useMount(() => {
+    console.log(count);
+  });
+}
+```
+
+### 场景2：只关心部分变量的变动
+
+例子中的 Modal 组件需要根据 visible 变量的变动来执行相应的方法，又需要引用到其它的 props 或 state 变量，但是又不希望将它们放入 useEffect 依赖数组里，因为不关心它们的变动。如果将它们放入 useEffect 数组中，在 visible 变量不变的情况下，其它变量的变动会带来副作用函数的重复执行，这可能是非预期的。
+
+```jsx
+function Modal({
+  visible,
+  value
+}) {
+  useEffect(() => {
+    if (visible) {
+      // open modal
+      console.log(value)
+    } else {
+      // hide modal
+    }
+  }, [visible])
+}
+```
+
+需要一个辅助变量来记录 visible 变量的前一状态值，用来在副作用函数中判断是否因为 visible 变量变动触发的函数执行。为了便于复用，封装成 usePrevious 函数
+
+```jsx
+const usePrevious = (value) => {
+  const ref = useRef();
+
+  useEffect(() => {
+    ref.current = value;
+  });
+
+  return ref.current;
+};
+
+function Modal({
+  visible,
+  value
+}) {
+  const preVisible = usePrevious(value);
+
+  useEffect(() => {
+    if (preVisible !== visible) {
+      if (visible) {
+        // open modal
+        console.log(value)
+        } else {
+        // hide modal
+      }
+    }
+  }, [visible, preVisible, value])
+}
+```
+
+### 依赖数组中变量的比较问题
+
+每次 App 组件渲染，传给 Child 组件的 list 变量都是一个全新引用地址的数组。如果 Child 组件将 list 变量放入了某个 hook 函数的依赖数组里，就会引起该 hook 函数的依赖变动。
+
+```jsx
+function App() {
+  const list = [1, 2, 3];
+
+  return (
+    <>
+      <Child list={list}></Child>
+      <Child list={[4, 5, 6]}></Child>
+    </>
+  );
+}
+```
+
+上面这种情况多加注意还是可以避免的，但在某些情况下我们希望依赖数组中对象类型的比较是浅比较或深比较。在 componnetDidUpdate 声明周期函数中这确实不难实现，但在函数式组件中还是需要借助 useRef 函数。
+
+```jsx
+import { isEqual } from 'lodash';
+
+function useCampare(value, compare) {
+  const ref = useRef(null);
+
+  if (!compare(value, ref.current)) {
+    ref.current = value;
+  }
+
+  return ref.current;
+}
+
+function Child({ list }) {
+  const listArr = useCampare(list, isEqual);
+
+  useEffect(() => {
+    console.log(listArr);
+  }, [listArr]);
+}
+```
+
+### 函数引用变动问题
+
+```jsx
+function Button({
+  child,
+  disabled,
+  onClick
+}) {
+  const handleBtnClickRef = useRef();
+
+  handleBtnClickRef.current = () => {
+    if (!disabled && onClick) {
+      onClick();
+    }
+  };
+
+  const handleBtnClick = useCallback(() => {
+    handleBtnClickRef.current();
+  }, [handleBtnClickRef]);
+
+  return (
+    <button onClick={handleBtnClick}>{child}</button>
+  );
+}
+```
+
+上面例子中，使用了一个 useRef 函数返回的变量 handleBtnClickRef 来保存最新的函数。因为该变量引用是固定的，所以 handleBtnClick 函数的引用也是固定的，触发 onClick 回调函数也能拿到最新的 disabled 和 onClick 值。
 
 ## useReducer
 
