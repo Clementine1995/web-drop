@@ -63,6 +63,54 @@ useEffect(() => {
 }, [name, callback]);
 ```
 
+### 异步的处理
+
+错误的示范
+
+```jsx
+useEffect(async () => {
+  const { data, result } = await asyncRequest();  
+}, [])
+```
+
+useEffect并不建议你在回调函数中直接使用async，这样使用会直接触发报错，通常如果安装了相关lint的话会有提示。async方法默认会返回一个Promise，因为这么使用会导致回调函数相互之间产生竞争状态，而Effect回调函数应该是同步的。
+
+推荐的做法
+
+```jsx
+const [value, updateValue] = useState();
+
+const requestFn = async () => {
+  const { data, result } = await asyncRequest();
+  updateValue(value);
+}
+
+useEffect(() => {
+  requestFn();
+}, [])
+```
+
+如果异步请求依赖任何的state，则需要清晰的写在useEffect的依赖项中，这样每次在state改变之后都会执行异步请求。
+
+```jsx
+const requestFn = async (param) => {
+  const { data, result } = await asyncRequest(param);
+  updateValue(value);
+}
+
+useEffect(() => {
+  requestFn(param);
+}, [param])
+```
+
+### 依赖项
+
+每次state或者props改变都会导致组件的re-render，所以useEffect在没有任何依赖项时每次都会执行一遍。这时如果在它当中改变了state，那么就会导致死循环。
+
+所以在useEffect中改变state时，应当在满足某些条件才执行，或者依赖另一个state
+
+函数也可以作为依赖项来使用，不过注意用useCallback包裹，因为每次渲染函数都会重新声明一遍。
+
 ## useMemo、useCallback
 
 对于 useMemo 和 useCallback 我们可以从函数的返回值中推断出来他们返回的类型，需要显示指定。

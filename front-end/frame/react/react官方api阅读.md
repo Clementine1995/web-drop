@@ -184,6 +184,8 @@ componentWillUnmount() 会在组件卸载及销毁之前直接调用。在此方
 
 它应返回一个对象来更新 state，如果返回 null 则不更新任何内容。此方法适用于罕见的用例，即 state 的值在任何时候都取决于 props。此方法无权访问组件实例。请注意，不管原因是什么，都会在每次渲染前触发此方法。
 
+将父组件传递过来的 props 映射 到子组件的 state 上面，这样组件内部就不用再通过 this.props.xxx 获取属性值了，统一通过 this.state.xxx 获取。映射就相当于拷贝了一份父组件传过来的 props ，作为子组件自己的状态。注意：子组件通过 setState 更新自身状态时，不会改变父组件的 props
+
 ### getSnapshotBeforeUpdate()
 
 getSnapshotBeforeUpdate() 在最近一次渲染输出（提交到 DOM 节点）之前调用。它使得组件能在发生更改之前从 DOM 中捕获一些信息（例如，滚动位置）。此生命周期的任何返回值将作为参数传递给 componentDidUpdate()。
