@@ -3,3 +3,5 @@
 ## MessageChannel
 
 ## requestAnimationFrame
+
+## requestIdleCallback
