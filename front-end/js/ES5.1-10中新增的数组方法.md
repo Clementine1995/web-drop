@@ -343,3 +343,5 @@ var arr4 = [1, 2, , 4, 5];
 arr4.flat();
 // [1, 2, 4, 5]
 ```
+
+>相关的替代方法可以在MDN上找到[Array.prototype.flat()](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/flat)
