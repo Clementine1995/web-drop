@@ -1,9 +1,14 @@
 # 在React中使用Typescript
 
 >[小邵教你玩转Typescript、ts版React全家桶脚手架](https://juejin.im/post/5c04d3f3f265da612e28649c)
+>
 >[TypeScript 在 React 中使用总结](https://juejin.im/post/5bab4d59f265da0aec22629b)
+>
 >[优雅的在 react 中使用 TypeScript](https://juejin.im/postf/5bed5f03e51d453c9515e69b)
+>
 >[React + TypeScript 默认 Props 的处理](https://www.cnblogs.com/Wayou/p/react_typescript_default_props.html)
+>
+>[TS 常见问题整理（60多个，持续更新ing）](https://juejin.im/post/5e33fcd06fb9a02fc767c427)
 
 ## 在 react 中使用 ts 的几点原则和变化
 
@@ -101,6 +106,17 @@ const Button: SFC<IProps> = ({onClick, children}) => {
 export default Button
 ```
 
+```tsx
+interface Greeting {
+    name: string;
+    age: number;
+}
+
+const Hello:React.FC<Greeting> = (props) => <h1>Hello {props.name}</h1>;
+// 推荐使用第二种
+const Hello2 = (props:Greeting) => <h1>Hello {props.name}</h1>;
+```
+
 ### 使用react高阶组件
 
 因为react中的高阶组件本质上是个高阶函数的调用，所以高阶组件的使用，我们既可以使用函数式方法调用，也可以使用装饰器。但是在TS中，编译器会对装饰器作用的值做签名一致性检查，而我们在高阶组件中一般都会返回新的组件，并且对被作用的组件的props进行修改（添加、删除）等。这些会导致签名一致性校验失败，TS会给出错误提示。这带来两个问题：
@@ -122,7 +138,7 @@ const App = withRouter(class extends Component<RouteComponentProps> {
 
 如上的例子，我们在声明组件时，注解了组件的props是路由的RouteComponentProps结构类型，但是我们在调用App组件时，并不需要给其传递RouteComponentProps里说具有的location、history等值，这是因为withRouter这个函数自身对齐做了正确的类型声明。
 
-#### 第二，使用装饰器语法或者没有函数类型签名的高阶组件怎么办？
+#### 第二，使用装饰器语法或者没有函数类型签名的高阶组件怎么办
 
 如何正确的声明高阶组件？
 
@@ -215,6 +231,29 @@ function withVisible<Self>(WrappedComponent: React.ComponentType<Self & IVisible
 ```
 
 如上，我们声明withVisible这个高阶组件时，利用泛型和类型推导，我们对高阶组件返回的新的组件以及接收的参数组件的props都做出类型声明。
+
+```tsx
+import React, { Component } from 'react';
+
+import HelloClass from './HelloClass';
+
+interface Loading {
+    loading: boolean
+}
+
+// HOC 可以接收一个类组件，也可以接收一个函数组件，所以参数的类型是 React.ComponentType
+// 源码：type ComponentType<P = {}> = ComponentClass<P> | FunctionComponent<P>;
+function HelloHOC<P>(WrappedComponent: React.ComponentType<P>) {
+    return class extends Component<P & Loading> {
+        render() {
+            const { loading, ...props } = this.props;
+            return loading ? <div>Loading...</div> : <WrappedComponent { ...props as P } />;
+        }
+    }
+}
+
+export default HelloHOC(HelloClass);
+```
 
 ## 事件处理
 
