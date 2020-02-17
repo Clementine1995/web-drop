@@ -162,9 +162,13 @@ grid-template-columns: repeat(3, 200px);    // 三列200px
 
 由于grid-template不会重置一些隐式的grid属性（如grid-auto-columns，grid-auto-rows和grid-auto-flow），因此，大多数时候，还是推荐使用grid代替grid-template。
 
-### grid-gap
+### grid-gap(已弃用)
 
 是grid-row-gap、grid-column-gap两个属性的缩写，定义网格之间的间距（不包括grid-item到容器边缘的间距）。如果没有指定 grid-row-gap，则会被设置为与 grid-column-gap 相同的值。
+
+起初是用 grid-gap 属性来定义的，目前逐渐被 gap 替代，以及row-gap和column-gap。
+
+>注意：这个gap也对其他布局也适用，比如flex布局，多列布局，只不过目前为止flex布局中gap属性只在火狐中得到了支持
 
 举例：
 
@@ -201,7 +205,7 @@ grid-template-columns: repeat(3, 200px);    // 三列200px
 
 ```css
 .container {
-  justify-items: start;
+  justify-items: end;
 }
 ```
 

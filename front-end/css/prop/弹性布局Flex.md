@@ -118,7 +118,7 @@ justify-content属性定义了项目在主轴上的对齐方式及额外空间�
 
 ### align-items属性
 
-align-items属性定义项目在交叉轴上的对齐方式。
+align-items属性定义项目在交叉轴上的对齐方式。单行，多行并且指定高度与否都有效
 
 ```css
 .box {
@@ -140,7 +140,7 @@ align-items属性定义项目在交叉轴上的对齐方式。
 
 ### align-content
 
-align-content属性定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用，类似于主轴上justify-content的作用。
+align-content属性定义了多根轴线的对齐方式。如果项目只有一根轴线，该属性不起作用，类似于主轴上justify-content的作用。除此之外，多行不指定高度也是无效的，但是单行固定高度，flex-wrap设置为wrap时是有效果的。
 
 ```css
 .box {
@@ -160,6 +160,11 @@ align-content属性定义了多根轴线的对齐方式。如果项目只有一�
 演示：
 
 ![align-content](https://user-gold-cdn.xitu.io/2018/4/2/1628695cb17eb348?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+
+总结：
+
++ align-items属性是针对单独的每一个flex子项起作用，它的基本单位是每一个子项，在所有情况下都有效果（当然要看具体的属性值）。
++ align-content属性是将flex子项作为一个整体起作用，它的基本单位是子项构成的行，只在两种情况下有效果：1.子项多行且flex容器高度固定，2.子项单行，flex容器高度固定且设置了flex-wrap:wrap。
 
 ## Flex项目属性
 
