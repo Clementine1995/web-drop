@@ -170,6 +170,8 @@ border-radius 可以分别设置水平半径和垂直半径, 以 "/" 分隔, 水
 
 ### border-image 边框背景详解
 
+>[MDN(border-image)](https://developer.mozilla.org/zh-CN/docs/Web/CSS/border-image)
+
 border-image属性可指定边框样式使用图像来填充, 图像可以是绝对或相对地址引入的图片, 也可以是渐变色。使用时, 需指定 border-style 指定边框样式。
 
 IE11+、Firefox 3.5+、Chrome、Safari 以及 Opera 支持 border-image 属性。为支持低版本, 最好增加带有-moz-以及-webkit-前缀的写法。
@@ -221,6 +223,10 @@ border-image-repeat: repeat;
 第二个效果图代码:
 border-image: url("border-image.png") 60 / 20px / 10px round;
 ```
+
+#### border-image的应用实现一个带圆角渐变边框
+
+>[巧妙实现带圆角的渐变边框](https://juejin.im/post/5e4a3a20e51d45270c277754)
 
 ### box-shadow各种投影的实现
 

@@ -299,3 +299,9 @@ http://www.example.com/index.html#section2
 </body>
 </html>
 ```
+
+## scroll-snap-type
+
+>[使用 scroll-snap-type 优化滚动](https://juejin.im/post/5de9c00ce51d4557f544f03d)
+>
+>[MDN(scroll-snap-type)](https://developer.mozilla.org/zh-CN/docs/Web/CSS/scroll-snap-type)
