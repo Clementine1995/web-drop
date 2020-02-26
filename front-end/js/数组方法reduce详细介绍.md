@@ -370,3 +370,14 @@ var items = [{price: 10}, {price: 120}, {price: 1000}];
 var totals = items.reduce(bigTotalPriceReducer, initialState);
 console.log(totals);
 ```
+
+### 数组扁平
+
+```js
+function flat(arr = []) {
+    return arr.reduce((t, v) => t.concat(Array.isArray(v) ? flat(v) : v), [])
+}
+
+const arr = [0, 1, [2, 3], [4, 5, [6, 7]], [8, [9, 10, [11, 12]]]];
+flat(arr); // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+```
