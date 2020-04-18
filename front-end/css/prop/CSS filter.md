@@ -151,6 +151,8 @@ filter: grayscale(100%)
 
 ### hue-rotate()
 
+>[CSS filter:hue-rotate色调旋转滤镜实现按钮批量生产](https://www.zhangxinxu.com/wordpress/2018/11/css-filter-hue-rotate-button/)
+
 给图像应用色相旋转。“angle”一值设定图像会被调整的色环角度值。值为0deg，则图像无变化。若值未设置，默认值是0deg。该值虽然没有最大值，超过360deg的值相当于又绕一圈。
 
 ```css
