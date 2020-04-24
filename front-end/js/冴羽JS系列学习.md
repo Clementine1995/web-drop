@@ -210,16 +210,6 @@ console.log(a) // 5
 4. 到函数声明的位置时，会给块外的变量a赋值，但此时块内的 a 已经是5，所以块外的5赋值为5
 5. a = 0，给块内的 a 重新赋值
 
-(1) There exist two variable declarations a, one inside the block and one outside of it.
-
-(2) The function declaration gets hoisted, and bound to the inner blocks variable.
-
-(3) a = 5 is reached, which overrides the block variable.
-
-(4) the function declaration is reached, and the block variable is copied to the outer variable. Both are 5 now.
-
-(5) a = 0 is reached, which overrides the block variable. The outer variable is not affected by this.
-
 ```js
 var a¹;
 if (true) {
