@@ -106,17 +106,18 @@ Function.prototype.call2 = (context, ...args) {
 
 // ES3实现
 Function.prototype.call = function (context) {
-    context = context || window;
-    context.fn = this;
+  // 这里没有考虑到如果传入context是，string,number之类的，原生call方法会把它变成对应的包装对象
+  context = context || window;
+  context.fn = this;
 
-    var args = [];
-    for(var i = 1, len = arguments.length; i < len; i++) {
-        args.push('arguments[' + i + ']');
-    }
-    var result = eval('context.fn(' + args +')');
+  var args = [];
+  for(var i = 1, len = arguments.length; i < len; i++) {
+      args.push('arguments[' + i + ']');
+  }
+  var result = eval('context.fn(' + args +')');
 
-    delete context.fn
-    return result;
+  delete context.fn
+  return result;
 }
 ```
 
@@ -154,7 +155,7 @@ Function.prototype.apply = function (context, arr) {
 
 ## 实现bind
 
-是用 apply 或 call 来实现的。
+是用 apply 或 call 来实现的。有一点要注意，对象中函数的简写定义方式，与箭头函数是没有prototype的。
 
 ```js
 Function.prototype.bind2 = function () {
@@ -172,6 +173,39 @@ Function.prototype.bind2 = function () {
   Agent.prototype = self.prototype
   result.prototype = new Agent()
   return result
+}
+
+
+Function.prototype.bind2 = function (context) {
+
+  var self = this;
+  var args = Array.prototype.slice.call(arguments, 1);
+
+  var fNOP = function () {};
+
+  var fBound = function () {
+    var bindArgs = Array.prototype.slice.call(arguments);
+
+    return self.apply(this instanceof fBound ? this : context, args.concat(bindArgs));
+
+    // 原生 bind 方法所返回的函数并不包含 prototype 属性，而是 undefined ，如果要更进一步更改，用作构造函数时，应该用 new 来实现，也就是下面这个
+    if (this instanceof fBound) {
+        var args2 = [];
+        for(var i = 0, len = args.length; i < len; i++) {
+            args2.push('args[' + i + ']');
+        }
+        for(var j = 0, len = bindArgs.length; j < len; j++) {
+            args2.push('bindArgs[' + j + ']');
+        }
+        return eval('new self('+ args2 +')');
+    } else {
+        return self.apply(context, args.concat(bindArgs));
+    }
+  }
+
+  fNOP.prototype = this.prototype;
+  fBound.prototype = new fNOP();
+  return fBound;
 }
 ```
 
