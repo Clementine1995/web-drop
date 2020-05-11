@@ -63,7 +63,7 @@ setTimeout(() => { // 2秒后清除定时器
 
 >原文[详解 new/bind/apply/call 的模拟实现](https://juejin.im/post/5c90b800f265da60ee12d75f)
 
-### new做了什么？
+### new做了什么
 
 1. 创建了一个全新的对象。
 2. 这个对象会被执行[[Prototype]]（也就是__proto__）链接。
@@ -81,12 +81,25 @@ function mynew(){
   var constructor = [].shift.call(arguments)
   // 其余的参数是构造函数的参数
   var args = [].slice.call(arguments)
-  // 修改原型
+  // 修改原型 var obj = Object.create(Constructor.prototype) 这种方式也可以
   obj.__proto__ = constructor.prototype
   // 修改构造函数上下文，为 obj 赋值
   var result = constructor.apply(obj, args)
-  // 判断结果的类型
-  return (typeof result === 'object' || 'function') ? result : obj
+  // 判断结果的类型, result || obj是考虑到构造函数也有可能return null...
+  return (typeof result === 'object' || 'function') ? result || obj : obj
+}
+
+// 或者
+
+const _new = (_Contructor, ...args) => {
+  // 1.创建一个空的简单JavaScript对象（即{}）；
+  const obj = {}
+  // 2.链接该对象（即设置该对象的构造函数）到另一个对象 ；
+  Object.setPrototypeOf(obj, _Contructor.prototype)
+  // 3.将步骤1新创建的对象作为this的上下文 ；
+  const ret = _Contructor.apply(obj, args)
+  //4.如果该函数没有返回对象，则返回this。
+  return ret instanceof Object ? ret : this
 }
 ```
 

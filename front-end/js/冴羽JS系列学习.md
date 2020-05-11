@@ -301,3 +301,22 @@ ECMAScript中所有函数的参数都是按值传递的。参数传递分为值�
 ## call,apply模拟实现
 
 看实现yyy.md
+
+## new的模拟实现
+
+看实现yyy.md
+
+注意：Object.create(null) 是创建一个没有任何属性的空对象，所以不能用在这里
+
+## 类数组对象与arguments
+
++ 拥有一个 length 属性和若干索引属性的对象
++ 拥有与数组类似的行为，可以通过数字下标读取属性，可以遍历，但是没有数组的方法
++ 可以通过slice, splice, Array.from, contat 等方式将类数组转换为数组，一些length只读的类数组，splice不能转换
++ Arguments对象也是一个类数组，它只存在于函数体中，包括了函数的参数（实参）以及其他属性
+  + length可以访问实参的个数（不是形参个数）
+  + callee表示函数本身，可以通过它递归调用
+  + 以及Symbol(Symbol.iterator)表示可迭代
+  + 传入的实参(非严格模式)和 arguments 的值会共享
+  + 最好不要去操作arguments，比如把它return出去
+  + 箭头函数没有arguments
