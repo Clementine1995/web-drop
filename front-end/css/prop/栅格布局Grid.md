@@ -153,7 +153,7 @@ grid-template-columns: repeat(3, 200px);    // 三列200px
     "header header header header"
     "main main . sidebar"
     "footer footer footer footer";
-}
+  }
 ```
 
 这将创建一个四列宽三行高的网格。 整个第一行将由 header 区域组成。 中间一行将由两个 main 区域、一个空单元格和一个 sidebar 区域组成。 最后一行是footer区域组成。
