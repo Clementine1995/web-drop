@@ -1,6 +1,6 @@
-# 冴羽JS系列学习
+# 冴羽JS深入系列学习
 
-主要记录冴羽博客中JS系列阅读后的关键点记录与总结
+主要记录冴羽博客中JS深入系列阅读后的关键点记录与总结
 
 >[冴羽的博客](https://github.com/mqyqingfeng/Blog)
 >
@@ -345,3 +345,23 @@ ECMAScript中所有函数的参数都是按值传递的。参数传递分为值�
 + Child.prototype = Object.create(Parent.prototype);和 Child.prototype = new Parent(); 都可以用来继承，但是后者会继承Parent构造函数中的属性，同时也会导致父级构造函数调用两次，产生额外属性
 + 有关JS执行文章[从浏览器多进程到JS单线程，JS运行机制最全面的一次梳理](https://juejin.im/post/5a6547d0f265da3e283a1df7)，[这一次，彻底弄懂 JavaScript 执行机制](https://juejin.im/post/59e85eebf265da430d571f89)
 + 关于数组的继承，上面几种方法都不能完美实现。可以参考文章[为什么 es5 不能完美继承数组](https://github.com/wengjq/Blog/issues/22)
+
+## 浮点数精度
+
+关于 0.1 + 0.2 != 0.3
+
+ECMAScript 中的 Number 类型使用 IEEE754 标准来表示整数和浮点数值，浮点数值采用的就是**双精确度**。
+
+浮点数转二进制，小数部分不断乘以2，每乘一次取整数位作为小数二进制的对应位，十分位，百分位往后推。
+
+而浮点数的存储采用： `Value = sign * exponent * fraction` 这种方式，sign 标志位，exponent 指数位，fraction 分数位
+
+举个例子，就拿 0.1 来看，对应二进制是 `1 * 1.1001100110011…… * 2^-4`， Sign 是 0，E + bias 是 -4 + 1023 = 1019，1019 用二进制表示是 1111111011，Fraction 是 1001100110011……，所以它在存储的时候已经发生了精度丢失，在运算经过 对阶、尾数运算、规格化、舍入处理、溢出判断 之后肯定也是丢失精度的
+
++ 以指定的精度返回该数值对象的字符串表示可以使用 toPrecision 方法
++ 二进制转十进制 parseInt(1100100,2)
++ 十进制转二进制 parseFloat(0.1).toString(2)
+
+## 类型转换
+
+配合这两篇文章[从206个console.log()完全弄懂数据类型转换的前世今生(上)](https://juejin.im/post/5e7f8314e51d4546fa4511c9)，[从206个console.log()完全弄懂数据类型转换的前世今生(下)](https://juejin.im/post/5e86e73e518825739e0704b4)
