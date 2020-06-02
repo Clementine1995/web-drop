@@ -8,7 +8,7 @@ eg：搜索框的请求优化，输入搜索词条需要立即触发搜索请求
 
 首先准备 html 文件中代码如下：
 
-```(html)
+```html
 <div id="content" style="height:150px;line-height:150px;text-align:center; color: #fff;background-color:#ccc;font-size:80px;"></div>
 <script>
     var num = 1;
@@ -34,14 +34,14 @@ debounce（防抖），简单来说就是防止抖动。
 
 非立即执行版的意思是触发事件后函数不会立即执行，而是在 n 秒后执行，如果在 n 秒内又触发了事件，则会重新计算函数执行时间。
 
-```(javascript)
+```javascript
 const debounce = (func, wait, ...args) => {
   let timeout;
   return function(){
-    const context = this;
+    const context = this; // 解决回调函数中this指向问题
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(() => {
-      func.apply(context, args)
+      func.apply(context, args) // 传入args解决回调函数中拿不到event对象的问题
     },wait);
   }
 }
@@ -59,7 +59,7 @@ content.onmousemove = debounce(count,1000);
 
 立即执行版的意思是触发事件后函数会立即执行，然后 n 秒内不触发事件才能继续执行函数的效果。
 
-```(javascript)
+```javascript
 const debounce = (func, wait, ...args) => {
   let timeout;
   return function(){
@@ -78,7 +78,7 @@ const debounce = (func, wait, ...args) => {
 
 ### 结合版
 
-```(javascript)
+```javascript
 /**
  * @desc 函数防抖
  * @param func 函数
@@ -109,6 +109,31 @@ function debounce(func,wait,immediate) {
 }
 ```
 
+## 结合版2
+
+```js
+function debounce(fn, wait, immediate = false) {
+  if (immediate) {
+    let lastTime = 0
+    return function (...args) {
+      const now = new Date()
+      if (now - lastTime > wait) {
+          fn.apply(this, args)
+      }
+      lastTime = now
+    }
+  } else {
+    let timer
+    return function (...args) {
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        fn.apply(this, args)
+      }, wait)
+    }
+  }
+}
+```
+
 ## 节流
 
 throttle（节流），当持续触发事件时，保证隔间时间触发一次事件。
@@ -121,7 +146,7 @@ throttle（节流），当持续触发事件时，保证隔间时间触发一次
 
 在持续触发事件的过程中，函数会立即执行，并且每 1s 执行一次。
 
-```(js)
+```js
 const throttle = (func, wait, ...args) => {
   let pre = 0;
   return function(){
@@ -143,7 +168,7 @@ const throttle = (func, wait, ...args) => {
 
 在持续触发事件的过程中，函数不会立即执行，并且每 1s 执行一次，在停止触发事件后，函数还会再执行一次。
 
-```(js)
+```js
 const throttle = (func, wait, ...args) => {
   let timeout;
   return function(){
@@ -164,7 +189,7 @@ const throttle = (func, wait, ...args) => {
 
 其实时间戳版和定时器版的节流函数的区别就是，时间戳版的函数触发是在时间段内开始的时候，而定时器版的函数触发是在时间段内结束的时候。
 
-```(js)
+```js
 /**
  * @desc 函数节流
  * @param func 函数
@@ -203,7 +228,7 @@ function throttle(func, wait ,type) {
 
 ## underscore 源码
 
-```(js)
+```js
 /**
  * underscore 防抖函数，返回函数连续调用时，空闲时间必须大于或等于 wait，func 才会执行
  *
@@ -254,7 +279,7 @@ _.debounce = function(func, wait, immediate) {
 + 对于按钮防点击来说的实现：一旦我开始一个定时器，只要我定时器还在，不管你怎么点击都不会执行回调函数。一旦定时器结束并设置为 null，就可以再次点击了。
 + 对于延时执行函数来说的实现：每次调用防抖动函数都会判断本次调用和之前的时间间隔，如果小于需要的时间间隔，就会重新创建一个定时器，并且定时器的延时为设定时间减去之前的时间间隔。一旦时间到了，就会执行相应的回调函数。
 
-```(js)
+```js
 /**
  * underscore 节流函数，返回函数连续调用时，func 执行频率限定为 次 / wait
  *
