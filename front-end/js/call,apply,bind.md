@@ -105,6 +105,8 @@ animal.showName.call(dog); // dog
 
 对于 apply、call 二者而言，作用完全一样，只是接受参数的方式不太一样。
 
+注意：apply可以将一个数组默认的转换为一个参数列表([param1,param2,param3] 转换为 param1,param2,param3) ，这样就可以用与Math.min，push等方法。
+
 ## bind
 
 bind()方法会创建一个新函数，称为绑定函数，当调用这个绑定函数时，绑定函数会以创建它时传入 bind()方法的第一个参数作为 this，传入 bind() 方法的**第二个以及以后的参数加上绑定函数运行时本身的参数**按照顺序作为原函数的参数来调用原函数。

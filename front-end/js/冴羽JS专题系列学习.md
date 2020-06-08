@@ -220,3 +220,76 @@ function isArrayLike(obj) {
     typeof length === "number" && length > 0 && (length - 1) in obj;
 }
 ```
+
+## 浅拷贝与深拷贝
+
+数组的浅拷贝可以使用 slice、concat 返回一个新数组的特性来实现。但是这两个方法都无法深拷贝。ES6之后还可以使用 `Array.from(array)` 与展开运算符来实现 `let [...spread]= [12, 5, 8, 130, 44];`
+
+数组的深拷贝可以使用 `JSON.parse(JSON.stringify(arr));` 这种方法，深拷贝中的函数问题比较难解决。
+
+浅拷贝的实现
+
+```js
+var shallowCopy = function(obj) {
+  // 只拷贝对象
+  if (typeof obj !== 'object') return;
+  // 根据obj的类型判断是新建一个数组还是对象
+  var newObj = obj instanceof Array ? [] : {};
+  // 遍历obj，并且判断是obj的属性才拷贝
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      newObj[key] = obj[key];
+    }
+  }
+  return newObj;
+}
+```
+
+深拷贝的实现，主要是靠递归
+
+```js
+var deepCopy = function(obj) {
+  if (typeof obj !== 'object') return;
+  var newObj = obj instanceof Array ? [] : {};
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      newObj[key] = typeof obj[key] === 'object' ? deepCopy(obj[key]) : obj[key];
+    }
+  }
+  return newObj;
+}
+```
+
+注意：JSON.stringify(..) 在对象中遇到 undefined 、 function 和 symbol 时会自动将其忽略， 在 数组中则会返回 null （以保证单元位置不变），如果用这个方法的时候要注意，还有如果要考虑完善的深拷贝Date,Set,RegExp等类型也是需要考虑的。
+
+## jQuery的extend
+
+具体链接[JavaScript专题之从零实现jQuery的extend](https://github.com/mqyqingfeng/Blog/issues/33)
+
+其中存在的问题 target 是函数（在判断target时，要同时判断是否为对象或函数），类型不一致（如果待复制对象属性值类型为数组或对象，目标属性值类型不为数组或对象的话，目标属性值就设为 []或者{}），循环引用（判断要复制的对象属性是否等于 target，如果等于，跳过）。
+
+## 求数组的最大值和最小值
+
+主要用的是 Math.max 这个方法，有几点需要注意
+
++ 如果有任一参数不能被**转换**为数值，则结果为 NaN，转换也就意味着参数可以是true,字符串,null等。
++ max 是 Math 的静态方法，所以应该像这样使用：Math.max()，而不是作为 Math 实例的方法 (简单的来说，就是不使用 new )
++ 如果没有参数，则结果为 -Infinity (注意是负无穷大)
+
+方法有：
+
+1. for循环遍历的方法
+2. reduce
+3. 排序后取最后一个
+4. eval `var max = eval("Math.max(" + arr + ")");`
+5. apply `Math.max.apply(null, arr)`
+6. ES6展开运算符 `Math.max(...arr)`
+
+## 数组扁平化
+
+数组的扁平化，就是将一个嵌套多层的数组 array (嵌套可以是任何层数)转换为只有一层的数组。
+
+1. 递归
+2. toString()，利用这个一个特点`[1, [2, [3, 4]]].toString() // "1,2,3,4"`
+3. reduce
+4. 利用展开运算符
