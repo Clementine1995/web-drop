@@ -1,4 +1,4 @@
-# 冴羽JS专题系列学习
+# 冴羽JS专题系列学习1
 
 主要记录冴羽博客中JS深入系列阅读后的关键点记录与总结
 
@@ -293,3 +293,95 @@ var deepCopy = function(obj) {
 2. toString()，利用这个一个特点`[1, [2, [3, 4]]].toString() // "1,2,3,4"`
 3. reduce
 4. 利用展开运算符
+
+比较难理解的展开方式 `flatten = Function.apply.bind([].concat, [])` 相当于
+
+```js
+function(arg) {
+  return [].concat(...arg)
+}
+```
+
+## 在数组中查找指定元素
+
+js提供的方法有很多indexOf 和 lastIndexOf 以及ES6推出的 findIndex , findLastIndex , find方法。
+
+findIndex返回数组中满足提供的函数的第一个元素的索引，当然也可以自己手动实现一个，同样的还有 findLastIndex，它与 findIndex 整合可以写成一个函数
+
+```js
+function createIndexFinder(dir) {
+  return function(array, predicate, context) {
+    var length = array.length;
+    var index = dir > 0 ? 0 : length - 1;
+    // index += dir 通过dir来表示是正序还是倒序，很巧妙，不仅用于了区分，还用于循环变量的控制
+    for (; index >= 0 && index < length; index += dir) {
+      if (predicate.call(context, array[index], index, array)) return index;
+    }
+    return -1;
+  }
+}
+
+var findIndex = createIndexFinder(1);
+var findLastIndex = createIndexFinder(-1);
+```
+
+indexOf的实现
+
+```js
+// 第一版
+function createIndexOfFinder(dir) {
+  return function(array, item){
+    var length = array.length;
+    var index = dir > 0 ? 0 : length - 1;
+
+    // 加入fromIndex的考虑
+    if (typeof idx == "number") {
+      if (dir > 0) {
+        i = idx >= 0 ? idx : Math.max(length + idx, 0);
+      }
+      else {
+        length = idx >= 0 ? Math.min(idx + 1, length) : idx + length + 1;
+      }
+    }
+    // 判断元素是否是 NaN
+    if (item !== item) {
+        // 在截取好的数组中查找第一个满足isNaN函数的元素的下标
+        idx = predicate(array.slice(i, length), isNaN)
+        return idx >= 0 ? idx + i: -1;
+    }
+    for (; index >= 0 && index < length; index += dir) {
+      if (array[index] === item) return index;
+    }
+    return -1;
+  }
+}
+var indexOf = createIndexOfFinder(1);
+var lastIndexOf = createIndexOfFinder(-1);
+```
+
+## 通用遍历方法each的实现
+
+根据参数的类型进行判断，如果是数组，就调用 for 循环，如果是对象，就使用 for in 循环，有一个例外是类数组对象，对于类数组对象，依然可以使用 for 循环。
+
+```js
+function each(obj, callback) {
+  var length, i = 0;
+
+  if (isArrayLike(obj)) {
+    length = obj.length;
+    for (; i < length; i++) {
+      if (callback.call(obj[i], i, obj[i]) === false) {
+        break;
+      }
+    }
+  } else {
+    for (i in obj) {
+      if (callback.call(obj[i], i, obj[i]) === false) {
+        break;
+      }
+    }
+  }
+
+  return obj;
+}
+```
