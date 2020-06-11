@@ -56,3 +56,25 @@ var curry = fn =>
 当然了像 `add(1)(2)(3); // 5` 这种的调用方式也不一定是柯里化，也有可能是链式调用
 
 ## 偏函数
+
+偏函数也叫局部应用，跟柯里化很相似，只不过它是固定一个函数的一个或者多个参数，也就是将一个 n 元函数转换成一个 n - x 元函数。
+
+```js
+支持占位符
+var _ = {};
+
+function partial(fn) {
+    var args = [].slice.call(arguments, 1);
+    return function() {
+        var position = 0, len = args.length;
+        for(var i = 0; i < len; i++) {
+            args[i] = args[i] === _ ? arguments[position++] : args[i]
+        }
+        while(position < arguments.length) args.push(arguments[position++]);
+        return fn.apply(this, args);
+    };
+};
+var subtract = function(a, b) { return b - a; };
+subFrom20 = partial(subtract, _, 20);
+subFrom20(5);
+```
