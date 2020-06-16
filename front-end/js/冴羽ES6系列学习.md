@@ -3,6 +3,8 @@
 主要记录冴羽博客中ES6系列阅读后的关键点记录与总结
 
 >[冴羽的博客](https://github.com/mqyqingfeng/Blog)
+>
+>ES规范[ECMAScript® 2019 Language Specification](http://www.ecma-international.org/ecma-262/)
 
 ## let 和 const
 
@@ -13,3 +15,329 @@ let 和 const 的特点
 + 不绑定全局作用域
 
 注意 for 循环中的 let 具有不同的行为，每次迭代循环时都创建一个新变量，并以之前迭代中同名变量的值将其初始化。圆括号之内有隐藏的作用域。普通 for 循环是不能使用 const 作为循环变量的，但是 forof 与 forin 每次循环是创建新的绑定，可以使用 const。
+
+## 模板字符串
+
+模板字符串中，空格、缩进、换行都会被保留。
+
+模板字符串支持嵌入变量，只需要将变量名写在 ${} 之中，其实不止变量，任意的 JavaScript 表达式，像加减运算，map操作之类的，不过当大括号中的值不是字符串时，会将其转为字符串，比如一个数组 [1, 2, 3] 就会被转为 1,2,3。要消除逗号，可以先join一下。
+
+### 标签模板
+
+模板标签是一个非常重要的能力，模板字符串可以紧跟在一个函数名后面，该函数将被调用来处理这个模板字符串
+
+```js
+let x = 'Hi', y = 'Kevin';
+var res = message`${x}, I am ${y}`;
+console.log(res);
+
+// 我们可以自定义 message 函数来处理返回的字符串, 利用这些参数将其拼合回去：:
+// literals就是将变量分离出来的字符串数组， 这个例子中是[ "", ", I am ", "" ]，变量x,y前后没有字符，所以被空字符串代替
+// ...values 就是对应的变量数组这里是 ['Hi', 'Kevin']
+function message(literals, ...values) {
+  let result = '';
+  for (let i = 0; i < values.length; i++) {
+    result += literals[i];
+    result += values[i];
+  }
+  result += literals[literals.length - 1];
+  return result;
+}
+// 合并肯定少不了reduce
+function message(literals, ...values) {
+  let result = literals.reduce((prev, next, i) => {
+    let value = values[i - 1];
+    return prev + value + next;
+  });
+
+  return result;
+}
+```
+
+这个的一些应用：
+
++ oneLine：希望书写的时候是换行的，但是最终输出的字符是在一行。拼合回去然后每行前面的多个空格替换成一个空格，利用正则匹配的是换行符以及换行符后面的多个空格。
++ stripIndents：将换行符后面的空白字符消掉的意思，关键正则`replace(/\n[^\S\n]*/g, '\n')`，`replace(/^[^\S\n]+/gm, '')`
++ includeArrays：解决${}中为数组会带逗号的问题，在处理函数中用join拼接
+
+## 箭头函数
+
+特点：
+
++ 箭头函数没有 this，所以需要通过查找作用域链来确定 this 的值，也就是最近一层非箭头函数的 this。因此call()、apply()、bind() 也并不能改变其this指向。比如给dom元素绑定事件触发时，this是指向当前元素的，如果希望改变这个可以使用箭头函数。
++ 没有自己 arguments，但是还是可以访问外层的 arguments 对象，如果想要访问需要以命名参数或者 rest 参数的形式访问参数
++ 不能通过 new 关键字调用，普通函数是有[[Call]] 和 [[Construct]] 这两个内部方法的，前者用于调用时执行函数体，后者用于 new 时执行，箭头函数没有[[Construct]]
++ 没有 new.target，没有原型，没有 super
+
+箭头函数最适合用于非方法函数，与方法函数（对象属性中的函数）相对应。
+
+## 模拟实现 Symbol 类型
+
+特点：
+
++ Symbol 值通过 Symbol 函数生成，使用 typeof，结果为 "symbol"
++ Symbol 函数前不能使用 new 命令，否则会报错。这是因为生成的 Symbol 是一个原始类型的值，不是对象。
++ instanceof 的结果为 false
++ Symbol 函数可以接受一个字符串作为参数，表示对 Symbol 实例的描述。
++ 如果 Symbol 的参数是一个对象，就会调用该对象的 toString 方法，将其转为字符串，然后才生成一个 Symbol 值。
++ Symbol 函数的参数只是表示对当前 Symbol 值的描述，相同参数的 Symbol 函数的返回值是不相等的。
++ Symbol 值不能与其他类型的值进行运算，会报错。
++ Symbol 值可以显式转为字符串。
++ Symbol 值可以作为标识符，用于对象的属性名，可以保证**不会出现同名的属性**。
++ Symbol 作为属性名，该属性不会出现在 for...in、for...of 循环中，也不会被 Object.keys()、Object.getOwnPropertyNames()、JSON.stringify() 返回。但是，它也不是私有属性，有一个 Object.getOwnPropertySymbols 方法，可以获取指定对象的所有 Symbol 属性名
++ 如果我们希望使用同一个 Symbol 值，可以使用 Symbol.for。它接受一个字符串作为参数，然后搜索有没有以该参数作为名称的 Symbol 值。如果有，就返回这个 Symbol 值，否则就新建并返回一个以该字符串为名称的 Symbol 值。
++ Symbol.keyFor 方法返回一个已登记的 Symbol 类型值的 key。
+
+模拟实现：
+
+symbol 具有一个[[Description]] 属性，所以模拟实现还是通过对象来做
+
+1. 第一点修改不了
+2. 第二点可以通过this是否为模拟symbol方法的实例来判断
+3. 不是通过 new 的方式实现的，所以 instanceof 的结果自然是 false。
+4. 无法实现
+5. 可以通过传入的描述判断如果传入就String()一下，否则就是undefined，并定义[[Description]]，其值为传入的描述
+6. 因为通过对象模拟实现，所以两个肯定不会相等
+7. 重写valueOf方法，使其抛错，因为与其他类型运算时会隐式调用，但是考虑到原生Symbol调用valueOf会返回Symbol值，这两个不能同时模拟
+8. 当调用 String 方法的时候，如果该对象有 toString 方法，就会调用该 toString 方法，所以只要给返回的对象添加 toString 方法，即可实现这两个效果。
+9. 这一点与第八点是冲突的，当对象作为对象的属性名的时候，就会进行隐式类型转换，会调用toString方法，所以只能再加一个生成唯一值的方法
+10. 无法实现
+11. 建立一个对象来存储创建过的Symbol，类似函数记忆
+12. 遍历 forMap,查找该值对应的键值即可
+
+### 一些使用场景
+
++ 定义类的私有变量/方法
++ 运用在单例模式中
++ 想要给某对象赋予某属性但又不确定对象是否已存在同名属性
+
+## 迭代器与forof
+
+### 迭代器
+
+迭代器，其实就是一个具有 next() 方法的对象，每次调用 next() 都会返回一个结果对象，该结果对象有两个属性，value 表示当前的值，done 表示遍历是否结束。
+
+### forof
+
+一个数据结构只要具有 Symbol.iterator 属性，就可以认为是"可遍历的"（iterable），因此也就可以被forof循环遍历
+
+一些默认的数据结构默认都具有 Symbol.iterator 属性，比如字符串、Set、Map、类数组对象、Generator 对象等。
+
+```js
+function forOf(obj, cb) {
+  let iterable, result;
+  if (typeof obj[Symbol.iterator] !== "function")
+    throw new TypeError(result + " is not iterable");
+  if (typeof cb !== "function") throw new TypeError("cb must be callable");
+
+  iterable = obj[Symbol.iterator]();
+
+  result = iterable.next();
+  while (!result.done) {
+    cb(result.value);
+    result = iterable.next();
+  }
+}
+```
+
+内建迭代器entries()，keys()，values()
+
+注意：迭代器对象除了 next 方法，还可以具有 return 方法和 throw 方法，不过这两个都是可选的。return 方法的使用场合是，如果 for...of 循环提前退出（通常是因为出错，或者有 break 语句或 continue 语句），就会调用 return 方法，但是也只仅仅是执行了return方法，return 函数中返回的值其实并不生效，然而如果不返回值又会报错。
+
+## 模拟实现一个 Set 数据结构
+
+>[具体参考](https://github.com/mqyqingfeng/Blog/issues/91)
+
+需要注意NaN的处理以及迭代器的处理
+
+## WeakMap
+
+特点：
+
++ WeakMap 只接受对象作为键名。
++ WeakMaps 保持了对键名所引用的对象的弱引用（是指不能确保其引用的对象不会被垃圾回收器回收的引用）。
+
+一般来说我们用到的都是强引用，创建一个对象，将对象的某个属性，数组某一项或者Map的key设置为一个对象，都是保持了对这个对象的强引用，仅仅将这个对象设置为 null 并不会导致垃圾回收机制回收，必须将其相关的所有引用都去掉，才能回收。而WeakMap保持了弱引用，垃圾回收机制也就不好考虑其保持的引用，一旦不需要，WeakMap 里面的键名对象和所对应的键值对会自动消失。因此WeakMap不可遍历，没有size
+
+应用场景：
+
+在 DOM 对象上保存相关数据，与下面数据缓存类似，只不过key值是dom对象
+
+数据缓存：我们需要关联对象和数据，比如在不修改原有对象的情况下储存某些属性或者根据对象储存一些计算的值等，而又不想管理这些数据的死活时非常适合考虑使用 WeakMap。
+
+```js
+const cache = new WeakMap();
+function countOwnKeys(obj) {
+  if (cache.has(obj)) {
+    console.log('Cached');
+    return cache.get(obj);
+  } else {
+    console.log('Computed');
+    const count = Object.keys(obj).length;
+    cache.set(obj, count);
+    return count;
+  }
+}
+```
+
+私有属性：WeakMap 也可以被用于实现私有变量，不过在 ES6 中实现私有变量的方式有很多种
+
+```js
+const privateData = new WeakMap();
+
+class Person {
+  constructor(name, age) {
+    privateData.set(this, { name: name, age: age });
+  }
+  getName() {
+    return privateData.get(this).name;
+  }
+  getAge() {
+    return privateData.get(this).age;
+  }
+}
+export default Person;
+```
+
+## 聊聊 Promise
+
+Promise之前的异步调用存在许多问题，最大的问题就是回调地狱，难以复用、堆栈信息被断开、借助外层变量，而Promise解决了部分问题。
+
+Promise链式调用可以解决嵌套问题，resolve可以解决回调函数可能被多次执行的问题以及回调函数可能同步也可能异步执行的问题
+
+### 红绿灯问题
+
+红灯三秒亮一次，绿灯一秒亮一次，黄灯2秒亮一次；如何让三个灯不断交替重复亮灯？（用 Promse 实现）
+
+```js
+function red(){
+  console.log('red');
+}
+function green(){
+  console.log('green');
+}
+function yellow(){
+  console.log('yellow');
+}
+
+var light = function(timmer, cb){
+  return new Promise(function(resolve, reject) {
+    setTimeout(function() {
+      cb();
+      resolve();
+    }, timmer);
+  });
+};
+
+var step = function() {
+  Promise.resolve().then(function(){
+    return light(3000, red);
+  }).then(function(){
+    return light(2000, green);
+  }).then(function(){
+    return light(1000, yellow);
+  }).then(function(){
+    step();
+  });
+}
+step();
+```
+
+### promisify
+
+有的时候，我们需要将 callback 语法的 API 改造成 Promise 语法
+
+callback 方式: stat(path, (err, res) => .....)
+
+promise 方式: promisify(stat)(path).then(res => console.log(res))
+
+```js
+function promisify(original) {
+  //  promisify(stat) 这一步 return 下一行
+  return function (...args) {
+    //  将 original 函数接管，比如调用 promisify(stat)(path) 则 return 下一行的 promise
+    return new Promise((resolve, reject) => {
+      // 将 arguments 里面新增一个 original 的 callback，用来改变 promise 的状态
+      args.push(function callback(err, ...values) {
+        if (err) {
+          return reject(err);
+        }
+        return resolve(...values)
+      });
+      //  执行原函数(args 已经新增了 callback 了)
+      original.call(this, ...args);
+    });
+  };
+}
+```
+
+Promise存在的问题
+
+1. 错误被吃掉，如果不手动写catch捕获错误处理函数，Promise内部抛出的错误外部无法捕获
+2. 无法取消
+3. 无法得知pending状态
+4. 单一值，resolve或者reject时只能传递一个值出去，当然可以自己构造对象或数组
+
+## Generator 的自动执行
+
+Generator可以执行单个异步任务
+
+```js
+var fetch = require('node-fetch');
+
+function* gen(){
+  var url = 'https://api.github.com/users/github';
+  var result = yield fetch(url);
+  console.log(result.bio);
+}
+
+// 在使用时
+var g = gen();
+var result = g.next();
+// 第一次调用时，result还是一个promise，fetch返回的就是promise
+result.value.then((data) => {
+  // 获得异步请求的数据处理后往下传
+  return data.json();
+}).then(function(data){
+  // 把处理后的data传给生成器，执行后面的 console.log(result.bio);
+  g.next(data);
+});
+```
+
+如何利用 Generator 来执行多个异步任务呢？难道要写一长串的then，然后一次次调用next方法吗？
+
+```js
+var fetch = require('node-fetch');
+
+function* gen() {
+  var r1 = yield fetch('https://api.github.com/users/github');
+  var json1 = yield r1.json();
+  var r2 = yield fetch('https://api.github.com/users/github/followers');
+  var json2 = yield r2.json();
+  var r3 = yield fetch('https://api.github.com/users/github/repos');
+  var json3 = yield r3.json();
+  console.log([json1.bio, json2[0].login, json3[0].full_name].join('\n'));
+}
+
+function run(gen) {
+  var g = gen();
+  function next(data) {
+    var result = g.next(data);
+    if (result.done) return;
+    result.value.then(function(data) {
+      next(data);
+    });
+  }
+  next();
+}
+run(gen);
+```
+
+这种方法是利用Promise，如果yield后面跟的是回调函数呢？
+
+不管是Promise还是回调函数，关键是需要能**自动**获取执行权
+
++ 回调函数。将异步操作进行包装，暴露出回调函数，在回调函数里面交回执行权。
++ Promise 对象。将异步操作包装成 Promise 对象，用 then 方法交回执行权。
+
+## 聊聊 Async
