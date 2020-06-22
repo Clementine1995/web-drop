@@ -226,7 +226,7 @@ flex-basis属性定义项目在分配额外空间之前的缺省尺寸。属性�
 
 取值：
 
-+ <'width'>：width 值可以是 `{{cssxref("<length>")}};` 该值也可以是一个相对于其父弹性盒容器主轴尺寸的`{{cssxref("<percentage>", "百分数")}}` 。负值是不被允许的。默认为 0。
++ <'width'>：width 值可以是 [`<length>`](https://developer.mozilla.org/zh-CN/docs/Web/CSS/length)，这里的length既可以是相对单位长度也可以是绝对单位长度， 该值也可以是一个相对于其父弹性盒容器主轴尺寸的百分数。负值是不被允许的。默认为 0。
 + content：基于 flex 的元素的内容自动调整大小。
 + 还有几个width宽度的取值也可以用fill,max-content,min-content,fit-content.
 
