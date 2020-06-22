@@ -11,7 +11,7 @@ Javascript是单线程的，也就是同时只能做一件事情，但是通过E
 
 如图所示，js中的内存分为 堆内存(heap) 和 栈内存(stack), 堆内存 中存的是我们声明的object类型的数据，栈内存 中存的是 基本数据类型 以及 函数执行时的运行空间。我们的 同步 代码就放在 执行栈 中，那异步代码呢？浏览器会将 dom事件 ajax setTimeout等异步代码放到队列中，等待执行栈中的代码都执行完毕，才会执行队列中的代码，是不是有点像发布订阅模式。
 
-```()
+```js
 console.log(1);
 setTimeout(() => {
     console.log(2);
@@ -23,7 +23,7 @@ console.log(3);
 
 但是异步代码也是有区别的：
 
-```()
+```js
 console.log(1)
 
 setTimeout(() => {
@@ -49,22 +49,22 @@ Promise.resolve().then(() => {
 
 + 等待执行栈和微任务队列都执行完毕才会执行，并且在执行完每一个宏任务之后，会去看看微任务队列有没有新添加的任务，如果有，会先将微任务队列中的任务清空，才会继续执行下一个宏任务
 
-```()
+```js
 setTimeout(() => {
-    console.log('timeout1')
-    Promise.resolve().then(() => {
-        console.log('promise1')
-    })
-    Promise.resolve().then(() => {
-        console.log('promise2')
-    })
+	console.log('timeout1')
+	Promise.resolve().then(() => {
+			console.log('promise1')
+	})
+	Promise.resolve().then(() => {
+			console.log('promise2')
+	})
 }, 100)
 
 setTimeout(() => {
-    console.log('timeout2')
-    Promise.resolve().then(() => {
-        console.log('promise3')
-    })
+	console.log('timeout2')
+	Promise.resolve().then(() => {
+		console.log('promise3')
+	})
 }, 200)
 ```
 
@@ -96,7 +96,7 @@ setTimeout(() => {
 
 Node中的Event Loop会在每次切换队列的时候 清空微任务队列，也就会会将当前队列都执行完，在进入下一阶段的时候检查一下微任务中有没有任务
 
-```()
+```js
 setTimeout(() => {
     console.log('timeout1')
     Promise.resolve().then(() => {

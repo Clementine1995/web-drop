@@ -6,7 +6,7 @@
 
 主要方法listen()
 
-```javascript
+```js
 const Koa = require('koa');
 const app = new Koa();
 app.listen(3000);
@@ -17,7 +17,7 @@ app.listen(3000);
 Koa 提供一个 Context 对象，表示一次对话的上下文（包括 HTTP 请求和 HTTP 回复）。每个请求都将创建一个 Context，并在中间件中作为接收器引用，或者 ctx 标识符，通过加工这个对象，就可以控制返回给用户的内容。
 Context.response.body属性就是发送给用户的内容。请看下面的例子
 
-```javascript
+```js
 const Koa = require('koa');
 const app = new Koa();
 
@@ -58,7 +58,7 @@ koa 的 Response 对象.
 
 推荐的命名空间，用于通过中间件传递信息和你的前端视图。
 
-```javascript
+```js
 ctx.state.user = await User.find(id);
 ```
 
@@ -94,7 +94,7 @@ Helper 方法抛出一个 .status 属性默认为 500 的错误，这将允许 K
 
 允许以下组合：
 
-```javascript
+```js
 ctx.throw(400);
 ctx.throw(400, 'name required');
 ctx.throw(400, 'name required', { user: user });
@@ -102,7 +102,7 @@ ctx.throw(400, 'name required', { user: user });
 
 例如 ctx.throw(400, 'name required') 等效于:
 
-```javascript
+```js
 const err = new Error('name required');
 err.status = 400;
 err.expose = true;
@@ -113,7 +113,7 @@ throw err;
 
 你可以根据需要将 properties 对象传递到错误中，对于装载上传给请求者的机器友好的错误是有用的。这用于修饰其人机友好型错误并向上游的请求者报告非常有用。
 
-```javascript
+```js
 ctx.throw(401, 'access_denied', { user: user });
 ```
 
@@ -123,7 +123,7 @@ koa 使用 [http-errors](https://github.com/jshttp/http-errors) 来创建错误�
 
 当 !value 时，Helper 方法抛出类似于 .throw() 的错误。这与 node 的 assert() 方法类似.
 
-```javascript
+```js
 ctx.assert(ctx.state.user, 401, 'User not found. Please login!');
 ```
 
@@ -202,7 +202,7 @@ Content-Type 默认为 application/octet-stream。
 
 以下是流错误处理的示例，而不会自动破坏流：
 
-```javascript
+```js
 const PassThrough = require('stream').PassThrough;
 
 app.use(async ctx => {
@@ -217,7 +217,7 @@ Content-Type 默认为 application/json. 这包括普通的对象 { foo: 'bar' }
 
 不区分大小写获取响应标头字段值 field。
 
-```javascript
+```js
 const etag = ctx.response.get('ETag');
 ```
 
@@ -225,7 +225,7 @@ const etag = ctx.response.get('ETag');
 
 设置响应标头 field 到 value:
 
-```javascript
+```js
 ctx.set('Cache-Control', 'no-cache');
 ```
 
@@ -233,7 +233,7 @@ ctx.set('Cache-Control', 'no-cache');
 
 用值 val 附加额外的标头 field。
 
-```javascript
+```js
 ctx.append('Link', '<http://127.0.0.1/>');
 ```
 
@@ -241,7 +241,7 @@ ctx.append('Link', '<http://127.0.0.1/>');
 
 用一个对象设置多个响应标头fields:
 
-```javascript
+```js
 ctx.set({
   'Etag': '1234',
   'Last-Modified': date
@@ -256,7 +256,7 @@ ctx.set({
 
 获取响应 Content-Type 不含参数 "charset"。
 
-```javascript
+```js
 const ct = ctx.type;
 // => "image/png"
 ```
@@ -265,7 +265,7 @@ const ct = ctx.type;
 
 设置响应 Content-Type 通过 mime 字符串或文件扩展名。
 
-```javascript
+```js
 ctx.type = 'text/plain; charset=utf-8';
 ctx.type = 'image/png';
 ctx.type = '.png';
@@ -280,7 +280,7 @@ ctx.type = 'png';
 
 例如, 这是一个中间件，可以削减除流之外的所有HTML响应。
 
-```javascript
+```js
 const minify = require('html-minifier');
 
 app.use(async (ctx, next) => {
@@ -301,7 +301,7 @@ app.use(async (ctx, next) => {
 执行 [302] 重定向到 url.
 字符串 “back” 是特别提供Referrer支持的，当Referrer不存在时，使用 alt 或“/”。
 
-```javascript
+```js
 ctx.redirect('back');
 ctx.redirect('back', '/index.html');
 ctx.redirect('/login');
@@ -310,7 +310,7 @@ ctx.redirect('http://google.com');
 
 要更改 “302” 的默认状态，只需在该调用之前或之后分配状态。要变更主体请在此调用之后:
 
-```javascript
+```js
 ctx.status = 301;
 ctx.redirect('/cart');
 ctx.body = 'Redirecting to shopping cart';
@@ -331,7 +331,7 @@ response.attachment([filename])
 
 将 Last-Modified 标头设置为适当的 UTC 字符串。您可以将其设置为 Date 或日期字符串。
 
-```javascript
+```js
 ctx.response.lastModified = new Date();
 ```
 
@@ -339,7 +339,7 @@ ctx.response.lastModified = new Date();
 
 设置包含 " 包裹的 ETag 响应， 请注意，没有相应的 response.etag getter。
 
-```javascript
+```js
 ctx.response.etag = crypto.createHash('md5').update(ctx.body).digest('hex');
 ```
 
@@ -356,7 +356,7 @@ ctx.response.etag = crypto.createHash('md5').update(ctx.body).digest('hex');
 Koa 默认的返回类型是text/plain，如果想返回其他类型的内容，可以先用ctx.request.accepts判断一下，
 客户端希望接受什么数据（根据 HTTP Request 的Accept字段），然后使用ctx.response.type指定返回类型。
 
-```javascript
+```js
 const main = ctx => {
   if (ctx.request.accepts('xml')) {
     ctx.response.type = 'xml';
@@ -378,7 +378,7 @@ const main = ctx => {
 
 实际开发中，返回给用户的网页往往都写成模板文件。我们可以让 Koa 先读取模板文件，然后将这个模板返回给用户。
 
-```javascript
+```js
 const fs = require('fs');
 const main = ctx => {
   ctx.response.type = 'html';
@@ -392,7 +392,7 @@ const main = ctx => {
 
 网站一般都有多个页面。通过ctx.request.path可以获取用户请求的路径，由此实现简单的路由。
 
-```javascript
+```js
 const main = ctx => {
   if (ctx.request.path !== '/') {
     ctx.response.type = 'html';
@@ -407,7 +407,7 @@ const main = ctx => {
 
 原生路由用起来不太方便，我们可以使用封装好的koa-route模块。
 
-```javascript
+```js
 const route = require('koa-route');
 
 const about = ctx => {
@@ -429,7 +429,7 @@ app.use(route.get('/about', about));
 
 如果网站提供静态资源（图片、字体、样式表、脚本......），为它们一个个写路由就很麻烦，也没必要。koa-static模块封装了这部分的请求。
 
-```javascript
+```js
 const path = require('path');
 const serve = require('koa-static');
 
@@ -458,7 +458,7 @@ app.use(route.get('/redirect', redirect));
 Koa 的最大特色，也是最重要的一个设计，就是中间件（middleware）。为了理解中间件，我们先看一下 Logger （打印日志）功能的实现。
 最简单的写法就是在main函数里面增加一行。
 
-```javascript
+```js
 const main = ctx => {
   console.log(`${Date.now()} ${ctx.request.method} ${ctx.request.url}`);
   ctx.response.body = 'Hello World';
@@ -469,7 +469,7 @@ const main = ctx => {
 
 上一个例子里面的 Logger 功能，可以拆分成一个独立函数
 
-```javascript
+```js
 const logger = (ctx, next) => {
   console.log(`${Date.now()} ${ctx.request.method} ${ctx.request.url}`);
   next();
@@ -495,7 +495,7 @@ app.use(logger);
 
 请看下面的例子
 
-```javascript
+```js
 const one = (ctx, next) => {
   console.log('>> one');
   next();
@@ -521,7 +521,7 @@ app.use(three);
 
 运行这个 demo，命令行窗口会有如下输出。
 
-```javascript
+```js
 >> one
 >> two
 >> three
@@ -536,7 +536,7 @@ app.use(three);
 
 迄今为止，所有例子的中间件都是同步的，不包含异步操作。如果有异步操作（比如读取数据库），中间件就必须写成 async 函数。
 
-```javascript
+```js
 const fs = require('fs.promised');
 const Koa = require('koa');
 const app = new Koa();
@@ -556,7 +556,7 @@ app.listen(3000);
 
 koa-compose模块可以将多个中间件合成为一个。
 
-```javascript
+```js
 const compose = require('koa-compose');
 
 const logger = (ctx, next) => {
@@ -581,7 +581,7 @@ app.use(middlewares);
 如果代码运行过程中发生错误，我们需要把错误信息返回给用户。HTTP 协定约定这时要返回500状态码。
 Koa 提供了ctx.throw()方法，用来抛出错误，ctx.throw(500)就是抛出500错误。
 
-```javascript
+```js
 const main = ctx => {
   ctx.throw(500);
 };
@@ -591,7 +591,7 @@ const main = ctx => {
 
 如果将ctx.response.status设置成404，就相当于ctx.throw(404)，返回404错误。
 
-```javascript
+```js
 const main = ctx => {
   ctx.response.status = 404;
   ctx.response.body = 'Page Not Found';
@@ -626,7 +626,7 @@ app.use(main);
 
  要执行自定义错误处理逻辑，如集中式日志记录，您可以添加一个 “error” 事件侦听器，运行过程中一旦出错，Koa 会触发一个error事件。监听这个事件，也可以处理错误。
 
-```javascript
+```js
 const main = ctx => {
   ctx.throw(500);
 };
@@ -640,7 +640,7 @@ app.on('error', (err, ctx) =>
 
 需要注意的是，如果错误被try...catch捕获，就不会触发error事件。这时，必须调用ctx.app.emit()，手动释放error事件，才能让监听函数生效。
 
-```javascript
+```js
 const handler = async (ctx, next) => {
   try {
     await next();
@@ -670,7 +670,7 @@ app.on('error', function(err) {
 
 ctx.cookies用来读写 Cookie。请看下面的例子
 
-```javascript
+```js
 const main = function(ctx) {
   const n = Number(ctx.cookies.get('view') || 0) + 1;
   ctx.cookies.set('view', n);
@@ -682,7 +682,7 @@ const main = function(ctx) {
 
 Web 应用离不开处理表单。本质上，表单就是 POST 方法发送到服务器的键值对。koa-body模块可以用来从 POST 请求的数据体里面提取键值对。
 
-```javascript
+```js
 const koaBody = require('koa-body');
 
 const main = async function(ctx) {
@@ -700,7 +700,7 @@ app.use(koaBody());
 
 koa-body模块还可以用来处理文件上传。请看下面的例子。
 
-```javascript
+```js
 const os = require('os');
 const path = require('path');
 const koaBody = require('koa-body');
@@ -749,7 +749,7 @@ app.listen(3000);
 
 这里的 app.listen(...) 方法只是以下方法的语法糖:
 
-```javascript
+```js
 const http = require('http');
 const Koa = require('koa');
 const app = new Koa();
@@ -758,7 +758,7 @@ http.createServer(app.callback()).listen(3000);
 
 这意味着您可以将同一个应用程序同时作为 HTTP 和 HTTPS 或多个地址：
 
-```javascript
+```js
 const http = require('http');
 const https = require('https');
 const Koa = require('koa');
@@ -783,14 +783,14 @@ https.createServer(app.callback()).listen(3001);
 
 例如，以下是可以接受的：
 
-```javascript
+```js
 app.keys = ['im a newer secret', 'i like turtle'];
 app.keys = new KeyGrip(['im a newer secret', 'i like turtle'], 'sha256');
 ```
 
 这些密钥可以倒换，并在使用 { signed: true } 参数签名 Cookie 时使用。
 
-```javascript
+```js
 ctx.cookies.set('name', 'tobi', { signed: true });
 ```
 
@@ -800,7 +800,7 @@ app.context 是从其创建 ctx 的原型。可以通过编辑 app.context 为 c
 
 例如，要从 ctx 添加对数据库的引用：
 
-```javascript
+```js
 app.context.db = db();
 
 app.use(async ctx => {

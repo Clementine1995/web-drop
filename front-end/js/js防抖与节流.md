@@ -34,7 +34,7 @@ debounce（防抖），简单来说就是防止抖动。
 
 非立即执行版的意思是触发事件后函数不会立即执行，而是在 n 秒后执行，如果在 n 秒内又触发了事件，则会重新计算函数执行时间。
 
-```javascript
+```js
 const debounce = (func, wait, ...args) => {
   let timeout;
   return function(){
@@ -59,7 +59,7 @@ content.onmousemove = debounce(count,1000);
 
 立即执行版的意思是触发事件后函数会立即执行，然后 n 秒内不触发事件才能继续执行函数的效果。
 
-```javascript
+```js
 const debounce = (func, wait, ...args) => {
   let timeout;
   return function(){
@@ -78,7 +78,7 @@ const debounce = (func, wait, ...args) => {
 
 ### 结合版
 
-```javascript
+```js
 /**
  * @desc 函数防抖
  * @param func 函数
