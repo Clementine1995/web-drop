@@ -127,7 +127,7 @@ fill-available、fit-content、max-content、min-content
 
 ## CSS变量
 
-```()
+```css
 // 声明一个变量：
 :root{
   --bgColor:#000;

@@ -302,10 +302,10 @@ background: repeating-radial-gradient(rgba(200, 0, 0, 0.5) 0, rgba(200, 0, 0, 0.
 
 ### 基本用法
 
-```()
+```css
 {
-    /* Basic example */
-    background: conic-gradient(deeppink, yellowgreen);
+  /* Basic example */
+  background: conic-gradient(deeppink, yellowgreen);
 }
 ```
 
@@ -338,7 +338,7 @@ background: repeating-radial-gradient(rgba(200, 0, 0, 0.5) 0, rgba(200, 0, 0, 0.
 
 我们再给加上 `border-radius: 50%` ，假设我们的 CSS 如下，
 
-```()
+```css
 {
   width: 200px;
   height: 200px;
@@ -366,7 +366,7 @@ wow，已经有了初步形状了。但是，总感觉哪里不大自然。
 
 也就是采用这样一个过渡 `hsl(0%, 100%, 50%) --> hsl(100%, 100%, 50%)`，中间只改变色相，生成 20 个过渡状态。借助 SCSS ，CSS 语法如下:
 
-```()
+```scss
 $colors: ();
 $totalStops:20;
 
@@ -390,7 +390,7 @@ $totalStops:20;
 
 假设我们有如下 CSS：
 
-```()
+```css
 {
   width: 200px;
   height: 200px;
@@ -405,7 +405,7 @@ $totalStops:20;
 
 当然，上面只是百分比的第一种写法，还有另一种写法也能实现：
 
-```()
+```css
 {
   background: conic-gradient(deeppink 0 30%, yellowgreen 0 70%, teal 0 100%);
 }
@@ -424,7 +424,7 @@ $totalStops:20;
 
 我们首先实现一个基础圆锥渐变图形如下：
 
-```()
+```css
 {
   width: 250px;
   height: 250px;
@@ -439,7 +439,7 @@ $totalStops:20;
 
 再加上 `background-size: 50px 50px;`，也就是：
 
-```()
+```css
 {
   width: 250px;
   height: 250px;
@@ -463,7 +463,7 @@ $totalStops:20;
 
 那么，使用了 `repaeting-conic-gradient` 之后，会自动填充满整个区域，CSS 代码如下：
 
-```()
+```css
 {
   width: 200px;
   height: 200px;

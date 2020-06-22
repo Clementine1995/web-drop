@@ -8,7 +8,7 @@ v-slot 指令自 Vue 2.6.0 起被引入，提供更好的支持 slot 和 slot-sc
 
 默认作用域插槽 (default scoped slot)
 
-```()
+```vue
 <my-component v-slot="{ msg }">
   {{ msg }}
 </my-component>
@@ -16,7 +16,7 @@ v-slot 指令自 Vue 2.6.0 起被引入，提供更好的支持 slot 和 slot-sc
 
 具名插槽 (named slots)
 
-```()
+```vue
 <my-component>
   <template v-slot:header>
     <p>Header</p>
@@ -35,7 +35,7 @@ v-slot 指令自 Vue 2.6.0 起被引入，提供更好的支持 slot 和 slot-sc
 
 注意 **v-slot 只能添加在一个 `<template>` 上** ，只有一种例外情况，就是当被提供的内容只有默认插槽时，组件的标签才可以被当作插槽的模板来使用。这样我们就可以把 v-slot 直接用在组件上。**只要出现多个插槽，请始终为所有的插槽使用完整的基于 `<template>` 的语法**。
 
-```()
+```vue
 <current-user v-slot:default="slotProps">
   {{ slotProps.user.firstName }}
 </current-user>
@@ -43,7 +43,7 @@ v-slot 指令自 Vue 2.6.0 起被引入，提供更好的支持 slot 和 slot-sc
 
 这种写法还可以更简单。
 
-```()
+```vue
 <current-user v-slot="slotProps">
   {{ slotProps.user.firstName }}
 </current-user>
@@ -53,7 +53,7 @@ v-slot 的值实际上可以是任何能够作为函数定义中的参数的 Jav
 
 它同样开启了 prop 重命名等其它可能，例如将 user 重命名为 person。
 
-```()
+```vue
 <current-user v-slot="{ user: person }">
   {{ person.firstName }}
 </current-user>
@@ -61,7 +61,7 @@ v-slot 的值实际上可以是任何能够作为函数定义中的参数的 Jav
 
 你甚至可以定义后备内容，用于插槽 prop 是 undefined 的情形
 
-```()
+```vue
 <current-user v-slot="{ user = { firstName: 'Guest' } }">
   {{ user.firstName }}
 </current-user>
@@ -71,7 +71,7 @@ v-slot 的值实际上可以是任何能够作为函数定义中的参数的 Jav
 
 跟 v-on 和 v-bind 一样，v-slot 也有缩写，即把参数之前的所有内容 (v-slot:) 替换为字符 #。例如 v-slot:header 可以被重写为 #header：
 
-```()
+```vue
 <base-layout>
   <template #header>
     <h1>Here might be a page title</h1>
@@ -90,7 +90,7 @@ v-slot 的值实际上可以是任何能够作为函数定义中的参数的 Jav
 
 Vue 的内置错误处理机制（组件中的 errorCaptured 钩子和全局的 errorHandler 配置项）现在也会处理 v-on 侦听函数中抛出的错误了。另外，如果你组件的生命周期钩子或是实践侦听函数中有异步操作，那么可以通过返回一个 Promise 的方式来让 Vue 处理可能存在的异步错误。如果你用了 async/await，那么就更简单了，因为 async 函数默认返回 Promise：
 
-```()
+```vue
 export default {
   async mounted() {
     // 这里抛出的异步错误会被 errorCaptured 或是
@@ -104,7 +104,7 @@ export default {
 
 指令的参数现在可以接受动态的 JavaScript 表达式：
 
-```()
+```vue
 <div v-bind:[attr]="value"></div>
 <div :[attr]="value"></div>
 
@@ -126,7 +126,7 @@ export default {
 
 2.6 引入了一个新的全局 API，可以用来显式地创建响应式对象：
 
-```()
+```vue
 const reactiveState = Vue.observable({
   count: 0
 })
@@ -139,7 +139,7 @@ const reactiveState = Vue.observable({
 举个例子，我们现在就来创建一个简单的计算器来暴露 state 给我们的 store。
 首先创建 store.js 文件：
 
-```()
+```vue
 import Vue from"vue";
 export const store = Vue.observable({
   count: 0
@@ -148,7 +148,7 @@ export const store = Vue.observable({
 
 复制代码如果你熟悉并喜欢 mutations 和 actions 的设计思想，那么你也可以创建一个简单的函数来更新数据：
 
-```()
+```vue
 import Vue from"vue";
 
 export const store = Vue.observable({
@@ -164,7 +164,7 @@ export const mutations = {
 
 复制代码现在你只需要在组件中使用它，就像使用 Vuex 一样地去获取 state，我们将会用到计算属性和调用 mutations 的实例方法。
 
-```()
+```vue
 <template>
   <div>
     <p>Count: {{ count }}</p>
@@ -197,7 +197,7 @@ export const mutations = {
 
 Vue 之前版本的 ES Modules 构建文件是针对打包工具的，因此里面包含了一些需要在构建时替换掉的环境变量，从而导致无法直接在浏览器中使用。2.6 包含了一个可以直接在浏览器导入的版本：
 
-```()
+```vue
 <script type="module">
 import Vue from 'https://unpkg.com/vue/dist/vue.esm.browser.js'
   

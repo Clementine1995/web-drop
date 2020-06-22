@@ -9,7 +9,7 @@
 
 举个聚焦输入框的例子，当页面加载时，该元素将获得焦点 (注意：autofocus 在移动版 Safari 上不工作)。事实上，只要你在打开这个页面后还没点击过任何内容，这个输入框就应当还是处于聚焦状态。现在让我们用指令来实现这个功能：
 
-```javascript
+```js
   // 注册一个全局自定义指令 `v-focus`
   Vue.directive('focus', {
     // 当被绑定的元素插入到 DOM 中时……
@@ -22,7 +22,7 @@
 
 如果想注册局部指令，组件中也接受一个 directives 的选项：
 
-```javascript
+```js
   directives: {
     focus: {
       // 指令的定义
@@ -67,7 +67,7 @@ unbind：只调用一次，指令与元素解绑时调用。
 除了 el 之外，其它参数都应该是只读的，切勿进行修改。如果需要在钩子之间共享数据，建议通过元素的 dataset 来进行。
 这是一个使用了这些属性的自定义钩子样例：
 
-```javascript
+```js
   <div id="hook-arguments-example" v-demo:foo.a.b="message"></div>
   Vue.directive('demo', {
     bind: function (el, binding, vnode) {
@@ -94,7 +94,7 @@ unbind：只调用一次，指令与元素解绑时调用。
 
 在很多时候，你可能想在 bind 和 update 时触发相同行为，而不关心其它的钩子。比如这样写:
 
-```javascript
+```js
   Vue.directive('color-swatch', function (el, binding) {
     el.style.backgroundColor = binding.value
   })
@@ -104,7 +104,7 @@ unbind：只调用一次，指令与元素解绑时调用。
 
 如果指令需要多个值，可以传入一个 JavaScript 对象字面量。记住，指令函数能够接受所有合法的 JavaScript 表达式。
 
-```javascript
+```js
   <div v-demo="{ color: 'white', text: 'hello!' }"></div>
   Vue.directive('demo', function (el, binding) {
     console.log(binding.value.color) // => "white"

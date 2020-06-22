@@ -113,11 +113,11 @@ HTML5 新增的表单属性
 视频`<video>`和音频`<audio>`，也是html提供的新的标签，它们的功能类似于`<img>`标签，`<img>`标签引用的是图片，它们引用的是视频文件和音频文件。不仅如此，html5针对视频文件和音频文件的特殊性，给
 `<video>`和`<audio>`提供了非常丰富的方法,属性和事件，用于操控这俩元素。
 
-```()
+```html
 <audio src="audio/putclub.com_Googlewasjusta.mp3" id="audio"></audio>
 <button id="start-music">开始播放</button>
 <button id="stop-music">暂停播放</button>
-
+<script>
 var startMusic = document.getElementById('start-music');
 var stopMusic = document.getElementById('stop-music');
 
@@ -130,18 +130,18 @@ stopMusic. onclick = function () {  // 暂停播放
   var audioEl = document.getElementById('audio');
   audioEl.pause()
 }
-
+</script>
 ```
 
 `<audio>`目前支持的音频格式有: MP3, Wav, 和 Ogg。
 
-```()
+```html
 <video width="600" height="400" id="video" controls="controls">
   <source src="video/jieda2.mp4" type="audio/mp4"></source>
 </video>
 <button id="start-tv">视频开始播放</button>
 <button id="stop-tv">暂停视频播放</button>
-
+<script>
 var startTv = document.getElementById('start-tv');
 var stopTv = document.getElementById('stop-tv');
 
@@ -154,6 +154,7 @@ stopTv.onclick = function () {
   var video = document.getElementById('video');
   video.pause();
 }
+</script>
 ```
 
 注意：video播放视频时请注意转换一下视频的格式，转换为AVC(H264)，不转换的话容易出现有声音而没有视频的现象，浏览器将支持第一个识别的文件类型：( MP4, WebM, 和 Ogg)。
