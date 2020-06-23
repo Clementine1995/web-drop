@@ -30,26 +30,26 @@ import Vue from 'vue'
 export default new Vue
 ```
 
-eventBus中只创建了一个新的Vue实例，以后它就承担起了组件之间通信的桥梁了，也就是中央事件总线.
+eventBus中只创建了一个新的Vue实例，以后它就承担起了组件之间通信的桥梁了，也就是中央事件总线。在递归组件中可以使用
 
 firstChild.vue
 
 ```html
 <template>
-    <div>
-        <h2>firstChild组件</h2>
-        <button @click="sendMsg">向另一个组件传值</button>
-    </div>
+  <div>
+    <h2>firstChild组件</h2>
+    <button @click="sendMsg">向另一个组件传值</button>
+  </div>
 </template>
 <script>
-    import bus from './eventBus'
-    export default {
-        methods: {
-            sendMsg: function(){
-                bus.$emit('userDefinedEvent', 'this message is from firstChild')
-            }
-        }
+  import bus from './eventBus'
+  export default {
+    methods: {
+      sendMsg: function(){
+        bus.$emit('userDefinedEvent', 'this message is from firstChild')
+      }
     }
+  }
 </script>
 ```
 
@@ -57,26 +57,26 @@ secondChild.vue
 
 ```html
 <template>
-    <div>
-        <h2>secondChild组件</h2>
-        <p>从firstchild接收的字符串参数： {{message}}</p>
-    </div>
+  <div>
+    <h2>secondChild组件</h2>
+    <p>从firstchild接收的字符串参数： {{message}}</p>
+  </div>
 </template>
 <script>
-    import bus from './eventBus'
-    export default {
-        data() {
-            return {
-                message: "默认值"
-            }
-        },
-        mounted() {
-            var self = this
-            bus.$on('userDefinedEvent', function(msg){
-                self.message = msg
-            })
-        }
+import bus from './eventBus'
+export default {
+  data() {
+    return {
+      message: "默认值"
     }
+  },
+  mounted() {
+    var self = this
+    bus.$on('userDefinedEvent', function(msg){
+      self.message = msg
+    })
+  }
+}
 </script>
 ```
 
@@ -91,31 +91,31 @@ parent.vue
 
 ```html
 <template>
-    <div class="parent">
-        <h2>$parent和$children</h2>
-        <p>父组件中的值： {{parentMessage}}</p>
-        <button @click="changeChildMsg">改变子组件中的值</button>
-        <Child/>
-    </div>
+  <div class="parent">
+    <h2>$parent和$children</h2>
+    <p>父组件中的值： {{parentMessage}}</p>
+    <button @click="changeChildMsg">改变子组件中的值</button>
+    <Child/>
+  </div>
 </template>
 <script>
-    import Child from './Child'
-    export default {
-        name: 'parent',
-        components: {
-            Child
-        },
-        data(){
-            return {
-                parentMessage: '默认值'
-            }
-        },
-        methods: {
-            changeChildMsg: function(){
-                this.$children[0].childMessage = "这是父组件改变的"
-            }
+  import Child from './Child'
+  export default {
+    name: 'parent',
+    components: {
+      Child
+    },
+    data(){
+        return {
+            parentMessage: '默认值'
         }
+    },
+    methods: {
+      changeChildMsg: function(){
+        this.$children[0].childMessage = "这是父组件改变的"
+      }
     }
+  }
 </script>
 ```
 
@@ -123,26 +123,26 @@ child.vue
 
 ```html
 <template>
-    <div>
-        <h3>子组件部分</h3>
-        <p>子组件中的值： {{childMessage}}</p>
-        <button @click="changeParentMsg">改变父组件中的值</button>
-    </div>
+  <div>
+    <h3>子组件部分</h3>
+    <p>子组件中的值： {{childMessage}}</p>
+    <button @click="changeParentMsg">改变父组件中的值</button>
+  </div>
 </template>
 <script>
-    export default {
-        name: 'child',
-        data(){
-            return {
-                childMessage: '默认值'
-            }
-        },
-        methods: {
-            changeParentMsg: function(){
-                this.$parent.parentMessage = '这是子组件改变的'
-            }
-        }
+export default {
+  name: 'child',
+  data(){
+    return {
+      childMessage: '默认值'
     }
+  },
+  methods: {
+    changeParentMsg: function(){
+      this.$parent.parentMessage = '这是子组件改变的'
+    }
+  }
+}
 </script>
 ```
 
@@ -158,22 +158,22 @@ parent.vue
 
 ```html
 <template>
-    <div class="parent">
-        <h2>Provide和inject</h2>
-        <Child />
-    </div>
+  <div class="parent">
+    <h2>Provide和inject</h2>
+    <Child />
+  </div>
 </template>
 <script>
-    import Child from './Child'
-    export default {
-        name: 'parent',
-        provide: {
-            name: 'Garrett'
-        },
-        components: {
-            Child
-        }
-    }
+import Child from './Child'
+export default {
+  name: 'parent',
+  provide: {
+    name: 'Garrett'
+  },
+  components: {
+    Child
+  }
+}
 </script>
 ```
 
@@ -181,19 +181,19 @@ child.vue
 
 ```html
 <template>
-    <div>
-        <h3>子组件部分</h3>
-        <GrandChild/>
-    </div>
+  <div>
+    <h3>子组件部分</h3>
+    <GrandChild/>
+  </div>
 </template>
 <script>
-    import GrandChild from './GrandChild'
-    export default {
-        name: 'Child',
-        components: {
-            GrandChild
-        }
-    }
+import GrandChild from './GrandChild'
+export default {
+  name: 'Child',
+  components: {
+    GrandChild
+  }
+}
 </script>
 ```
 
@@ -201,16 +201,16 @@ grandChild.vue
 
 ```html
 <template>
-    <div>
-        <h3>孙子组件部分</h3>
-        <p>{{name}}</p>
-    </div>
+  <div>
+    <h3>孙子组件部分</h3>
+    <p>{{name}}</p>
+  </div>
 </template>
 <script>
-    export default {
-        name: 'grandChild',
-        inject: ['name'],
-    }
+export default {
+  name: 'grandChild',
+  inject: ['name'],
+}
 </script>
 ```
 
@@ -218,42 +218,42 @@ PS：provide 和 inject 主要为高阶插件/组件库提供用例。并不推�
 
 ## $attrs和$listeners
 
-$attrs和$listeners是2.4.0新增的方法。
-$attrs--继承所有的父组件属性（除了prop传递的属性、class 和 style ）
-$listeners--属性，它是一个对象，里面包含了作用在这个组件上的所有监听器，你就可以配合
- v-on="$listeners" 将所有的事件监听器指向这个组件的某个特定的子元素。
+- $attrs和$listeners是2.4.0新增的方法。
+- $attrs--继承所有的父组件属性（除了prop传递的属性、class 和 style ）
+- $listeners--属性，它是一个对象，里面包含了作用在这个组件上的所有监听器，你就可以配合v-on="$listeners" 将所有的事件监听器指向这个组件的某个特定的子元素。
+- 在递归组件中也可以很好的工作
 
 parent.vue
 
 ```html
 <template>
-    <div class="parent">
-        <h2>$attrs和$listeners</h2>
-        <p>父组件中的两个值：</p>
-        <p>子组件会改变的值：{{message1}}</p>
-        <p>孙子组件会改变的值：{{message2}}</p>
-        <hr>
-        <!--        此处监听了两个事件，可以在B组件或者C组件中直接触发-->
-        <child1 :child="child" :grand-child="grandChild" v-on:changeMsg1="changeMsg1" v-on:changeMsg2="changeMsg2"/>
-    </div>
+  <div class="parent">
+    <h2>$attrs和$listeners</h2>
+    <p>父组件中的两个值：</p>
+    <p>子组件会改变的值：{{message1}}</p>
+    <p>孙子组件会改变的值：{{message2}}</p>
+    <hr>
+    <!--        此处监听了两个事件，可以在B组件或者C组件中直接触发-->
+    <child1 :child="child" :grand-child="grandChild" v-on:changeMsg1="changeMsg1" v-on:changeMsg2="changeMsg2"/>
+  </div>
 </template>
 <script>
-    import Child1 from './Child.vue'
-    export default {
-        data() {
-            return {
-                child: 'child',
-                grandChild: 'grandChild',
-                message1: '默认值',
-                message2: '默认值'
-            };
-        },
-        components: {Child1},
-        methods: {
-            changeMsg1(msg) {this.message1 = msg},
-            changeMsg2(msg) {this.message2 = msg}
-        }
+import Child1 from './Child.vue'
+export default {
+  data() {
+    return {
+      child: 'child',
+      grandChild: 'grandChild',
+      message1: '默认值',
+      message2: '默认值'
     };
+  },
+  components: {Child1},
+  methods: {
+    changeMsg1(msg) {this.message1 = msg},
+    changeMsg2(msg) {this.message2 = msg}
+  }
+};
 </script>
 ```
 
@@ -261,32 +261,32 @@ child.vue
 
 ```html
 <template>
-    <div>
-        <p>in child:</p>
-        <p>props: {{child}}</p>
-        <p>$attrs: {{$attrs}}</p>
-        <button @click="changeMsg">改变父组件的值</button>
-        <hr>
-        <!-- GrandChild组件中能直接触发changeMsg的原因在于 Child组件调用GrandChild组件时 使用 v-on 绑定了$listeners 属性 -->
-        <!-- 通过v-bind 绑定$attrs属性，GrandChild组件可以直接获取到Parent组件中传递下来的props（除了Child组件中props声明的） -->
-        <GrandChild v-bind="$attrs" v-on="$listeners"></GrandChild>
-    </div>
+  <div>
+    <p>in child:</p>
+    <p>props: {{child}}</p>
+    <p>$attrs: {{$attrs}}</p>
+    <button @click="changeMsg">改变父组件的值</button>
+    <hr>
+    <!-- GrandChild组件中能直接触发changeMsg的原因在于 Child组件调用GrandChild组件时 使用 v-on 绑定了$listeners 属性 -->
+    <!-- 通过v-bind 绑定$attrs属性，GrandChild组件可以直接获取到Parent组件中传递下来的props（除了Child组件中props声明的） -->
+    <GrandChild v-bind="$attrs" v-on="$listeners"></GrandChild>
+  </div>
 </template>
 <script>
-    import GrandChild from './GrandChild.vue';
-    export default {
-        props: ['child'],
-        data() {
-            return {};
-        },
-        inheritAttrs: false,
-        components: {GrandChild},
-        methods: {
-            changeMsg: function(){
-                this.$emit('changeMsg1', '这是子组件改变的');
-            }
-        }
-    };
+import GrandChild from './GrandChild.vue';
+export default {
+  props: ['child'],
+  data() {
+    return {};
+  },
+  inheritAttrs: false,
+  components: {GrandChild},
+  methods: {
+    changeMsg: function(){
+      this.$emit('changeMsg1', '这是子组件改变的');
+    }
+  }
+};
 </script>
 ```
 
@@ -294,23 +294,23 @@ grandChild.vue
 
 ```html
 <template>
-    <div>
-        <p>in grandChild:</p>
-        <p>props: {{grandChild}}</p>
-        <p>$attrs: {{$attrs}}</p>
-        <button @click="changeMsg">改变祖先组件的值</button>
-    </div>
+  <div>
+    <p>in grandChild:</p>
+    <p>props: {{grandChild}}</p>
+    <p>$attrs: {{$attrs}}</p>
+    <button @click="changeMsg">改变祖先组件的值</button>
+  </div>
 </template>
 <script>
-    export default {
-        props: ['grandChild'],
-        inheritAttrs: false,
-        methods: {
-            changeMsg: function(){
-                this.$emit('changeMsg2', '这是孙子组件改变的');
-            }
-        }
-    };
+export default {
+  props: ['grandChild'],
+  inheritAttrs: false,
+  methods: {
+    changeMsg: function(){
+      this.$emit('changeMsg2', '这是孙子组件改变的');
+    }
+  }
+};
 </script>
 ```
 
@@ -319,7 +319,7 @@ grandChild.vue
 ## 双向绑定原理
 
 - 数据响应的实现由两部分构成: 观察者( watcher ) 和 依赖收集器( Dep )，其核心是 Object.DefineProperty这个方法，它可以 重写属性的 get 与 set 方法，从而完成监听数据的改变。
-- Observe (观察者)观察 props 与 state 
+- Observe (观察者)观察 props 与 state
   - 遍历 props 与 state，对每个属性创建独立的监听器( watcher )
 - 使用 defineProperty 重写每个属性的 get/set(defineReactive）
   - get: 收集依赖
@@ -345,78 +345,78 @@ data.a = 2
 
 // 简单表示用于数据更新后的操作
 function updateComponent() {
-    vm._update() // patchs
+  vm._update() // patchs
 }
 
 // 监视对象
 function observe(obj) {
-         // 遍历对象，使用 get/set 重新定义对象的每个属性值
-    Object.keys(obj).map(key => {
-        defineReactive(obj, key, obj[key])
-    })
+  // 遍历对象，使用 get/set 重新定义对象的每个属性值
+  Object.keys(obj).map(key => {
+    defineReactive(obj, key, obj[key])
+  })
 }
 
 function defineReactive(obj, k, v) {
-    // 递归子属性
-    if (type(v) == 'object') observe(v)
-    // 新建依赖收集器
-    let dep = new Dep()
-    // 定义get/set
-    Object.defineProperty(obj, k, {
-        enumerable: true,
-        configurable: true,
-        get: function reactiveGetter() {
-                  // 当有获取该属性时，证明依赖于该对象，因此被添加进收集器中
-            if (Dep.target) {
-                dep.addSub(Dep.target)
-            }
-            return v
-        },
-        // 重新设置值时，触发收集器的通知机制
-        set: function reactiveSetter(nV) {
-            v = nV
-            dep.nofify()
-        },
-    })
+  // 递归子属性
+  if (type(v) == 'object') observe(v)
+  // 新建依赖收集器
+  let dep = new Dep()
+  // 定义get/set
+  Object.defineProperty(obj, k, {
+    enumerable: true,
+    configurable: true,
+    get: function reactiveGetter() {
+      // 当有获取该属性时，证明依赖于该对象，因此被添加进收集器中
+      if (Dep.target) {
+        dep.addSub(Dep.target)
+      }
+      return v
+    },
+    // 重新设置值时，触发收集器的通知机制
+    set: function reactiveSetter(nV) {
+      v = nV
+      dep.nofify()
+    },
+  })
 }
 
 // 依赖收集器
 class Dep {
-    constructor() {
-        this.subs = []
-    }
-    addSub(sub) {
-        this.subs.push(sub)
-    }
-    notify() {
-        this.subs.map(sub => {
-            sub.update()
-        })
-    }
+  constructor() {
+    this.subs = []
+  }
+  addSub(sub) {
+    this.subs.push(sub)
+  }
+  notify() {
+    this.subs.map(sub => {
+      sub.update()
+    })
+  }
 }
 
 Dep.target = null
 
 // 观察者
 class Watcher {
-    constructor(obj, key, cb) {
-        Dep.target = this
-        this.cb = cb
-        this.obj = obj
-        this.key = key
-        this.value = obj[key]
-        Dep.target = null
-    }
-    addDep(Dep) {
-        Dep.addSub(this)
-    }
-    update() {
-        this.value = this.obj[this.key]
-        this.cb(this.value)
-    }
-    before() {
-        callHook('beforeUpdate')
-    }
+  constructor(obj, key, cb) {
+    Dep.target = this
+    this.cb = cb
+    this.obj = obj
+    this.key = key
+    this.value = obj[key]
+    Dep.target = null
+  }
+  addDep(Dep) {
+    Dep.addSub(this)
+  }
+  update() {
+    this.value = this.obj[this.key]
+    this.cb(this.value)
+  }
+  before() {
+    callHook('beforeUpdate')
+  }
 }
 ```
 
