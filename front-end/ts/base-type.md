@@ -99,6 +99,10 @@ alert("This is my warning message");
 默认情况下null和undefined是所有类型的子类型，所以他俩赋值给其他类型的变量，比如number。
 当你指定了--strictNullChecks标记，null和undefined只能赋值给void和它们各自。
 
+## unknown
+
+unknown类型与any都可以表示任何类型，但是它更安全，any 类型的变量是可以进行任意进行赋值、实例化、函数执行等操作，但是 unknown 只允许赋值，不允许实例化、函数执行等操作。
+
 ## Never
 
 never类型表示的是那些永不存在的值的类型，比如：总是会抛出异常或根本就不会有返回值的函数表达式或箭头函数表达式的返回值类型，还有无限死循环的函数
