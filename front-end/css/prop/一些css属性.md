@@ -17,11 +17,11 @@ text-rendering CSS 属性定义浏览器渲染引擎如何渲染字体。浏览�
 
 注意：这个 geometricPrecision 特性——当被渲染引擎完全支持时——会使文本缩放是流畅的。对于大比例的缩放，你可能看到并不太漂亮的文本渲染，但这个字体大小是你期望的，而不是被 Windows 或 Linux 系统四舍五入或向下取整的字体大小。 WebKit 准确地的实现了这个值, 但是 Gecko 把这个值按照 optimizeLegibility 处理。
 
-## font-smoothing
+## font-smooth
 
 font-smooth CSS 属性用来控制字体渲染时的平滑效果。该特性是非标准的，请尽量不要在生产环境中使用它！属性已经在规范中被移除，而且已经不在标准跟踪之中。
 
-语法：`font-smoothing: auto | never | always | <value>`
+语法：`font-smooth: auto | never | always | <value>`
 
 注意：
 
@@ -73,6 +73,8 @@ function removeHint() {
 ```
 
 ## contain
+
+>相关文章[CSS新特性contain，控制页面的重绘与重排](https://github.com/chokcoco/iCSS/issues/23)
 
 contain 属性允许开发者声明当前元素和它的内容尽可能的独立于 DOM 树的其他部分。这使得浏览器在重新计算布局、样式、绘图或它们的组合的时候，只会影响到有限的 DOM 区域，而不是整个页面。
 
@@ -232,6 +234,8 @@ caret-color 属性用来定义插入光标（caret）的颜色，这里说的插
 
 [MDN Mask](https://developer.mozilla.org/zh-CN/docs/Web/CSS/mask)
 
+其下有很多属性 mask-image, mask-mode, mask-repeat, mask-border等等。
+
 ## appearance
 
 [MDN Appearance](https://developer.mozilla.org/zh-CN/docs/Web/CSS/appearance)
@@ -300,6 +304,34 @@ http://www.example.com/index.html#section2
 </html>
 ```
 
+## overscroll-behavior
+
+`overscroll-behavior` CSS 属性是 `overscroll-behavior-x` 和 `overscroll-behavior-y` 属性的合并写法, 让你可以控制浏览器过度滚动时的表现——也就是滚动到边界。
+
+默认情况下，当触及页面顶部或者底部时（或者是其他可滚动区域），移动端浏览器倾向于提供一种“触底”效果，甚至进行页面刷新。或者当对话框中含有可滚动内容时，一旦滚动至对话框的边界，对话框下方的页面内容也开始滚动了——这被称为“滚动链”。在某些情况下不想要这些表现，就可以使用 overscroll-behavior 来去除不需要的滚动链，以及类似 QQ 一类的应用下拉刷新效果。
+
+语法:
+
++ auto:默认效果
++ contain:设置这个值后，默认的滚动边界行为不变（“触底”效果或者刷新），但是临近的滚动区域不会被滚动链影响到，比如对话框后方的页面不会滚动。
++ none:临近滚动区域不受到滚动链影响，而且默认的滚动到边界的表现也被阻止。
+
+如果希望移除标准的滚动至顶部或底部的滚动特效，比如在移动端，滚动到顶部或者底部，在下滑头部会出现一块白色的空白区域，需要移除这个效果就可以设置为 none, 而一个对话框中有滚动条，在滚动到边界时再滚动，其后面的部分也会开始滚动（如果有滚动条的话），想要移除这个效果则可以使用 contain。
+
+## scroll-behavior
+
+当用户手动导航或者 CSSOM scrolling API 触发滚动操作时，可以让浏览器的滚动定位表现为平滑。在根元素中指定这个属性时，它反而适用于视窗。
+
+需要根据实际情况，如果页面高度很高，从最底部平滑滚动到顶部，就会显得比较慢看着难受。
+
+语法：
+
+```css
+/* Keyword values */
+scroll-behavior: auto; /* 滚动框立即滚动。 */
+scroll-behavior: smooth; /* 滚动框通过一个用户代理预定义的时长、使用预定义的时间函数，来实现平稳的滚动 */
+```
+
 ## scroll-snap-type
 
 >[使用 scroll-snap-type 优化滚动](https://juejin.im/post/5de9c00ce51d4557f544f03d)
@@ -309,3 +341,72 @@ http://www.example.com/index.html#section2
 ## box-decoration-break
 
 >[有趣的 box-decoration-break](https://juejin.im/post/5c77457951882540447df818)
+
+## color-adjust
+
+color-adjust 这个属性是否允许浏览器自己调节颜色以便有更好的阅读体验。
+
+例如，在打印时，浏览器可能会选择忽略所有背景图像并调整文本颜色，以确保针对在白纸上阅读而优化了对比度。这是默认值 economy 的效果。而想要精确显示色彩就需要使用 exact。
+
+语法：
+
+```css
+color-adjust: economy;
+color-adjust: exact;
+```
+
+## margin-inline和margin-block
+
+margin-inline定义元素的逻辑行内开始和结束边距，指的是水平方向的控制，margin-block属性定义元素的逻辑块开始和结束边距，指的是垂直方向的控制，这两个属性都取决于元素的书写方式，方向性和文本方向而映射到物理边距。margin-inline 是 margin-inline-start， margin-inline-end 的简写，同理 margin-block。
+
+关于取决于书写方式，在横板正向书写时，margin-inline-start表现跟 margin-left 相同，但是调整为反向书写（direction）时，就表现跟 margin-right 相同。margin-block同理。
+
+### 逻辑属性
+
+所谓CSS逻辑属性，指的是`*-start`，`*-end`以及`*-inline-start`，`*-inline-end`，`*-block-start`， `*-block-end`这类CSS属性，其最终渲染的方向是有逻辑性在里面的。
+
+逻辑属性往往配合direction属性或者writing-mode使用，或者在多语言项目中。
+
+## font-feature-settings
+
+这个属性用于控制OpenType字体中的高级印刷功能。
+
+## ::backdrop
+
+::backdrop伪元素可以用来设置所有全屏元素后面“幕布”的样式，是在任何处于全屏模式的元素下的即刻渲染的盒子。
+
+可以设置`<video>`视频元素的全屏黑背景，可以设置`<dialog>`元素显示时候的背景，也可以设置处于全屏状态下的普通元素(借助[HTML5 fullscreen API](https://developer.mozilla.org/zh-CN/docs/Web/API/Fullscreen_API))的黑背景。
+
+## vector-effect
+
+vector-effect主要用在SVG元素上，可以让SVG元素的描边不随着SVG图形的尺寸变化而缩放
+
+## :focus-visible
+
+:focus-visible可以有效解决Chrome浏览器下部分元素的焦点轮廓问题。可以让`<button>`，`<summary>`元素或者设置了tabindex的元素在点击时候没有焦点轮廓，键盘访问时候出现。这个选择器可以有效地根据用户的输入方式(鼠标 vs 键盘)展示不同形式的焦点。
+
+Firefox通过较旧的前缀伪类 :-moz-focusring 支持类似的功能，而Chrome需要开启支持实现属性css
+
+## backdrop-filter
+
+backdrop-filter CSS 属性可以让你为一个元素后面区域添加图形效果（如模糊或颜色偏移）。 因为它适用于元素背后的所有元素，为了看到效果，必须使元素或其背景至少部分透明。和filter属性的语法一模一样，只不过一个是作用于背后元素，一个是作用于自身。
+
+## image-set()
+
+image-set（）CSS函数是一种让浏览器从给定集合中选择最合适的CSS图像的方法，主要用于高像素密度的屏幕。
+
+```css
+background-image: image-set( "cat.png" 1x, "cat-2x.png" 2x, "cat-print.png" 600dpi);
+```
+
+表示：如果屏幕是一倍屏，也就是设备像素比是1的话，就使用cat.png作为背景图片；如果屏幕是2倍屏及其以上，则使用cat-2x.png这张图作为背景图；如果设备的分辨率大于600dpi，则使用cat-print.png作为背景图。
+
+## inset
+
+inset它具有与margin相同的多值语法。它是与top，right，bottom和/或left属性相对应的简写。`inset: 0` 也就等同于 `left: 0; top: 0; right: 0; bottom: 0;`。
+
+## display: contents
+
+>相关文章[使用 display: contents 增强页面语义](https://github.com/chokcoco/iCSS/issues/79)
+
+## display: flow-root 和 display: flow
