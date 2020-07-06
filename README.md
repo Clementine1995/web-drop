@@ -11,3 +11,7 @@
 7. dota2-sight
 8. electron
 9. mp
+
+## 几个很不错的博客
+
+>[日问](https://q.shanyue.tech/weekly/)

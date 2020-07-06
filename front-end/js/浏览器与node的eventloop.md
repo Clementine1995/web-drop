@@ -41,30 +41,30 @@ Promise.resolve().then(() => {
 
 + 执行栈中的代码永远最先执行
 
-### 微任务(microtask): promise MutationObserver...
+### 微任务(microtask): promise MutationObserver等等
 
 + 当执行栈中的代码执行完毕，会在执行宏任务队列之前先看看微任务队列中有没有任务，如果有会先将微任务队列中的任务清空才会去执行宏任务队列
 
-### 宏任务(task): setTimeout setInterval setImmediate(IE专用) messageChannel...
+### 宏任务(task): setTimeout setInterval setImmediate(IE专用) messageChannel等等
 
 + 等待执行栈和微任务队列都执行完毕才会执行，并且在执行完每一个宏任务之后，会去看看微任务队列有没有新添加的任务，如果有，会先将微任务队列中的任务清空，才会继续执行下一个宏任务
 
 ```js
 setTimeout(() => {
-	console.log('timeout1')
-	Promise.resolve().then(() => {
-			console.log('promise1')
-	})
-	Promise.resolve().then(() => {
-			console.log('promise2')
-	})
+  console.log('timeout1')
+  Promise.resolve().then(() => {
+    console.log('promise1')
+  })
+  Promise.resolve().then(() => {
+     console.log('promise2')
+  })
 }, 100)
 
 setTimeout(() => {
-	console.log('timeout2')
-	Promise.resolve().then(() => {
-		console.log('promise3')
-	})
+  console.log('timeout2')
+  Promise.resolve().then(() => {
+    console.log('promise3')
+  })
 }, 200)
 ```
 
