@@ -17,6 +17,8 @@ CSRF（Cross-site request forgery）跨站请求伪造：攻击者诱导受害�
 5. a.com以受害者的名义执行了act=xx。
 6. 攻击完成，攻击者在受害者不知情的情况下，冒充受害者，让a.com执行了自己定义的操作。
 
+注意：form表单提交不受同源策略限制，form表单会自动把cookie数据提交，会被恶意网站伪造请求，同时img标签的src也是不受同源策略限制的
+
 ## CSRF分类
 
 ### GET类型的CSRF
@@ -130,6 +132,52 @@ CSRF攻击之所以能够成功，是因为服务器误把攻击者发送的请�
 
 ### 分布式校验
 
+在大型网站中，使用Session存储CSRF Token会带来很大的压力。服务器不只一台并且可能分布在不同地区，在由像Ngnix之类的负载均衡器之后，用户发的多次请求可能落到不同的服务器上，这时存在Seesion中的token可能获取不到，从而导致Session机制在分布式环境下失效，在分布式集群中CSRF Token需要存储在Redis之类的公共存储空间。
+
+使用token这种方法的实现比较复杂，需要给每一个页面都写入Token（前端无法使用纯静态页面），每一个Form及Ajax请求都携带这个Token，后端对每一个接口都进行校验，并保证页面Token及请求Token一致。这就使得这个防护策略不能在通用的拦截上统一拦截处理，而需要每一个页面和接口都添加对应的输出和校验。
+
 ### 双重Cookie验证
 
+#### 双重Cookie流程
+
+1. 在用户访问网站页面时，向请求域名注入一个Cookie，内容为随机字符串（例如csrfcookie=v8g9e4ksfhw）。
+2. 在前端向后端发起请求时，取出Cookie，并添加到URL的参数中（接上例POST `https://www.a.com/comment?csrfcookie=v8g9e4ksfhw`）。
+3. 后端接口验证Cookie中的字段与URL参数中的字段是否一致，不一致则拒绝。
+
+优缺点：
+
++ 无需使用Session，适用面更广，易于实施。
++ Token储存于客户端中，不会给服务器带来压力。
++ 相对于Token，实施成本更低，可以在前后端统一拦截校验，而不需要一个个接口和页面添加。
+
++ Cookie中增加了额外的字段。
++ 如果有其他漏洞（例如XSS），攻击者可以注入Cookie，那么该防御方式失效。
++ 难以做到子域名的隔离。
++ 为了确保Cookie传输安全，采用这种防御方式的最好确保用整站HTTPS的方式，如果还没切HTTPS的使用这种方式也会有风险。
+
 ### Samesite Cookie属性
+
+为了从源头上解决这个问题，Google起草了一份草案来改进HTTP协议，那就是为Set-Cookie响应头新增Samesite属性，它用来标明这个 Cookie是个“同站 Cookie”，同站Cookie只能作为第一方Cookie，不能作为第三方Cookie，Samesite 有两个属性值，分别是 Strict 和 Lax
+
+#### Samesite=Strict
+
+这种称为严格模式，表明这个 Cookie 在任何情况下都不可能作为第三方 Cookie，绝无例外。
+
+```html
+Set-Cookie: foo=1; Samesite=Strict
+Set-Cookie: bar=2; Samesite=Lax
+Set-Cookie: baz=3
+```
+
+我们在 a.com 下发起对 b.com 的任意请求，foo 这个 Cookie 都不会被包含在 Cookie 请求头中，但 bar 会。
+
+#### Samesite=Lax
+
+这种称为宽松模式，比 Strict 放宽了点限制：假如这个请求是这种请求（改变了当前页面或者打开了新页面）且同时是个GET请求，但假如这个请求是从 a.com 发起的对 b.com 的异步请求，或者页面跳转是通过表单的 post 提交触发的，则该cookie也不会发送。
+
+## 防止网站被利用
+
++ 严格管理所有的上传接口，防止任何预期之外的上传内容（例如HTML）。
++ 添加Header X-Content-Type-Options: nosniff 防止黑客上传HTML内容的资源（例如图片）被解析为网页。
++ 对于用户上传的图片，进行转存或者校验。不要直接使用用户填写的图片链接。
++ 当前用户打开其他用户填写的链接时，需告知风险（这也是很多论坛不允许直接在内容中发布外域链接的原因之一，不仅仅是为了用户留存，也有安全考虑）。

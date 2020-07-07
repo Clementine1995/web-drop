@@ -218,4 +218,4 @@ CSP可以限制加载资源的类型：
 jaVasCript:/*-/*`/*\`/*'/*"/**/(/* */oNcliCk=alert() )//%0D%0A%0d%0a//</stYle/</titLe/</teXtarEa/</scRipt/--!>\x3csVg/<sVg/oNloAd=alert()//>\x3e
 ```
 
-+ 使用扫描工具自动检测 XSS 漏洞（BeEF、w3af 、 noXss等）
++ 使用扫描工具自动检测 XSS 漏洞（BeEF、w3af、noXss等）
