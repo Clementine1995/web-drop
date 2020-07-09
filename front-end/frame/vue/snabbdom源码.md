@@ -116,6 +116,16 @@ export function init (modules: Array<Partial<Module>>, domApi?: DOMAPI) {
 
 ## patch函数
 
+patch的整体过程
+
++ patch(oldVnode, newVnode)
++ 把新节点中变化的内容渲染到真实DOM，最后返回新节点作为下一次处理的旧节点
++ 对比新旧VNode是否为相同节点(节点的key和sel是否相同)
++ 如果不是相同的节点，删除之前的内容，重新渲染
++ 如果是相同的节点，再判断新的VNode是否有text，如果有并且和 oldVnode 的text不相同，直接更新文本内容
++ 如果新的 VNode 有 children，判断子节点是否有变化，判断子节点变化的过程就是 diff 算法
++ diff 过程只进行同级比较
+
 ```js
 function isVnode (vnode: any): vnode is VNode {
   return vnode.sel !== undefined
@@ -334,3 +344,145 @@ function addVnodes (
 ```
 
 ## patchVnode
+
+patchVnode 的整体过程，会更新 DOM
+
+1. 触发prepatch钩子函数
+2. 触发update钩子函数
+3. 新节点有 text 属性，且不等于旧节点的 text 属性
+    1. 如果老节点有children， 移除老节点children对应的DOM元素
+    2. 设置新节点对应 DOM 元素的 textContent
+4. 新老节点都有 children 且不相等
+    1. 调用 updateChildren()
+    2. 对比子节点，并且更新子节点的差异
+5. 只有新节点有 children 属性
+    1. 如果老节点有 text 属性，清空对应 DOM元素的 textContent
+    2. 添加所有子节点
+6. 只有老节点有children属性，就移除所有的老节点
+7. 只有老节点有 text 属性，清空对应DOM元素的 textContent
+8. 触发 postpatch 钩子函数
+
+```js
+function patchVnode (oldVnode: VNode, vnode: VNode, insertedVnodeQueue: VNodeQueue) {
+  // 首先执行用户设置的 prepatch 钩子函数
+  const hook = vnode.data?.hook
+  hook?.prepatch?.(oldVnode, vnode)
+  // 把老节点的 elm 赋值给 新节点的 elm，并保存在 elm 中
+  const elm = vnode.elm = oldVnode.elm!
+  // 存储新旧节点的 children
+  const oldCh = oldVnode.children as VNode[]
+  const ch = vnode.children as VNode[]
+  // 如果新老 vnode 相同返回
+  if (oldVnode === vnode) return
+  if (vnode.data !== undefined) {
+    // 执行模块的 update 钩子函数
+    for (let i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
+    // 执行用户设置的 update 钩子函数，只会在新老 vnode 不相同并且正式开始对比之前执行，而prepatch进来就执行了
+    vnode.data.hook?.update?.(oldVnode, vnode)
+  }
+  // 如果 vnode.text 未定义
+  if (isUndef(vnode.text)) {
+    // 如果新老节点都有children
+    if (isDef(oldCh) && isDef(ch)) {
+      // 使用 diff 算法对比子节点，更新子节点
+      if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue)
+    } else if (isDef(ch)) {
+      // 如果新节点有children，老节点没有children
+      // 如果老节点有text，清空 dom 元素的内容
+      if (isDef(oldVnode.text)) api.setTextContent(elm, '')
+      // 批量添加子节点
+      addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue)
+    } else if (isDef(oldCh)) {
+      // 如果老节点有children，新节点没有children
+      // 批量移除老节点的子节点
+      removeVnodes(elm, oldCh, 0, oldCh.length - 1)
+    } else if (isDef(oldVnode.text)) {
+      // 如果老节点有 text，清空 DOM元素
+      api.setTextContent(elm, '')
+    }
+  } else if (oldVnode.text !== vnode.text) {
+    // 如果没有设置 vnode.text
+    if (isDef(oldCh)) {
+      // 如果老节点有 children 移除
+      removeVnodes(elm, oldCh, 0, oldCh.length - 1)
+    }
+    api.setTextContent(elm, vnode.text!)
+  }
+  // 最后执行用户设置的 postpatch 钩子函数
+  hook?.postpatch?.(oldVnode, vnode)
+}
+
+function updateChildren (parentElm: Node,
+  oldCh: VNode[],
+  newCh: VNode[],
+  insertedVnodeQueue: VNodeQueue) {
+  let oldStartIdx = 0
+  let newStartIdx = 0
+  let oldEndIdx = oldCh.length - 1
+  let oldStartVnode = oldCh[0]
+  let oldEndVnode = oldCh[oldEndIdx]
+  let newEndIdx = newCh.length - 1
+  let newStartVnode = newCh[0]
+  let newEndVnode = newCh[newEndIdx]
+  let oldKeyToIdx: KeyToIndexMap | undefined
+  let idxInOld: number
+  let elmToMove: VNode
+  let before: any
+
+  while (oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx) {
+    if (oldStartVnode == null) {
+      oldStartVnode = oldCh[++oldStartIdx] // Vnode might have been moved left
+    } else if (oldEndVnode == null) {
+      oldEndVnode = oldCh[--oldEndIdx]
+    } else if (newStartVnode == null) {
+      newStartVnode = newCh[++newStartIdx]
+    } else if (newEndVnode == null) {
+      newEndVnode = newCh[--newEndIdx]
+    } else if (sameVnode(oldStartVnode, newStartVnode)) {
+      patchVnode(oldStartVnode, newStartVnode, insertedVnodeQueue)
+      oldStartVnode = oldCh[++oldStartIdx]
+      newStartVnode = newCh[++newStartIdx]
+    } else if (sameVnode(oldEndVnode, newEndVnode)) {
+      patchVnode(oldEndVnode, newEndVnode, insertedVnodeQueue)
+      oldEndVnode = oldCh[--oldEndIdx]
+      newEndVnode = newCh[--newEndIdx]
+    } else if (sameVnode(oldStartVnode, newEndVnode)) { // Vnode moved right
+      patchVnode(oldStartVnode, newEndVnode, insertedVnodeQueue)
+      api.insertBefore(parentElm, oldStartVnode.elm!, api.nextSibling(oldEndVnode.elm!))
+      oldStartVnode = oldCh[++oldStartIdx]
+      newEndVnode = newCh[--newEndIdx]
+    } else if (sameVnode(oldEndVnode, newStartVnode)) { // Vnode moved left
+      patchVnode(oldEndVnode, newStartVnode, insertedVnodeQueue)
+      api.insertBefore(parentElm, oldEndVnode.elm!, oldStartVnode.elm!)
+      oldEndVnode = oldCh[--oldEndIdx]
+      newStartVnode = newCh[++newStartIdx]
+    } else {
+      if (oldKeyToIdx === undefined) {
+        oldKeyToIdx = createKeyToOldIdx(oldCh, oldStartIdx, oldEndIdx)
+      }
+      idxInOld = oldKeyToIdx[newStartVnode.key as string]
+      if (isUndef(idxInOld)) { // New element
+        api.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm!)
+      } else {
+        elmToMove = oldCh[idxInOld]
+        if (elmToMove.sel !== newStartVnode.sel) {
+          api.insertBefore(parentElm, createElm(newStartVnode, insertedVnodeQueue), oldStartVnode.elm!)
+        } else {
+          patchVnode(elmToMove, newStartVnode, insertedVnodeQueue)
+          oldCh[idxInOld] = undefined as any
+          api.insertBefore(parentElm, elmToMove.elm!, oldStartVnode.elm!)
+        }
+      }
+      newStartVnode = newCh[++newStartIdx]
+    }
+  }
+  if (oldStartIdx <= oldEndIdx || newStartIdx <= newEndIdx) {
+    if (oldStartIdx > oldEndIdx) {
+      before = newCh[newEndIdx + 1] == null ? null : newCh[newEndIdx + 1].elm
+      addVnodes(parentElm, before, newCh, newStartIdx, newEndIdx, insertedVnodeQueue)
+    } else {
+      removeVnodes(parentElm, oldCh, oldStartIdx, oldEndIdx)
+    }
+  }
+}
+```
