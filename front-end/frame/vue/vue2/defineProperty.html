@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+    hello aaa
+  </div>
+  <script>
+    let data = {
+      msg: 'Hello Vue',
+      count: 10
+    }
+
+    let vm = {}
+    proxyData(data)
+    function proxyData(data) {
+      Object.keys(data).forEach(key => {
+        Object.defineProperty(vm, key, {
+          enumerable: true,
+          configurable: true,
+          get () {
+            return data[key]
+          },
+          set (newValue) {
+            if (newValue === data[key]) {
+              return
+            }
+            data[key] = newValue
+            document.querySelector('#app').textContent = data[key]
+          }
+        })
+      })
+    }
+    
+    vm.msg = 'Hello World'
+    console.log(vm.msg)
+  </script>
+</body>
+</html>
