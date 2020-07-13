@@ -83,3 +83,11 @@ class Watcher {
 + Compiler：解析每个元素中的指令以及插值表达式，并替换成相应的数据
 + Watch: 观察者，负责更新视图
 + Dep: 发布者，添加观察者，当数据发生变化时，通知所有的观察者
+
+### Vue
+
++ 负责接受初始化参数
++ 负责把 data 中的属性注入到 Vue 实例，转换成 getter/setter
++ 负责调用 observer 监听 data 中所有属性的变化
++ 负责调用 compiler 解析指令/插值表达式
+
