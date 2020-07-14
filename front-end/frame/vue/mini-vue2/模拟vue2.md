@@ -91,3 +91,8 @@ class Watcher {
 + 负责调用 observer 监听 data 中所有属性的变化
 + 负责调用 compiler 解析指令/插值表达式
 
+### Observer
+
++ 负责把 data 选项中的属性转换成响应式数据
++ data 中的某个属性也是对象，把该属性转换成响应式数据
++ 数据变化发送通知
