@@ -10,11 +10,16 @@
     <h1>插值表达式</h1>
     <h3>{{ msg }}</h3>
     <h3>{{ count }}</h3>
+    <h1>v-text</h1>
+    <div v-text="msg"></div>
+
+    <h1>v-model</h1>
+    <input type="text" v-model="msg">
   </div>
   <script src="./js/observer.js"></script>
+  <script src="./js/compiler.js"></script>
   <script src="./js/vue.js"></script>
   <script>
-    console.log(11111)
     let vm = new Vue({
       el: '#app',
       data: {
