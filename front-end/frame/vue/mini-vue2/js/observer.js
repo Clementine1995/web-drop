@@ -14,6 +14,9 @@ class Observer {
   }
   defineReactive(obj, key, val) {
     let that = this
+
+    // 负责收集依赖并发送通知
+    let dep = new Dep()
     // 如果val此时是对象，会把val内部的属性也转换成响应式数据
     this.walk(val)
     // 为啥 defineReactive 需要第三个参数 val 呢？
@@ -22,6 +25,8 @@ class Observer {
       enumerable: true,
       configurable: true,
       get () {
+        // 收集依赖
+        Dep.target && dep.addSub(Dep.target)
         return val
       },
       set (newValue) {
@@ -35,6 +40,7 @@ class Observer {
         // 所以用先存储过的 that 调用
         that.walk(newValue)
         // 发送通知
+        dep.notify()
       }
     })
   }

@@ -45,15 +45,28 @@ class Compiler {
 
   update (node, key, attrName) {
     let updateFn = this[`${attrName}Updater`]
-
-    updateFn && updateFn(node, this.vm[key])
+    // 为什么要用call，直接执行 updateFn 的话 
+    // this 是由 updateFn 的调用者决定的，直接调用是没有的
+    updateFn && updateFn.call(this, node, this.vm[key], key)
   }
   // 处理v-text指令
-  textUpdater(node, value) {
+  textUpdater(node, value, key) {
     node.textContent = value
+
+    new Watcher(this.vm, key, (newValue) => {
+      node.textContent = newValue
+    })
   }
-  modelUpdater(node, value) {
+  modelUpdater(node, value, key) {
     node.value = value
+
+    new Watcher(this.vm, key, (newValue) => {
+      node.value = newValue
+    })
+    // 针对表单元素（绑定v-model的）绑定事件，来处理变化后来更新数据的逻辑，也就是双向绑定
+    node.addEventListener('input', () => {
+      this.vm[key] = node.value
+    })
   }
   // 编译文本节点，处理插值表达式
   compilerText(node) {
@@ -66,6 +79,13 @@ class Compiler {
       // RegExp.$1 是个啥玩意
       let key = RegExp.$1.trim()
       node.textContent = value.replace(reg, this.vm[key])
+
+      // 创建watcher对象，当数据改变更新视图
+      // 为什么要写在这里，因为数据更新是发生在这里的
+      // 而watcher需要的 cb 正是用来更新视图的
+      new Watcher(this.vm, key, (newValue) => {
+        node.textContent = newValue
+      })
     }
   }
   // 判断元素属性是否为指令
