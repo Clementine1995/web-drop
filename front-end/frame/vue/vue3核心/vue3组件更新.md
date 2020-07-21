@@ -323,6 +323,174 @@ const patchChildren = (n1, n2, container, anchor, parentComponent, parentSuspens
 
 ## 核心 diff 算法
 
+在对比新旧节点的时候，整体流程就是同步头部节点，同步尾部节点，添加新的节点，删除多余节点，处理未知子序列，而处理未知子序列最为复杂。
+
+假如现在存在这样两个新旧子节点
+
+prev children     a b c d
+
+next children     a b e c d
+
+### 同步头部节点
+
+```js
+const patchKeyedChildren = (c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized) => {
+  let i = 0
+  const l2 = c2.length
+  // 旧子节点的尾部索引
+  let e1 = c1.length - 1
+  // 新子节点的尾部索引
+  let e2 = l2 - 1
+  // 1. 从头部开始同步
+  // i = 0, e1 = 3, e2 = 4
+  // (a b) c d
+  // (a b) e c d
+  while (i <= e1 && i <= e2) {
+    const n1 = c1[i]
+    const n2 = c2[i]
+    if (isSameVNodeType(n1, n2)) {
+      // 相同的节点，递归执行 patch 更新节点
+      patch(n1, n2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized)
+    }
+    else {
+      break
+    }
+    i++
+  }
+}
+```
+
+在整个 diff 的过程，我们需要维护几个变量：头部的索引 i、旧子节点的尾部索引 e1和新子节点的尾部索引 e2。
+
+同步头部节点就是从头部开始，依次对比新节点和旧节点，如果它们相同的则执行 patch 更新节点；如果不同或者索引 i 大于索引 e1 或者 e2，则同步过程结束。
+
+那么完成头部同步后：i 是 2，e1 是 3，e2 是 4。
+
+### 同步尾部节点
+
+接着从尾部开始同步尾部节点
+
+```js
+const patchKeyedChildren = (c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized) => {
+  let i = 0
+  const l2 = c2.length
+  // 旧子节点的尾部索引
+  let e1 = c1.length - 1
+  // 新子节点的尾部索引
+  let e2 = l2 - 1
+  // 1. 从头部开始同步
+  // i = 0, e1 = 3, e2 = 4
+  // (a b) c d
+  // (a b) e c d
+  // 2. 从尾部开始同步
+  // i = 2, e1 = 3, e2 = 4
+  // (a b) (c d)
+  // (a b) e (c d)
+  while (i <= e1 && i <= e2) {
+    const n1 = c1[e1]
+    const n2 = c2[e2]
+    if (isSameVNodeType(n1, n2)) {
+      patch(n1, n2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized)
+    }
+    else {
+      break
+    }
+    e1--
+    e2--
+  }
+}
+```
+
+同步尾部节点就是从尾部开始，依次对比新节点和旧节点，如果相同的则执行 patch 更新节点；如果不同或者索引 i 大于索引 e1 或者 e2，则同步过程结束。
+这个过程 i 不会改变。
+
+完成尾部节点同步后：i 是 2，e1 是 1，e2 是 2。
+
+接下来只有 3 种情况要处理：
+
++ 新子节点有剩余要添加的新节点；
++ 旧子节点有剩余要删除的多余节点；
++ 未知子序列。
+
+### 添加新的节点
+
+```js
+const patchKeyedChildren = (c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized) => {
+  let i = 0
+  const l2 = c2.length
+  // 旧子节点的尾部索引
+  let e1 = c1.length - 1
+  // 新子节点的尾部索引
+  let e2 = l2 - 1
+  // 1. 从头部开始同步
+  // i = 0, e1 = 3, e2 = 4
+  // (a b) c d
+  // (a b) e c d
+  // ...
+  // 2. 从尾部开始同步
+  // i = 2, e1 = 3, e2 = 4
+  // (a b) (c d)
+  // (a b) e (c d)
+  // 3. 挂载剩余的新节点
+  // i = 2, e1 = 1, e2 = 2
+  if (i > e1) {
+    if (i <= e2) {
+      const nextPos = e2 + 1
+      const anchor = nextPos < l2 ? c2[nextPos].el : parentAnchor
+      while (i <= e2) {
+        // 挂载新节点
+        patch(null, c2[i], container, anchor, parentComponent, parentSuspense, isSVG)
+        i++
+      }
+    }
+  }
+}
+```
+
+如果索引 i 大于尾部索引 e1 且 i 小于 e2，那么从索引 i 开始到索引 e2 之间，我们直接挂载新子树这部分的节点。
+
+对于例子而言，同步完尾部节点后 i 是 2，e1 是 1，e2 是 2，此时满足条件需要添加新的节点
+
+### 删除多余节点
+
+如果不满足添加新节点的情况，我就要接着判断旧子节点是否有剩余，如果满足则删除旧子节点
+
+```js
+const patchKeyedChildren = (c1, c2, container, parentAnchor, parentComponent, parentSuspense, isSVG, optimized) => {
+  let i = 0
+  const l2 = c2.length
+  // 旧子节点的尾部索引
+  let e1 = c1.length - 1
+  // 新子节点的尾部索引
+  let e2 = l2 - 1
+  // 1. 从头部开始同步
+  // i = 0, e1 = 4, e2 = 3
+  // (a b) c d e
+  // (a b) d e
+  // ...
+  // 2. 从尾部开始同步
+  // i = 2, e1 = 4, e2 = 3
+  // (a b) c (d e)
+  // (a b) (d e)
+  // 3. 普通序列挂载剩余的新节点
+  // i = 2, e1 = 2, e2 = 1
+  // 不满足
+  if (i > e1) {
+  }
+  // 4. 普通序列删除多余的旧节点
+  // i = 2, e1 = 2, e2 = 1
+  else if (i > e2) {
+    while (i <= e1) {
+      // 删除节点
+      unmount(c1[i], parentComponent, parentSuspense, true)
+      i++
+    }
+  }
+}
+```
+
+如果索引 i 大于尾部索引 e2，那么从索引 i 开始到索引 e1 之间，我们直接删除旧子树这部分的节点。
+
 ### 最长递增子序列
 
 最长递增子序列（longest increasing subsequence）问题是指，在一个给定的数值序列中，找到一个子序列，使得这个子序列元素的数值依次递增，并且这个子序列的长度尽可能地大。最长递增子序列中的元素在原序列中不一定是连续的。
