@@ -755,6 +755,8 @@ const patchKeyedChildren = (c1, c2, container, parentAnchor, parentComponent, pa
 
 主要思路：对数组遍历，依次求解长度为 i 时的最长递增子序列，当 i 元素大于 i - 1 的元素时，添加 i 元素并更新最长子序列；否则往前查找直到找到一个比 i 小的元素，然后插在该元素后面并更新对应的最长递增子序列。
 
+假设我们有这个样一个数组 arr：[2, 1, 5, 3, 6, 4, 8, 9, 7]，最终求得最长递增子序列的值就是 [1, 3, 4, 8, 9]。
+
 ```js
 function getSequence (arr) {
   const p = arr.slice()
@@ -762,9 +764,11 @@ function getSequence (arr) {
   let i, j, u, v, c
   const len = arr.length
   for (i = 0; i < len; i++) {
+    // 数组的第 i 项
     const arrI = arr[i]
     // 去掉值为 0 的干扰，因为 0 代表新子序列中的该节点在旧子序列中不存在，不应考虑在递增子序列中
     if (arrI !== 0) {
+      // j 为 result 数组的最后一项，result里面存储的是下标
       j = result[result.length - 1]
       if (arr[j] < arrI) {
         // 存储在 result 更新前的最后一个索引的值
@@ -776,6 +780,7 @@ function getSequence (arr) {
       v = result.length - 1
       // 二分搜索，查找比 arrI 小的节点，更新 result 的值
       while (u < v) {
+        // | 0 向下取整
         c = ((u + v) / 2) | 0
         if (arr[result[c]] < arrI) {
           u = c + 1
@@ -803,5 +808,20 @@ function getSequence (arr) {
   return result
 }
 ```
+
+其中 result 存储的是长度为 i 的递增子序列最小末尾值的索引。比如我们上述例子的第九步，在对数组 p 回溯之前， result 值就是 [1, 3, 4, 7, 9] ，这不是最长递增子序列，它只是存储的对应长度递增子序列的最小末尾。因此在整个遍历过程中会额外用一个数组 p，来存储在每次更新 result 前最后一个索引的值，并且它的 key 是这次要更新的 result 值
+
+```js
+j = result[result.length - 1]
+p[i] = j
+result.push(i)
+```
+
+可以看到，result 添加的新值 i 是作为 p 存储 result 最后一个值 j 的 key。上述例子遍历后 p 的结果如图所示：
+
+p       2   1   1   1   3   3   5   6   5
+index   0   1   2   3   4   5   6   7   8
+
+从 result 最后一个元素 9 对应的索引 7 开始回溯，可以看到 p[7] = 6，p[6] = 5，p[5] = 3，p[3] = 1，所以通过对 p 的回溯，得到最终的 result 值是 [1, 3 ,5 ,6 ,7]，也就找到最长递增子序列的最终索引了。这里要注意，我们求解的是最长子序列索引值，它的每个元素其实对应的是数组的下标。对于我们的例子而言，[2, 1, 5, 3, 6, 4, 8, 9, 7] 的最长子序列是 [1, 3, 4, 8, 9]，而我们求解的 [1, 3 ,5 ,6 ,7] 就是最长子序列中元素在原数组中的下标所构成的新数组。
 
 ## Todo：组件更新流程总结
