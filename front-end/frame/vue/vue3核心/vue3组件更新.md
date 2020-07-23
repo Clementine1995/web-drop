@@ -758,7 +758,7 @@ const patchKeyedChildren = (c1, c2, container, parentAnchor, parentComponent, pa
 >维护一个 result 列表表示 arr[] 中的最慢上升序列，遍历 nums，对于一个 arr[i]，若：
 >
 >1. arr[i] > result 的最后一个元素（即大于slow中的所有元素），就将加入到slow的最后面
->2. arr[i] <= result 的最后一个元素，我们就查找 result 列表中第一个大于等于 arr[i] 的数并替换它。由于非严格单调递增的序列，我们很容易的发现，可以使用二分法来查找这个数。这一步的时间复杂度便降到了log(n)
+>2. arr[i] <= result 的最后一个元素，我们就查找 result 列表中第一个大于等于 arr[i] 的数并替换它。由于非严格单调递增的序列，很容易的发现，可以使用二分法来查找这个数。这一步的时间复杂度便降到了log(n)
 >3. 最终的 result 数组的长度就等于LIS的长度
 >
 >虽然最终能得到LIS的长度，但是slow列表明显不是一个 LIS，甚至连一个子序列都不是，因此需要辅助数组，在下面会有
@@ -801,6 +801,7 @@ function getSequence (arr) {
       }
       if (arrI < arr[result[u]]) {
         if (u > 0) {
+          // 存储在 result 更新位置的前一个下标
           p[i] = result[u - 1]
         }
         result[u] = i
@@ -821,7 +822,7 @@ function getSequence (arr) {
 
 在回溯之前的遍历过程
 
-初始 result = []
+初始 result = [0]
 
 |当前项|操作|result|p|
 |-|-|-|-|
@@ -853,3 +854,22 @@ index   0   1   2   3   4   5   6   7   8
 从 result 最后一个元素 9 对应的索引 7 开始回溯，可以看到 p[7] = 6，p[6] = 5，p[5] = 3，p[3] = 1，所以通过对 p 的回溯，得到最终的 result 值是 [1, 3 ,5 ,6 ,7]，也就找到最长递增子序列的最终索引了。这里要注意，我们求解的是最长子序列索引值，它的每个元素其实对应的是数组的下标。对于我们的例子而言，[2, 1, 5, 3, 6, 4, 8, 9, 7] 的最长子序列是 [1, 3, 4, 8, 9]，而我们求解的 [1, 3 ,5 ,6 ,7] 就是最长子序列中元素在原数组中的下标所构成的新数组。
 
 ## Todo：组件更新流程总结
+
+1. 组件更新分为两种：一种是组件本身的数据变化，另一种是父组件在更新的过程中，遇到子组件节点，先判断子组件是否需要更新，如果需要则主动执行子组件的重新渲染方法，而 patch 函数就负责 vnode 的挂载与更新
+2. 进入 patch 函数后，会根据节点类型的不同，走不同的处理逻辑，主要看处理组件节点与普通 DOM 节点的方法processComponent，processElement。
+3. processComponent 中会分别处理挂载与更新的逻辑，更新用到的是 updateComponent
+  3.1 updateComponent 方法中首先会判断新旧节点是否需要更新，如果需要更新就会触发 instance.update 方法，这个方法是在挂载时定义的响应式方法，在执行之前会将 instance 的 next 属性 设置为新的 vnode，以此来区分是父节点更新产生的变化还是组件内部状态发生变化导致的更新
+  3.2 在 instance.next 存在的情况下，会执行 updateComponentPreRender 方法，来更新组件 vnode 节点信息，比如 props, slots等等
+  3.3 而如果是组件自身内部状态发生变化，就不是由 patch 函数进入了，而是直接走 instance.update 方法，因为它是响应式的，此时 instance.next 是 null，以此时的 vnode 作为 next
+  3.4 然后渲染新的子树 vnode、根据新旧子树 vnode 执行 patch 逻辑
+4. processElement 是处理普通元素节点 vnode 时的主要方法，更新用到的是 patchElement 方法
+  4.1 patchElement 方法，主要做的是更新 props 和更新子节点
+  4.2 更新子节点是 patchChildren 方法，这里面会对新旧子节点不同情况进行处理，组合后一共有9种情况，其中最复杂的是新旧节点都为 vnode 数组的情况，此时就要通过 diff 算法
+5. diff 算法主要分为下面这几步，其中主要通过 key 来分辨是否为同一个节点
+  5.1 同步头部节点
+  5.2 同步尾部节点
+  5.3 添加新的节点
+  5.4 删除多余节点
+  5.5 处理未知子序列
+  5.6 处理未知子序列中首先建立索引图，来确定需要更新和移除的旧节点
+  5.7 然后通过最长递增子序列算法确定需要移动和挂载的新节点，并移动挂载
