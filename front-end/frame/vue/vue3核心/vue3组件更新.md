@@ -740,6 +740,7 @@ const patchKeyedChildren = (c1, c2, container, parentAnchor, parentComponent, pa
       if (j < 0 || i !== increasingNewIndexSequence[j]) {
         move(nextChild, container, anchor, 2)
       }
+      // 只要 j  >= 0，总会在 最长递增子序列 中找到当前项的下标，这个时候是不需要移动的
       else {
         // 倒序递增子序列
         j--
@@ -748,6 +749,14 @@ const patchKeyedChildren = (c1, c2, container, parentAnchor, parentComponent, pa
   }
 }
 ```
+
+前面已经判断了是否移动，如果 moved 为 true 就通过 getSequence(newIndexToOldIndexMap) 计算最长递增子序列，下面介绍了这个算法。
+
+接着采用倒序的方式遍历新子序列，因为倒序遍历可以方便我们使用最后更新的节点作为锚点。在倒序的过程中，锚点指向上一个更新的节点，然后判断 newIndexToOldIndexMap[i] 是否为 0，如果是则表示这是新节点，就需要挂载它；接着判断是否存在节点移动的情况，如果存在的话则看节点的索引是不是在最长递增子序列中，如果在则倒序最长递增子序列，否则把它移动到锚点的前面。
+
+为了便于更直观地理解，我们用前面的例子展示一下这个过程，此时 toBePatched 的值为 4，j 的值为 1，最长递增子序列 increasingNewIndexSequence 的值是 [1, 2]。在倒序新子序列的过程中，首先遇到节点 i，发现它在 newIndexToOldIndexMap 中的值是 0，则说明它是新节点，需要挂载它；然后继续遍历遇到节点 d，因为 moved 为 true，且 d 的索引存在于最长递增子序列中，则执行 j-- 倒序最长递增子序列，j 此时为 0；接着继续遍历遇到节点 c，它和 d 一样，索引也存在于最长递增子序列中，则执行 j--，j 此时为 -1；接着继续遍历遇到节点 e，此时 j 是 -1 并且 e 的索引也不在最长递增子序列中，所以做一次移动操作，把 e 节点移到上一个更新的节点，也就是 c 节点的前面。
+
+新子序列倒序完成，即完成了新节点的插入和旧节点的移动操作，也就完成了整个核心 diff 算法对节点的更新。
 
 ### 最长递增子序列LIS
 
@@ -860,16 +869,23 @@ index   0   1   2   3   4   5   6   7   8
 3. processComponent 中会分别处理挂载与更新的逻辑，更新用到的是 updateComponent
   3.1 updateComponent 方法中首先会判断新旧节点是否需要更新，如果需要更新就会触发 instance.update 方法，这个方法是在挂载时定义的响应式方法，在执行之前会将 instance 的 next 属性 设置为新的 vnode，以此来区分是父节点更新产生的变化还是组件内部状态发生变化导致的更新
   3.2 在 instance.next 存在的情况下，会执行 updateComponentPreRender 方法，来更新组件 vnode 节点信息，比如 props, slots等等
-  3.3 而如果是组件自身内部状态发生变化，就不是由 patch 函数进入了，而是直接走 instance.update 方法，因为它是响应式的，此时 instance.next 是 null，以此时的 vnode 作为 next
-  3.4 然后渲染新的子树 vnode、根据新旧子树 vnode 执行 patch 逻辑
+  3.3 而如果是组件自身内部状态发生变化，就不是由 patch 函数进入了，而是直接走 instance.update 方法，因为它是响应式的，此时 instance.next 是 null，以此时的 vnode 作为 next，这时 vnode 节点信息已经是更新过的了
+  3.4 然后渲染生成新的子树 vnode、根据新旧子树 vnode 执行 patch 逻辑
 4. processElement 是处理普通元素节点 vnode 时的主要方法，更新用到的是 patchElement 方法
   4.1 patchElement 方法，主要做的是更新 props 和更新子节点
-  4.2 更新子节点是 patchChildren 方法，这里面会对新旧子节点不同情况进行处理，组合后一共有9种情况，其中最复杂的是新旧节点都为 vnode 数组的情况，此时就要通过 diff 算法
+  4.2 更新子节点是 patchChildren 方法，这里面会对新旧子节点不同情况进行处理（空节点，vnode数组，纯文本），组合后一共有9种情况，其中最复杂的是新旧节点都为 vnode 数组的情况，此时就要通过 diff 算法
 5. diff 算法主要分为下面这几步，其中主要通过 key 来分辨是否为同一个节点
   5.1 同步头部节点
   5.2 同步尾部节点
   5.3 添加新的节点
   5.4 删除多余节点
   5.5 处理未知子序列
-  5.6 处理未知子序列中首先建立索引图，来确定需要更新和移除的旧节点
-  5.7 然后通过最长递增子序列算法确定需要移动和挂载的新节点，并移动挂载
+    5.5.1 处理未知子序列中首先建立索引图 keyToNewIndexMap，遍历新子序列中未知子序列，将其 key 设置为keyToNewIndexMap 的 key，而 value 为对应项在新子序列中的下标
+    5.5.2 更新和移除旧节点，遍历旧子序列，如果该节点的 key 在 keyToNewIndexMap 中不存在，说明该节点被删除了，删除该节点；如果存在，将其在旧子序列中的位置下标加一（避免为0的情况，因为0表示新增的节点）记录下来，保存在 newIndexToOldIndexMap 这个数组，用于后面求解最长递增子序列
+    5.5.3 如果存在的情况中还会记录旧子序列中的节点在新子序列中的索引 maxNewIndexSoFar，下次循环时，如果 maxNewIndexSoFar 这个大于了 旧子序列中的节点在新子序列中的索引，说明有移动的情况，用 moved 标记，然后更新对应的节点
+    5.5.4 如果所有新的子序列节点都已经更新，而对旧子序列遍历还未结束，说明剩余的节点就是多余的，删除即可。
+  5.7 然后通过最长递增子序列算法确定需要移动和挂载的新节点
+    5.7.1 上一步的 moved 如果为 true 说明有移动，则需要求解最长递增子序列
+    5.7.2 然后倒序遍历，次数就是新子序列中未知子序列的长度，序遍历以便可以使用最后更新的节点作为锚点
+    5.7.3 如果 newIndexToOldIndexMap[i] 的值为0，说明是新增的节点，挂载
+    5.7.4 如果发生过移动，没有最长递增子序列，或者当前节点的索引不在最长递增子序列中，则需要移动
