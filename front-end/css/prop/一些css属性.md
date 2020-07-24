@@ -409,4 +409,17 @@ inset它具有与margin相同的多值语法。它是与top，right，bottom和/
 
 >相关文章[使用 display: contents 增强页面语义](https://github.com/chokcoco/iCSS/issues/79)
 
+设置了display: contents的元素本身不会被渲染，但是其子元素能够正常被渲染。
+
+总结来说，这个属性适用于那些充当遮罩（wrapper）的元素，这些元素本身没有什么作用，可以被忽略的一些布局场景。
+
+应用：
+
+1. 充当无语义的包裹框，React 中的 `<React.Fragment>`，Vue 中的 `<template>`，都是一层没有样式的包裹，并且不会渲染在 DOM 树中，但有时可以给该元素加上display: contents 来达到这种效果，只不过它会出现在 DOM 树中
+2. 让代码更加符合语义化，例如：因为`<button>`标签存在一些默认样式，使用`<p>、<div>、<a>` 等标签来模拟，但是这样又缺少了语义化，可以依旧使用 button 标签，但是让它 display: contents，通过外层的 p 或者 div 来控制具体样式
+
 ## display: flow-root 和 display: flow
+
+## 可替换元素
+
+>[可替换元素](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Replaced_element)
