@@ -15,3 +15,9 @@
 ## 几个很不错的博客
 
 >[日问](https://q.shanyue.tech/weekly/)
+
+## 面试有关的 TODO
+
+1. 手写Promise，有关Promise.resolve() 传入 Promise 的问题
+2. 手写深拷贝，去重...
+3. ...

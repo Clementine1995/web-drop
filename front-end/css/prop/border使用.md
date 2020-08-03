@@ -9,6 +9,7 @@
 + border-radius 圆角的使用
 + border-image 边框背景详解
 + box-shadow 邻边投影、单侧投影、对边投影以及一些虚线边框等特殊元素的不规则阴影使用
++ border-spacing 与 border-collapse
 
 ### 透明边框的实现
 
@@ -303,3 +304,23 @@ box-shadow有6个参数值：X轴偏移量、Y轴偏移量、模糊距离、扩�
 filter的drop-shadow用法与box-shadow类似，四个属性分别是：x轴y轴扩展半径和模糊距离以及颜色。
 
 需要注意的是：box-shadow兼容性稍微好一些，IE9+；而filter的兼容性差一点，IE13+，android4+
+
+### border-spacing 与 border-collapse
+
+border-collapse 是用来决定表格的边框是分开的还是合并的。在分隔模式下，相邻的单元格都拥有独立的边框。在合并模式下，相邻单元格共享边框。
+
+语法：
+
+```css
+border-collapse: collapse;
+border-collapse: separate;
+```
+
+border-spacing 属性指定相邻单元格边框之间的距离，该属性只适用于 border-collapse 值是 separate 的时候。
+
+语法：
+
+```css
+/* horizontal <length> | vertical <length> 可以指定水平方向与垂直方向 */
+border-spacing: 1cm 2em;
+```
