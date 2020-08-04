@@ -59,7 +59,7 @@ function custPromise(executor) {
   }
 }
 
-// 这些方法都会返回一个 Promise
+// 这些方法都会返回一个 Promise，注意这里不要用 箭头函数
 // 向Promise 原型对象上添加方法，then，catch
 custPromise.prototype.then = function(onResolved, onReject) {
   // .then 或者 .catch 的参数期望是函数，传入非函数则会发生值穿透。
