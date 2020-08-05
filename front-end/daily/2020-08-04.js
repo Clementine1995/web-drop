@@ -269,6 +269,7 @@ const p2 = p1.then(res => {
 
 var array = [1, 1, '1', '1']
 
+// 双重循环
 function unique(array) {
   var res = []
   for (var i = 0; i < array.length; i++) {
@@ -287,10 +288,9 @@ function unique(array) {
 
 console.log(unique(array))
 
+// indexOf
 function unique2(array) {
-
   var res = []
-
   for (let i = 0; i < array.length; i++) {
     if (res.indexOf(array[i]) === -1) {
       res.push(array[i])
@@ -300,11 +300,11 @@ function unique2(array) {
   return res
 }
 
+// 排序后去重, 注意：sort 排序的结果并不总是正确的
 function unique3(array) {
   var res = []
 
   var sortArray = array.concat().sort()
-
   var seen
   for (let index = 0; index < array.length; index++) {
     if (!index || seen !== array[index]) {
@@ -316,4 +316,61 @@ function unique3(array) {
   return res
 }
 
-console.log(unique(array3))
+console.log(unique3(array))
+
+// filter
+
+function unique4(array) {
+  var res = array.filter((item, index, array) => {
+    return index == array.indexOf(item)
+  })
+  return res
+}
+
+// filter + 排序
+function unique5(array) {
+  var res = array.concat().sort().filter((item, index, array) => {
+    return !index || item !== array[index - 1]
+  })
+  return res
+}
+
+// Object键值对，存在问题无法区分1 '1' 这种，因为对象的键值只能是字符串
+
+function unique6(array) {
+  var obj = {}
+  return array.filter((item, index, array) => {
+    return obj.hasOwnProperty(item) ? false : (obj[item] = true)
+  })
+}
+
+// 改进用 typeof item + item 作为key，不过仍然有问题，如果数组里面是对象就不行
+function unique7(array) {
+  var obj = {}
+  return array.filter((item, index, array) => {
+    return obj.hasOwnProperty(typeof item + item) ? false : (obj[typeof item + item] = true)
+  })
+}
+// 再次改进使用序列化
+
+function unique8(array) {
+  var obj = {}
+  return array.filter((item, index, array) => {
+    return obj.hasOwnProperty(typeof item + JSON.stringify(item)) ? false : (obj[typeof item + JSON.stringify(item)] = true)
+  })
+}
+// ES6 set
+function unique9(array) {
+  return Array.from(new Set(array))
+}
+const unique10 = array => [...new Set(array)]
+// ES6 map + filter
+
+function unique11(array) {
+  var res = new Map()
+  return array.filter(item => {
+    return !res.has(item) && res.set(item, 1)
+  })
+}
+
+// indexOf 底层还是使用 === 进行判断，所以 NaN 不能去重，Set 可以去重 NaN

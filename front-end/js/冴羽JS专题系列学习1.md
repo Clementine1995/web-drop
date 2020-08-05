@@ -101,7 +101,7 @@ function throttle(func, wait, options) {
 
 1. 双层循环，内层循环找到第一个与外层循环相等的值的索引，如果索引值等于内层数组长度，表示不重复，push进内层数组
 2. indexOf，如果数组indexOf方法查找当前项为-1，则push进数组
-3. 排序后去重，排序后去重只需要比较当前元素与上一元素是否相同
+3. 排序后去重，排序后去重只需要比较当前元素与上一元素是否相同，注意：sort 排序的结果并不总是正确的
 4. filter，可以使用filter来代替命令式的for循环
 5. Object键值对，通过对象某个键是否已经有值来判断重复
 6. Set，使用ES6新增的Set来去重
@@ -223,11 +223,11 @@ function isArrayLike(obj) {
 
 ## 浅拷贝与深拷贝
 
-数组的浅拷贝可以使用 slice、concat 返回一个新数组的特性来实现。但是这两个方法都无法深拷贝。ES6之后还可以使用 `Array.from(array)` 与展开运算符来实现 `let [...spread]= [12, 5, 8, 130, 44];`
+数组的浅拷贝可以使用 slice、concat 返回一个新数组的特性来实现。但是这两个方法都无法深拷贝。ES6之后还可以使用 `Array.from(array)` 与展开运算符来实现 `let [...spread]= [12, 5, 8, 130, 44];`，除此之外此外还有 Object.assign()
 
 数组的深拷贝可以使用 `JSON.parse(JSON.stringify(arr));` 这种方法，深拷贝中的函数问题比较难解决。
 
-浅拷贝的实现
+### 浅拷贝的实现
 
 ```js
 var shallowCopy = function(obj) {
@@ -245,7 +245,7 @@ var shallowCopy = function(obj) {
 }
 ```
 
-深拷贝的实现，主要是靠递归
+### 深拷贝的实现，主要是靠递归
 
 ```js
 var deepCopy = function(obj) {
