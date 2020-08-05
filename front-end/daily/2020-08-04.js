@@ -1,3 +1,5 @@
+// 第二个 Promise
+
 const PENDING = Symbol('PENDING')
 const RESOLVED = Symbol('RESOLVED')
 const REJECTED = Symbol('REJECTED')
@@ -56,7 +58,7 @@ const resolvePromise = (promise, x, resolve, reject) => {
             return
           }
           called = true
-          resolvePromise(promise2, y, resolve, reject)
+          resolvePromise(promise, y, resolve, reject)
         }, r => {
           if (called) {
             return
@@ -90,7 +92,7 @@ custPromise.prototype.then = function (onFulfilled, onRejected) {
   let promise = new custPromise((resolve, reject) => {
     if (this.status === RESOLVED) {
       // 使用 setTimeout (宏任务)，确保 onFulfilled 和 onRejected 方法异步执行，也确保 promise 已经定义，
-      // 如果不使用 setTimeout，会导致执行 resolvePromise(promise2, x, resolve, reject) 时 promise2 未定义而报错。
+      // 如果不使用 setTimeout，会导致执行 resolvePromise(promise, x, resolve, reject) 时 promise 未定义而报错。
       setTimeout(() => {
         try {
           const result = onFulfilled(this.value)
@@ -113,7 +115,7 @@ custPromise.prototype.then = function (onFulfilled, onRejected) {
         setTimeout(() => {
           try {
             const x = onFulfilled(this.value)
-            resolvePromise(promise2, x, resolve, reject)
+            resolvePromise(promise, x, resolve, reject)
           } catch (e) {
             reject(e)
           }
@@ -122,8 +124,8 @@ custPromise.prototype.then = function (onFulfilled, onRejected) {
       this.onRejectedCallbacks.push(() => {
         setTimeout(() => {
           try {
-            const x = onRejected(this.value)
-            resolvePromise(promise2, x, resolve, reject)
+            const x = onRejected(this.reason)
+            resolvePromise(promise, x, resolve, reject)
           } catch (e) {
             reject(e)
           }
@@ -141,7 +143,6 @@ custPromise.prototype.catch = function(onRejected) {
 
 
 custPromise.prototype.finally = function (callback) {
-  debugger
   return this.then((value) => {
     return custPromise.resolve(callback()).then(() => {
       return value;
@@ -249,12 +250,22 @@ const p1 = new custPromise((resolve, reject) => {
   }, 1000)
 })
 
-p1.then(res => {
+
+const p2 = p1.then(res => {
   console.log(res)
   return 222222
+}).then(res => {
+  console.log(res)
 }).finally(res => {
   console.log('finally:', res)
   return 111
 }).then(res => {
   console.log('before finally', res)
+}, (error) => {
+  console.log(error)
 })
+
+// 深拷贝
+
+// 去重
+
