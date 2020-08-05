@@ -20,7 +20,7 @@
   3.1 首先 then 方法回返回一个 Promise
   3.2 第二步已经实现了状态为 pending 的逻辑，当状态为 resolved 时有两种情况，当 onResolved 返回值为普通类型时，直接 resolve，如果为 Promise 则继续调用 then 方法，并传入对应回调
   3.3 执行 onResolved 可能抛错，需要 try/catch
-  3.4 当状态为 resolved 时同理，并且在 pending 时也需要处理其返回值以及 try/catch
+  3.4 当状态为 rejected 时同理，并且在 pending 时也需要处理其返回值以及 try/catch
   3.5 处理值穿透，当传入then的不是函数，那就忽略那个传入值，再写一个函数。这个函数的执行结果将返回上一个promise的data
 3.实现catch方法，catch 方法与 then 原理类似，可以重用then，第一个参数不传即可
 4. 实现Promise.resolve，其会返回一个 Promise，同样需要处理传入的值是否为 Promise，如果是对其调用 then 方法，否则直接 resolve

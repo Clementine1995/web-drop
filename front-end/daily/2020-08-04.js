@@ -261,11 +261,59 @@ const p2 = p1.then(res => {
   return 111
 }).then(res => {
   console.log('before finally', res)
-}, (error) => {
-  console.log(error)
 })
 
-// 深拷贝
+
 
 // 去重
 
+var array = [1, 1, '1', '1']
+
+function unique(array) {
+  var res = []
+  for (var i = 0; i < array.length; i++) {
+    for (var j = 0; j < res.length; j++) {
+      if (array[i] === res[j]) {
+        break
+      }
+    }
+    if (res.length === j) {
+      res.push(array[i])
+    }
+    
+  }
+  return res
+}
+
+console.log(unique(array))
+
+function unique2(array) {
+
+  var res = []
+
+  for (let i = 0; i < array.length; i++) {
+    if (res.indexOf(array[i]) === -1) {
+      res.push(array[i])
+    }
+    
+  }
+  return res
+}
+
+function unique3(array) {
+  var res = []
+
+  var sortArray = array.concat().sort()
+
+  var seen
+  for (let index = 0; index < array.length; index++) {
+    if (!index || seen !== array[index]) {
+      res.push(array[index])
+    }
+    seen = array[index]
+  }
+  
+  return res
+}
+
+console.log(unique(array3))

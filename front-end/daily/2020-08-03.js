@@ -149,7 +149,7 @@ custPromise.resolve = function(value) {
 
 // 添加Promise函数对象上的方法 reject
 // 返回一个状态为rejected的promise
-custPromise.reject = function(value) {
+custPromise.reject = function(reason) {
   return new custPromise((resolve,reject)=>{
     reject(reason)
   })
