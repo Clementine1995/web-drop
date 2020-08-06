@@ -245,7 +245,9 @@ var shallowCopy = function(obj) {
 }
 ```
 
-### 深拷贝的实现，主要是靠递归
+### 深拷贝的实现
+
+原理：遍历对象、数组直到里边都是基本数据类型，然后再去复制，就是深度拷贝。
 
 ```js
 var deepCopy = function(obj) {
@@ -260,7 +262,13 @@ var deepCopy = function(obj) {
 }
 ```
 
-注意：JSON.stringify(..) 在对象中遇到 undefined 、 function 和 symbol 时会自动将其忽略， 在 数组中则会返回 null （以保证单元位置不变），如果用这个方法的时候要注意，还有如果要考虑完善的深拷贝Date,Set,RegExp等类型也是需要考虑的。
+还有 JSON.parse(JSON.stringify(obj)) 方法，当然一些库比如 lodash，jq 也提供了实现好的深拷贝方法
+
+注意：JSON.stringify(..) 在对象中遇到 undefined 、 function 、 symbol 和正则时会自动将其忽略， 在 数组中则会返回 null （以保证单元位置不变），如果用这个方法的时候要注意，还有如果要考虑完善的深拷贝Date,Set,RegExp等类型也是需要考虑的。
+
+#### 比较完善的手写深拷贝
+
+>[如何写出一个惊艳面试官的深拷贝?](https://segmentfault.com/a/1190000020255831)
 
 ## jQuery的extend
 
