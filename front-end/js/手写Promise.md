@@ -1,6 +1,8 @@
 # 手写 Promise 原理实现
 
 >参考[手写Promise核心原理，再也不怕面试官问我Promise原理](https://juejin.im/post/6856213486633304078)
+>
+>参考[JS 高级之手写一个Promise,Generator,async和 await](https://juejin.im/post/6844904022223110151)
 
 ## 第一种实现
 
