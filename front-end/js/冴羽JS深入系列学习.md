@@ -66,7 +66,7 @@ console.log(Person === Person.prototype.constructor); // true
 
 一般对象的原型尽头是 Object.prototype ，Object没有原型，null在js是没有对象的意思，所以`Object.prototype.__proto__ === null`，也可能是在底层设置好的，不然打印可能是undefined或者报错。
 
-注意：**Function__proto__===Function.prototype**
+注意：**Function.__proto__===Function.prototype**
 
 这个问题 Function 作为构造函数
 
