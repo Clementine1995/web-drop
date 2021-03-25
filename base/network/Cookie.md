@@ -39,10 +39,10 @@ SameSite 可以有下面三种值：
 |链接|`<a href='...'></a>`|发送cookie|不发送|发送cookie|发送cookie|
 |预加载|`<link rel="prerender" href="..." />`|发送cookie|不发送|发送cookie|发送cookie|
 |get表单|`<form method="GET" action="...">`|发送cookie|不发送|发送cookie|发送cookie|
-|post表单|`<form method="POST" action="...">`|发送cookie|不发送|不发送|不发送|
-|iframe|`<iframe src="...">`|发送cookie|不发送|不发送|不发送|
-|Ajax|`$.get('...')`|发送cookie|不发送|不发送|不发送|
-|Image|`<img src="...">`|发送cookie|不发送|不发送|不发送|
+|post表单|`<form method="POST" action="...">`|发送cookie|不发送|不发送|发送cookie|
+|iframe|`<iframe src="...">`|发送cookie|不发送|不发送|发送cookie|
+|Ajax|`$.get('...')`|发送cookie|不发送|不发送|发送cookie|
+|Image|`<img src="...">`|发送cookie|不发送|不发送|发送cookie|
 
 iframe的影响应该是最大的
 
