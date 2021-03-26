@@ -111,7 +111,8 @@ Function.prototype.call2 = (context, ...args) {
   const glo = typeof window === 'object' ? window : global
   context = context || glo
   let fn = Symbol();
-  context[fn] = this;  
+  // 因为是要用目标对象来执行该函数，就把这个函数加到目标对象上，然后删除掉就可
+  context[fn] = this;
   let result = context[fn](...args);
   delete context[fn];
   return result;
