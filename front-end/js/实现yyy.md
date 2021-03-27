@@ -178,6 +178,7 @@ Function.prototype.bind2 = function () {
   var args1 = [].slice.call(arguments)
   var result = function () {
     var args2 = Array.prototype.slice.call(arguments)
+    // 返回的函数可能被用作构造函数，所以要加下面的判断
     var context = this instanceof result ? this : context
     return self.apply(context, args1.concat(args2))
   }
