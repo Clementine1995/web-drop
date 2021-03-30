@@ -572,7 +572,7 @@ const patchKeyedChildren = (c1, c2, container, parentAnchor, parentComponent, pa
   // (a b) e c d i (g h)
   // 3. 普通序列挂载剩余的新节点， 不满足
   // 4. 普通序列删除多余的旧节点，不满足
-  // i = 2, e1 = 4, e2 = 5
+  // i = 2, e1 = 5, e2 = 5
   // 旧子序列开始索引，从 i 开始记录
   const s1 = i
   // 新子序列开始索引，从 i 开始记录
@@ -641,6 +641,7 @@ const patchKeyedChildren = (c1, c2, container, parentAnchor, parentComponent, pa
   // 0 是一个特殊的值，如果遍历完了仍有元素的值为 0，则说明这个新节点没有对应的旧节点
   for (i = 0; i < toBePatched; i++)
     newIndexToOldIndexMap[i] = 0
+  // newIndexToOldIndexMap = [0, 0, 0, 0]
   // 正序遍历旧子序列
   for (i = s1; i <= e1; i++) {
     // 拿到每一个旧子序列节点
@@ -719,11 +720,13 @@ const patchKeyedChildren = (c1, c2, container, parentAnchor, parentComponent, pa
   const s2 = i //
   // 5.1 根据 key 建立新子序列的索引图
   // 5.2 正序遍历旧子序列，找到匹配的节点更新，删除不在新子序列中的节点，判断是否有移动节点
+  // newIndexToOldIndexMap = [5, 3, 4 ,0]
   // 5.3 移动和挂载新节点
   // 仅当节点移动时生成最长递增子序列
   const increasingNewIndexSequence = moved
     ? getSequence(newIndexToOldIndexMap)
     : EMPTY_ARR
+  // increasingNewIndexSequence = [3, 4]
   let j = increasingNewIndexSequence.length - 1
   // 倒序遍历以便我们可以使用最后更新的节点作为锚点
   for (i = toBePatched - 1; i >= 0; i--) {
