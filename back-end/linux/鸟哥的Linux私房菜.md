@@ -314,3 +314,5 @@ xargs 可以读入 stdin 的数据，并以空白字符或者断行字符作为�
 [root@study ~]# mkdir /tmp/homeback
 [root@study ~]# tar -cvf - /home | tar -xvf - -C /tmp/homeback
 ```
+
+## 十一、正则表达式与文件格式化处理
