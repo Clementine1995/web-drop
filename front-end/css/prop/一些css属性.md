@@ -319,26 +319,6 @@ http://www.example.com/index.html#section2
 
 如果希望移除标准的滚动至顶部或底部的滚动特效，比如在移动端，滚动到顶部或者底部，在下滑头部会出现一块白色的空白区域，需要移除这个效果就可以设置为 none, 而一个对话框中有滚动条，在滚动到边界时再滚动，其后面的部分也会开始滚动（如果有滚动条的话），想要移除这个效果则可以使用 contain。
 
-## scroll-behavior
-
-当用户手动导航或者 CSSOM scrolling API 触发滚动操作时，可以让浏览器的滚动定位表现为平滑。在根元素中指定这个属性时，它反而适用于视窗。
-
-需要根据实际情况，如果页面高度很高，从最底部平滑滚动到顶部，就会显得比较慢看着难受。
-
-语法：
-
-```css
-/* Keyword values */
-scroll-behavior: auto; /* 滚动框立即滚动。 */
-scroll-behavior: smooth; /* 滚动框通过一个用户代理预定义的时长、使用预定义的时间函数，来实现平稳的滚动 */
-```
-
-## scroll-snap-type
-
-> [使用 scroll-snap-type 优化滚动](https://juejin.im/post/5de9c00ce51d4557f544f03d)
->
-> [MDN(scroll-snap-type)](https://developer.mozilla.org/zh-CN/docs/Web/CSS/scroll-snap-type)
-
 ## box-decoration-break
 
 > [有趣的 box-decoration-break](https://juejin.im/post/5c77457951882540447df818)
