@@ -471,3 +471,69 @@ p:nth-child(6) {
 上面说可变字体新格式的核心是可变轴，可变轴分为注册轴（上面的 5 个）和自定义轴。注册轴最为常见，常见到制定规范的作者认为有必要进行标准化。自定义轴是无限的，字体设计师可以定义和界定他们喜欢的任何轴。
 
 ## CSS @layer
+
+CSS @规则 中的 @layer 声明了一个级联层， 同一层内的规则将级联在一起，这给予了开发者对层叠机制的更多控制。
+
+@layer 级联层最大的功能，就是用于控制不同样式之间的优先级。看下面这样一个例子，定义了两个 @layer 级联层 A 和 B：
+
+```css
+div {
+  width: 200px;
+  height: 200px;
+}
+@layer A {
+  div {
+    background: blue;
+  }
+}
+@layer B {
+  div {
+    background: green;
+  }
+}
+```
+
+由于 @layer B 的顺序排在 @layer A 之后，所以 @layer B 内的所有样式优先级都会比 @layer A 高，最终 div 的颜色为 green。
+
+当然，如果页面内的 @layer 太多，可能不太好记住所有 @layer 的顺序，因此，还有这样一种写法。
+
+```css
+/* 首先定义了 @layer B, C, A 三个 @layer 级联层。而后再后面的 CSS 代码中补充了每个级联层的 CSS 代码，但是样式的优先级为：A > C > B */
+@layer B, C, A;
+```
+
+### @layer 级联层的三种定义引入方式
+
+- 直接创建一个块级的 @layer 规则，其中包含作用于该层内部的 CSS 规则
+- 一个级联层可以通过 @import 来创建，规则存在于被引入的样式表内
+- 创建带命名的级联层，但不指定任何样式。样式随后可在 CSS 内任意位置添加
+
+### 非 @layer 包裹层与 @layer 层内样式优先级
+
+非 @layer 包裹的样式，拥有比 @layer 包裹样式更高的优先级
+
+```css
+@layer A {
+  a {
+    color: red;
+  }
+}
+@layer B {
+  a {
+    color: orange;
+  }
+}
+@layer C {
+  a {
+    color: yellow;
+  }
+}
+a {
+  color: green;
+} /* 未被 @layer 包裹的样式 */
+/* 最终显示为 green */
+```
+
+### 匿名层与嵌套层
+
+还有两种层级关系，分别是匿名层和嵌套层。

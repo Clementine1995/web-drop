@@ -657,12 +657,96 @@ impl<T: Display + PartialOrd> Pair<T> {
 }
 ```
 
+cmd_display 方法，并不是所有的 `Pair<T>` 结构体对象都可以拥有，只有 T 同时实现了 Display + PartialOrd 的 `Pair<T>` 才可以拥有此方法。
+
+也可以有条件地实现特征, 例如，标准库为任何实现了 Display 特征的类型实现了 ToString 特征：
+
+```rust
+impl<T: Display> ToString for T {
+  // --snip--
+}
+```
+
 ### 函数返回中的 impl Trait
+
+可以通过 impl Trait 来说明一个函数返回了一个类型，该类型实现了某个特征：
+
+```rust
+fn returns_summarizable() -> impl Summary {
+  Weibo {
+    username: String::from("sunface"),
+    content: String::from("m1 max太厉害了，电脑再也不会卡"),
+  }
+}
+```
+
+虽然知道这里是一个 Weibo 类型，但是对于 returns_summarizable 的调用者而言，他只知道返回了一个实现了 Summary 特征的对象，但是并不知道返回了一个 Weibo 类型。
+
+这种 impl Trait 形式的返回值，在一种场景下非常非常有用，那就是返回的真实类型非常复杂，你不知道该怎么声明时，此时就可以用 impl Trait 的方式简单返回。例如，闭包和迭代器就是很复杂，可以用 impl Iterator 来告诉调用者，返回了一个迭代器，因为所有迭代器都会实现 Iterator 特征。
+
+但是这种返回值方式有一个很大的限制：只能有一个具体的类型，不能返回不同的类型。如果想要实现返回不同的类型，需要使用特征对象。
 
 ### 修复上一节中的 largest 函数
 
+```rust
+fn largest<T>(list: &[T]) -> T {
+  let mut largest = list[0];
+
+  for &item in list.iter() {
+    if item > largest {
+      largest = item;
+    }
+  }
+
+  largest
+}
+```
+
+这个例子中 `T` 类型上是无法应用 `>` 运算符的，`>` 运算符是标准库中特征 std::cmp::PartialOrd 的一个默认方法。所以需要在 T 的特征约束中指定 PartialOrd，这样 largest 函数可以用于内部元素类型可比较大小的数组切片。
+
+```rust
+fn largest<T: PartialOrd>(list: &[T]) -> T {}
+```
+
+加上之后又会出现新的错误 `cannot move out of type [T], a non-copy slice`，原因是 T 没有实现 Copy 特性，因此只能把所有权进行转移，毕竟只有 i32 等基础类型才实现了 Copy 特性，可以存储在栈上，而 T 可以指代任何类型。因此，为了让 T 拥有 Copy 特性，我们可以增加特征约束：
+
+```rust
+fn largest<T: PartialOrd + Copy>(list: &[T]) -> T {}
+```
+
+如果并不希望限制 largest 函数只能用于实现了 Copy 特征的类型，我们可以在 T 的特征约束中指定 Clone 特征 而不是 Copy 特征。并克隆 list 中的每一个值使得 largest 函数拥有其所有权。
+
+另一种 largest 的实现方式是返回在 list 中 T 值的引用。如果将函数返回值从 T 改为 &T 并改变函数体使其能够返回一个引用，将不需要任何 Clone 或 Copy 的特征约束而且也不会有任何的堆分配。
+
 ### 通过 derive 派生特征
 
+在本书中，形如 #[derive(Debug)] 的代码已经出现了很多次，这种是一种特征派生语法，被 derive 标记的对象会自动实现对应的默认特征代码，继承相应的功能。
+
+例如 Debug 特征，它有一套自动实现的默认代码，当给一个结构体标记后，就可以使用 println!("{:?}", s) 的形式打印该结构体的对象。
+
+再如 Copy 特征，它也有一套自动实现的默认代码，当标记到一个类型上时，可以让这个类型自动实现 Copy 特征，进而可以调用 copy 方法，进行自我复制。
+
+总之，derive 派生出来的是 Rust 默认给我们提供的特征，在开发过程中极大的简化了自己手动实现相应特征的需求，当然，如果有特殊的需求，还可以自己手动重载该实现。
+
 ### 调用方法需要引入特征
+
+在一些场景中，使用 as 关键字做类型转换会有比较大的限制，因为想要在类型转换上拥有完全的控制，例如处理转换错误，那么将需要 TryInto：
+
+```rust
+use std::convert::TryInto;
+
+fn main() {
+  let a: i32 = 10;
+  let b: u16 = 100;
+  let b_ = b.try_into().unwrap();
+  if a < b_ {
+    println!("Ten is less than one hundred.");
+  }
+}
+```
+
+上面代码中引入了 std::convert::TryInto 特征，但是却没有使用它，可能有些同学会为此困惑，主要原因在于如果要使用一个特征的方法，那么需要引入该特征到当前的作用域中，在上面用到了 `try_into` 方法，因此需要引入对应的特征。
+
+但是 Rust 又提供了一个非常便利的办法，即把最常用的标准库中的特征通过 std::prelude 模块提前引入到当前作用域中，其中包括了 std::convert::TryInto。
 
 ### 几个综合例子
