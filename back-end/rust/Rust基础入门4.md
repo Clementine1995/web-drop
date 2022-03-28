@@ -448,9 +448,9 @@ Rust 通过在编译时进行泛型代码的 单态化(monomorphization)来保�
 
 ## 特征 Trait
 
-特征很类似接口，例如 `#[derive(Debug)]`，它在我们定义的类型（struct）上自动派生 Debug 特征，接着可以使用 println!("{:?}", x) 打印这个类型。
+特征很类似接口，例如 `#[derive(Debug)]`，它在定义的类型（struct）上自动派生 Debug 特征，接着可以使用 println!("{:?}", x) 打印这个类型。
 
-特征定义了一个可以被共享的行为，只要实现了特征，你就能使用该行为。
+特征定义了一个可以被共享的行为，只要实现了特征，就能使用该行为。
 
 ### 定义特征
 
@@ -750,3 +750,338 @@ fn main() {
 但是 Rust 又提供了一个非常便利的办法，即把最常用的标准库中的特征通过 std::prelude 模块提前引入到当前作用域中，其中包括了 std::convert::TryInto。
 
 ### 几个综合例子
+
+#### 为自定义类型实现 + 操作
+
+在 Rust 中除了数值类型的加法，String 也可以做加法，因为 Rust 为该类型实现了 `std::ops::Add` 特征，同理，如果为自定义类型实现了该特征，那就可以实现 Point1 + Point2 的操作:
+
+```rust
+use std::ops::Add;
+
+// 为Point结构体派生Debug特征，用于格式化输出
+#[derive(Debug)]
+struct Point<T: Add<T, Output = T>> { //限制类型T必须实现了Add特征，否则无法进行+操作。
+  x: T,
+  y: T,
+}
+
+impl<T: Add<T, Output = T>> Add for Point<T> {
+  type Output = Point<T>;
+  fn add(self, p: Point<T>) -> Point<T> {
+    Point{
+      x: self.x + p.x,
+      y: self.y + p.y,
+    }
+  }
+}
+
+fn add<T: Add<T, Output=T>>(a:T, b:T) -> T {
+  a + b
+}
+
+fn main() {
+  let p1 = Point{x: 1.1f32, y: 1.1f32};
+  let p2 = Point{x: 2.1f32, y: 2.1f32};
+  println!("{:?}", add(p1, p2));
+
+  let p3 = Point{x: 1i32, y: 1i32};
+  let p4 = Point{x: 2i32, y: 2i32};
+  println!("{:?}", add(p3, p4));
+}
+```
+
+#### 自定义类型的打印输出
+
+在开发过程中，往往只要使用 #[derive(Debug)] 对自定义类型进行标注，即可实现打印输出的功能，但是在实际项目中，往往需要对自定义类型进行自定义的格式化输出，以让用户更好的阅读理解类型，此时就要为自定义类型实现 std::fmt::Display 特征
+
+## 特征对象
+
+在上一节中有一段代码无法通过编译:
+
+```rust
+fn returns_summarizable(switch: bool) -> impl Summary {
+  if switch {
+    Post {
+      // ...
+    }
+  } else {
+    Weibo {
+      // ...
+    }
+  }
+}
+```
+
+其中 Post 和 Weibo 都实现了 Summary 特征，因此上面的函数试图通过返回 impl Summary 来返回这两个类型，但是编译器却无情地报错了，原因是 impl Trait 的返回值类型并不支持多种不同的类型返回，可以利用枚举解决这个问题，但是如果对象集合并不能事先明确地知道呢？在拥有继承的语言中，可以定义一个类，其他子类从父类派生并因此继承方法。它们各自都可以覆盖方法来定义自己的行为，不过 Rust 并没有继承，得另寻出路。
+
+### 特征对象定义
+
+为了解决上面的所有问题，Rust 引入了一个概念 —— 特征对象。
+
+在介绍特征对象之前，先来为之前的 UI 组件定义一个特征：
+
+```rust
+pub trait Draw {
+  fn draw(&self);
+}
+// 假设有一个 Button 和 SelectBox 组件实现了 Draw 特征
+pub struct Button {
+  pub width: u32,
+  pub height: u32,
+  pub label: String,
+}
+
+impl Draw for Button {
+  fn draw(&self) {
+    // 绘制按钮的代码
+  }
+}
+
+struct SelectBox {
+  width: u32,
+  height: u32,
+  options: Vec<String>,
+}
+
+impl Draw for SelectBox {
+  fn draw(&self) {
+    // 绘制SelectBox的代码
+  }
+}
+// 此时，还需要一个动态数组来存储这些 UI 对象
+pub struct Screen {
+  pub components: Vec<?>,
+}
+```
+
+注意到上面代码中的 ? 吗？它的意思是：应该填入什么类型，可以说就之前学过的内容里，找不到哪个类型可以填入这里，但是因为 Button 和 SelectBox 都实现了 Draw 特征，那是不是可以把 Draw 特征的对象作为类型，填入到数组中呢？答案是肯定的。
+
+特征对象指向实现了 Draw 特征的类型的实例，也就是指向了 Button 或者 SelectBox 的实例，这种映射关系是存储在一张表中，可以在运行时通过特征对象找到具体调用的类型方法。
+
+可以通过 `&` 引用或者 `Box<T>` 智能指针的方式来创建特征对象:
+
+```rust
+trait Draw {
+  fn draw(&self) -> String;
+}
+
+impl Draw for u8 {
+  fn draw(&self) -> String {
+    format!("u8: {}", *self)
+  }
+}
+
+impl Draw for f64 {
+  fn draw(&self) -> String {
+    format!("f64: {}", *self)
+  }
+}
+
+fn draw1(x: Box<dyn Draw>) {
+  x.draw();
+}
+
+fn draw2(x: &dyn Draw) {
+  x.draw();
+}
+
+fn main() {
+  let x = 1.1f64;
+  // do_something(&x);
+  let y = 8u8;
+
+  draw1(Box::new(x));
+  draw1(Box::new(y));
+  draw2(&x);
+  draw2(&y);
+}
+```
+
+上面代码，有几个非常重要的点：
+
+- draw1 函数的参数是 `Box<dyn Draw>` 形式的特征对象，该特征对象是通过 `Box::new(x)` 的方式创建的
+- draw2 函数的参数是 `&dyn Draw` 形式的特征对象，该特征对象是通过 `&x` 的方式创建的
+- dyn 关键字只用在特征对象的类型声明上，在创建时无需使用 `dyn`
+
+因此，可以使用特征对象来代表泛型或具体的类型。
+
+继续来完善之前的 UI 组件代码，首先来实现 Screen：
+
+```rust
+pub struct Screen {
+  pub components: Vec<Box<dyn Draw>>,
+}
+```
+
+其中存储了一个动态数组，里面元素的类型是 Draw 特征对象：`Box<dyn Draw>`，任何实现了 Draw 特征的类型，都可以存放其中。
+
+再来为 Screen 定义 run 方法，用于将列表中的 UI 组件渲染在屏幕上：
+
+```rust
+impl Screen {
+  pub fn run(&self) {
+    for component in self.components.iter() {
+      component.draw();
+    }
+  }
+}
+```
+
+至此，就完成了之前的目标：在列表中存储多种不同类型的实例，然后将它们使用同一个方法逐一渲染在屏幕上
+
+再来看看，如果通过泛型实现，会如何：
+
+```rust
+pub struct Screen<T: Draw> {
+  pub components: Vec<T>,
+}
+
+impl<T> Screen<T>
+  where T: Draw {
+  pub fn run(&self) {
+    for component in self.components.iter() {
+      component.draw();
+    }
+  }
+}
+```
+
+但是这种写法限制了 Screen 实例的 `Vec<T>` 中的每个元素必须是 Button 类型或者全是 SelectBox 类型。
+
+如果只需要同质（相同类型）集合，更倾向于这种写法：使用泛型和 特征约束，因为实现更清晰，且性能更好(特征对象，需要在运行时从 vtable 动态查找需要调用的方法)。
+
+现在来运行渲染下精心设计的 UI 组件列表：
+
+```rust
+fn main() {
+  let screen = Screen {
+    components: vec![
+      Box::new(SelectBox {
+        width: 75,
+        height: 10,
+        options: vec![
+          String::from("Yes"),
+          String::from("Maybe"),
+          String::from("No")
+        ],
+      }),
+      Box::new(Button {
+        width: 50,
+        height: 10,
+        label: String::from("OK"),
+      }),
+    ],
+  };
+
+  screen.run();
+}
+```
+
+在动态类型语言中，有一个很重要的概念：鸭子类型(duck typing)，简单来说，就是只关心值长啥样，而不关心它实际是什么。当一个东西走起来像鸭子，叫起来像鸭子，那么它就是一只鸭子，就算它实际上是一个奥特曼，也不重要，就当它是鸭子。
+
+在上例中，Screen 在 run 的时候，并不需要知道各个组件的具体类型是什么。它也不检查组件到底是 Button 还是 SelectBox 的实例，只要它实现了 Draw 特征，就能通过 `Box::new` 包装成 `Box<dyn Draw>` 特征对象，然后被渲染在屏幕上。
+
+注意 dyn 不能单独作为特征对象的定义，例如下面的代码编译器会报错，原因是特征对象可以是任意实现了某个特征的类型，编译器在编译期不知道该类型的大小，不同的类型大小是不同的。而 `&dyn` 和 `Box<dyn>` 在编译期都是已知大小，所以可以用作特征对象的定义。
+
+```rust
+fn draw2(x: dyn Draw) {
+  x.draw();
+  // ^ doesn't have a size known at compile-time
+}
+```
+
+### 特征对象的动态分发
+
+泛型是在编译期完成处理的：编译器会为每一个泛型参数对应的具体类型生成一份代码，这种方式是静态分发(static dispatch)，因为是在编译期完成的，对于运行期性能完全没有任何影响。
+
+与静态分发相对应的是动态分发(dynamic dispatch)，在这种情况下，直到运行时，才能确定需要调用什么方法。之前代码中的关键字 dyn 正是在强调这一“动态”的特点。
+
+当使用特征对象时，Rust 必须使用动态分发。编译器无法知晓所有可能用于特征对象代码的类型，所以它也不知道应该调用哪个类型的哪个方法实现。为此，Rust 在运行时使用特征对象中的指针来知晓需要调用哪个方法。动态分发也阻止编译器有选择的内联方法代码，这会相应的禁用一些优化。
+
+- 特征对象大小不固定：这是因为，对于特征 Draw，类型 Button 可以实现特征 Draw，类型 SelectBox 也可以实现特征 Draw，因此特征没有固定大小
+- 几乎总是使用特征对象的引用方式，如 `&dyn Draw`、`Box<dyn Draw>`
+  - 虽然特征对象没有固定大小，但它的引用类型的大小是固定的，它由两个指针组成（ptr 和 vptr），因此占用两个指针大小
+  - 一个指针 ptr 指向实现了特征 Draw 的具体类型的实例，也就是当作特征 Draw 来用的类型的实例，比如类型 Button 的实例、类型 SelectBox 的实例
+  - 另一个指针 vptr 指向一个虚表 vtable，vtable 中保存了类型 Button 或类型 SelectBox 的实例对于可以调用的实现于特征 Draw 的方法。当调用方法时，直接从 vtable 中找到方法并调用。之所以要使用一个 vtable 来保存各实例的方法，是因为实现了特征 Draw 的类型有多种，这些类型拥有的方法各不相同，当将这些类型的实例都当作特征 Draw 来使用时(此时，它们全都看作是特征 Draw 类型的实例)，有必要区分这些实例各自有哪些方法可调用
+
+简而言之，当类型 Button 实现了特征 Draw 时，类型 Button 的实例对象 btn 可以当作特征 Draw 的特征对象类型来使用，btn 中保存了作为特征对象的数据指针（指向类型 Button 的实例数据）和行为指针（指向 vtable）。
+
+一定要注意，此时的 btn 是 Draw 的特征对象的实例，而不再是具体类型 Button 的实例，而且 btn 的 vtable 只包含了实现自特征 Draw 的那些方法（比如 draw），因此 btn 只能调用实现于特征 Draw 的 draw 方法，而不能调用类型 Button 本身实现的方法和类型 Button 实现于其他特征的方法。也就是说，btn 是哪个特征对象的实例，它的 vtable 中就包含了该特征的方法。
+
+### Self 与 self
+
+在 Rust 中，有两个 self，一个指代当前的实例对象，一个指代特征或者方法类型的别名：
+
+```rust
+trait Draw {
+  fn draw(&self) -> Self;
+}
+
+#[derive(Clone)]
+struct Button;
+impl Draw for Button {
+  fn draw(&self) -> Self {
+    return self.clone()
+  }
+}
+
+fn main() {
+  let button = Button;
+  let newb = button.draw();
+}
+```
+
+上述代码中，self 指代的就是当前的实例对象，也就是 button.draw() 中的 button 实例，Self 则指代的是 Button 类型。
+
+### 特征对象的限制
+
+不是所有特征都能拥有特征对象，只有对象安全的特征才行。当一个特征的所有方法都有如下属性时，它的对象才是安全的：
+
+- 方法的返回类型不能是 Self
+- 方法没有任何泛型参数
+
+对象安全对于特征对象是必须的，因为一旦有了特征对象，就不再需要知道实现该特征的具体类型是什么了。如果特征方法返回了具体的 Self 类型，但是特征对象忘记了其真正的类型，那这个 Self 就非常尴尬，因为没人知道它是谁了。但是对于泛型类型参数来说，当使用特征时其会放入具体的类型参数：此具体类型变成了实现该特征的类型的一部分。而当使用特征对象时其具体类型被抹去了，故而无从得知放入泛型参数类型到底是什么。
+
+标准库中的 Clone 特征就不符合对象安全的要求：
+
+```rust
+pub trait Clone {
+  fn clone(&self) -> Self;
+}
+```
+
+因为它的其中一个方法，返回了 Self 类型，因此它是对象不安全的。
+
+String 类型实现了 Clone 特征， String 实例上调用 clone 方法时会得到一个 String 实例。类似的，当调用 `Vec<T>` 实例的 clone 方法会得到一个 `Vec<T>` 实例。clone 的签名需要知道什么类型会代替 Self，因为这是它的返回值。如果违反了对象安全的规则，编译器会提示你。
+
+## 深入了解特征
+
+### 关联类型
+
+关联类型是在特征定义的语句块中，申明一个自定义类型，这样就可以在特征的方法签名中使用该类型：
+
+```rust
+pub trait Iterator {
+  type Item;
+  fn next(&mut self) -> Option<Self::Item>;
+}
+```
+
+以上是标准库中的迭代器特征 Iterator，它有一个 Item 关联类型，用于替代遍历的值的类型。同时，next 方法也返回了一个 Item 类型，不过使用 Option 枚举进行了包裹，假如迭代器中的值是 i32 类型，那么调用 next 方法就将获取一个 `Option<i32>` 的值。Self 用来指代当前调用者的具体类型，那么 Self::Item 就用来指代该类型实现中定义的 Item 类型：
+
+```rust
+impl Iterator for Counter {
+  type Item = u32;
+  fn next(&mut self) -> Option<Self::Item> {
+    // --snip--
+  }
+}
+fn main() {
+  let c = Counter{..}
+  c.next()
+}
+```
+
+在上述代码中，为 Counter 类型实现了 Iterator 特征，变量 c 是特征 Iterator 的实例，也是 next 方法的调用者。对于 next 方法而言，Self 是调用者 c 的具体类型： Counter，而 Self::Item 是 Counter 中定义的 Item 类型: u32。
+
+### 默认泛型类型参数
