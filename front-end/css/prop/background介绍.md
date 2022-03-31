@@ -92,13 +92,14 @@ background-origin: padding-box; // border-box, content-box
 
 ### background-clip
 
-用于指定背景图像向外裁剪的区域, 默认值 `border-box` , 另外还有两个值: `padding-box` 和 `content-box`。
+用于指定背景图像向外裁剪的区域, 默认值 `border-box` , 另外还有两个值: `padding-box` 和 `content-box`，以及最新的 `text`。
 
 注意:
 
 - background-origin 的默认值为 padding-box;
 - 即背景图像 background-position 的默认定位原点为 padding 区域;
 - 为更好的了解 background-clip 属性值的特性, 可将 background-origin 设置为 border-box 。
+- text 属性：背景被裁剪成文字的前景色。目前使用需要 `-webkit-` 前缀
 
 代码示例:
 
