@@ -239,3 +239,80 @@ Function.prototype.bind1 = function (context, ...arr1) {
   };
 };
 ```
+
+## 实现 Object.create()
+
+Object.create() 接受两个参数，第一个为新创建对象的原型对象，第二个参数可选，需要传一个对象，该对象的属性类型参照 Object.defineProperties() 的第二个参数。
+
+```js
+const myCreate = (proto, props) => {
+  if (!["object", "function"].includes(typeof proto)) {
+    throw new TypeError(
+      `Object prototype may only be an Object or null: ${proto}`
+    );
+  }
+
+  const Ctor = function () {};
+
+  Ctor.prototype = proto;
+
+  const obj = new Ctor();
+
+  if (props) {
+    Object.defineProperties(obj, props);
+  }
+
+  if (proto === null) {
+    obj.__proto__ = null;
+  }
+  return obj;
+};
+```
+
+## 模拟 instanceOf
+
+```js
+const instanceOf1 = (obj, func) => {
+  if (!(obj && ["object", "function"].includes(typeof obj))) {
+    return false;
+  }
+  let proto = Object.getPrototypeOf(obj);
+
+  if (proto === func.prototype) {
+    return true;
+  } else if (proto === null) {
+    return false;
+  } else {
+    return instanceOf1(proto, func);
+  }
+};
+
+const instanceOf2 = (obj, func) => {
+  if (!(obj && ["object", "function"].includes(typeof obj))) {
+    return false;
+  }
+
+  let proto = obj;
+  while ((proto = Object.getPrototypeOf(proto))) {
+    if (proto === null) {
+      // 这个判断其实可以不用
+      return false;
+    } else if (proto === func.prototype) {
+      return true;
+    }
+  }
+  return true;
+};
+```
+
+## 模拟 Sleep
+
+```js
+const sleep = (fn, delay) => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(fn());
+    }, delay);
+  });
+};
+```

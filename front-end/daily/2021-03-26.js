@@ -156,7 +156,7 @@ function throttle(fn, wait) {
   return function () {
     var context = this;
     var args = arguments;
-    if (timeId) {
+    if (!timeId) {
       setTimeout(function () {
         fn.call(context, args);
         timeId = null;
