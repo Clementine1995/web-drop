@@ -1085,3 +1085,275 @@ fn main() {
 在上述代码中，为 Counter 类型实现了 Iterator 特征，变量 c 是特征 Iterator 的实例，也是 next 方法的调用者。对于 next 方法而言，Self 是调用者 c 的具体类型： Counter，而 Self::Item 是 Counter 中定义的 Item 类型: u32。
 
 ### 默认泛型类型参数
+
+当使用泛型类型参数时，可以为其指定一个默认的具体类型，例如标准库中的 std::ops::Add 特征：
+
+```rust
+#![allow(unused)]
+fn main() {
+trait Add<RHS=Self> {
+    type Output;
+    fn add(self, rhs: RHS) -> Self::Output;
+  }
+}
+```
+
+它有一个泛型参数 RHS，但是与我们以往的用法不同，这里它给 RHS 一个默认值，也就是当用户不指定 RHS 时，默认使用两个同样类型的值进行相加，然后返回一个关联类型 Output。
+
+```rust
+use std::ops::Add;
+
+#[derive(Debug, PartialEq)]
+struct Point {
+  x: i32,
+  y: i32,
+}
+
+impl Add for Point {
+  type Output = Point;
+
+  fn add(self, other: Point) -> Point {
+    Point {
+      x: self.x + other.x,
+      y: self.y + other.y,
+    }
+  }
+}
+
+fn main() {
+  assert_eq!(Point { x: 1, y: 0 } + Point { x: 2, y: 3 }, Point { x: 3, y: 3 });
+}
+```
+
+上面的代码主要干了一件事，就是为 Point 结构体提供 + 的能力，这就是运算符重载，只有定义在 std::ops 中的运算符才能进行重载。
+
+跟 + 对应的特征是 std::ops::Add，在之前也看过它的定义 `trait Add<RHS=Self>`，但是上面的例子中并没有为 Point 实现 `Add<RHS>` 特征，而是实现了 Add 特征（没有默认泛型类型参数），这意味着使用了 RHS 的默认类型，也就是 Self。
+
+与上面的例子相反，下面的例子，来创建两个不同类型的相加：
+
+```rust
+use std::ops::Add;
+
+struct Millimeters(u32);
+struct Meters(u32);
+
+impl Add<Meters> for Millimeters {
+  type Output = Millimeters;
+
+  fn add(self, other: Meters) -> Millimeters {
+    Millimeters(self.0 + (other.0 * 1000))
+  }
+}
+```
+
+这里，是进行 Millimeters + Meters 两种数据类型的 + 操作，因此此时不能再使用默认的 RHS，否则就会变成 Millimeters + Millimeters 的形式。使用 `Add<Meters>` 可以将 RHS 指定为 Meters，那么 fn add(self, rhs: RHS) 自然而言的变成了 Millimeters 和 Meters 的相加。
+
+默认类型参数主要用于两个方面：
+
+1. 减少实现的样板代码
+2. 扩展类型但是无需大幅修改现有的代码
+
+### 调用同名的方法
+
+不同特征拥有同名的方法是很正常的事情，甚至除了特征上的同名方法外，在类型上，也有同名方法：
+
+```rust
+trait Pilot {
+  fn fly(&self);
+}
+
+trait Wizard {
+  fn fly(&self);
+}
+
+struct Human;
+
+impl Pilot for Human {
+  fn fly(&self) {
+    println!("This is your captain speaking.");
+  }
+}
+impl Wizard for Human {
+  fn fly(&self) {
+    println!("Up!");
+  }
+}
+impl Human {
+  fn fly(&self) {
+    println!("*waving arms furiously*");
+  }
+}
+```
+
+#### 优先调用类型上的方法
+
+当调用 Human 实例的 fly 时，编译器默认调用该类型中定义的方法
+
+#### 调用特征上的方法
+
+为了能够调用两个特征的方法，需要使用显式调用的语法：
+
+```rust
+fn main() {
+  let person = Human;
+  Pilot::fly(&person); // 调用Pilot特征上的方法
+  Wizard::fly(&person); // 调用Wizard特征上的方法
+  person.fly(); // 调用Human类型自身的方法
+}
+```
+
+当显式调用时，编译器就可以根据调用的类型( self 的类型)决定具体调用哪个方法。如果方法没有 self 参数呢？比如关联函数。
+
+```rust
+trait Animal {
+  fn baby_name() -> String;
+}
+
+struct Dog;
+
+impl Dog {
+  fn baby_name() -> String {
+    String::from("Spot")
+  }
+}
+
+impl Animal for Dog {
+  fn baby_name() -> String {
+    String::from("puppy")
+  }
+}
+
+fn main() {
+  println!("A baby dog is called a {}", Dog::baby_name());
+  // A baby dog is called a Spot
+}
+```
+
+Dog::baby_name() 的调用方式显然不行，并不能调用到 Animal 上的 baby_name 函数。
+
+```rust
+fn main() {
+  println!("A baby dog is called a {}", Animal::baby_name());
+  //                                    ^^^^^^^^^^^^^^^^^ cannot infer type // 无法推断类型
+}
+```
+
+这时需要完全限定语法
+
+完全限定语法是调用函数最为明确的方式：
+
+```rust
+fn main() {
+  println!("A baby dog is called a {}", <Dog as Animal>::baby_name());
+}
+```
+
+完全限定语法定义为：`<Type as Trait>::function(receiver_if_method, next_arg, ...);`
+
+上面定义中，第一个参数是方法接收器 receiver （三种 self），只有方法才拥有，例如关联函数就没有 receiver。
+
+### 特征定义中的特征约束
+
+例如有一个特征 OutlinePrint，它有一个方法，能够对当前的实现类型进行格式化输出：
+
+```rust
+use std::fmt::Display;
+
+trait OutlinePrint: Display {
+  fn outline_print(&self) {
+    let output = self.to_string();
+    let len = output.len();
+    println!("{}", "*".repeat(len + 4));
+    println!("*{}*", " ".repeat(len + 2));
+    println!("* {} *", output);
+    println!("*{}*", " ".repeat(len + 2));
+    println!("{}", "*".repeat(len + 4));
+  }
+}
+```
+
+这里有一个眼熟的语法: OutlinePrint: Display，感觉很像之前讲过的特征约束，只不过用在了特征定义中而不是函数的参数中，用来说明一个特征需要实现另一个特征，这里就是：如果你想要实现 OutlinePrint 特征，首先你需要实现 Display 特征。
+
+想象一下，假如没有这个特征约束，那么 self.to_string 还能够调用吗（ to_string 方法会为实现 Display 特征的类型自动实现）
+
+```rust
+struct Point {
+  x: i32,
+  y: i32,
+}
+
+impl OutlinePrint for Point {}
+```
+
+因为 Point 没有实现 Display 特征，会得到下面的报错：
+
+```sh
+error[E0277]: the trait bound `Point: std::fmt::Display` is not satisfied
+  --> src/main.rs:20:6
+   |
+20 | impl OutlinePrint for Point {}
+   |      ^^^^^^^^^^^^ `Point` cannot be formatted with the default formatter;
+try using `:?` instead if you are using a format string
+   |
+   = help: the trait `std::fmt::Display` is not implemented for `Point`
+```
+
+既然有求于编译器，那只能选择满足它：
+
+```rust
+use std::fmt;
+
+impl fmt::Display for Point {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "({}, {})", self.x, self.y)
+  }
+}
+```
+
+### 在外部类型上实现外部特征(newtype)
+
+在特征章节中，有提到孤儿规则，简单来说，就是特征或者类型必需至少有一个是本地的，才能在此类型上定义特征。
+
+这里提供一个办法来绕过孤儿规则，那就是使用 `newtype` 模式，简而言之：就是为一个元组结构体创建新类型。该元组结构体封装有一个字段，该字段就是希望实现特征的具体类型。
+
+该封装类型是本地的，因此我们可以为此类型实现外部的特征。newtype 不仅仅能实现以上的功能，而且它在运行时没有任何性能损耗，因为在编译期，该类型会被自动忽略。
+
+下面来看一个例子，有一个动态数组类型： `Vec<T>`，它定义在标准库中，还有一个特征 Display，它也定义在标准库中，如果没有 newtype，是无法为 `Vec<T>` 实现 Display 的：
+
+```sh
+error[E0117]: only traits defined in the current crate can be implemented for arbitrary types
+--> src/main.rs:5:1
+|
+5 | impl<T> std::fmt::Display for Vec<T> {
+| ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^------
+| |                             |
+| |                             Vec is not defined in the current crate
+| impl doesn't use only types from inside the current crate
+|
+= note: define and implement a trait or new type instead
+```
+
+编译器给了提示： define and implement a trait or new type instead，重新定义一个特征，或者使用 new type，前者当然不可行，那么来试试后者：
+
+```rust
+use std::fmt;
+
+struct Wrapper(Vec<String>);
+
+impl fmt::Display for Wrapper {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "[{}]", self.0.join(", "))
+  }
+}
+
+fn main() {
+  let w = Wrapper(vec![String::from("hello"), String::from("world")]);
+  println!("w = {}", w);
+}
+```
+
+其中，`struct Wrapper(Vec<String>)` 就是一个元组结构体，它定义了一个新类型 Wrapper。
+
+既然 new type 有这么多好处，它有没有不好的地方呢？答案是肯定的。注意到怎么访问里面的数组吗？self.0.join(", ")，是的，很啰嗦，因为需要先从 Wrapper 中取出数组: self.0，然后才能执行 join 方法。
+
+Rust 提供了一个特征叫 Deref，实现该特征后，可以自动做一层类似类型转换的操作，可以将 Wrapper 变成 `Vec<String>` 来使用。这样就会像直接使用数组那样去使用 Wrapper，而无需为每一个操作都添加上 self.0。
