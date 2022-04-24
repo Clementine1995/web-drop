@@ -1,6 +1,8 @@
 # 弹性布局 Flex
 
-> [Flex 布局教程：语法篇](https://juejin.im/post/5ac2329b6fb9a028bf057caf) >[Flex-弹性布局原来如此简单！！](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html)
+> [Flex 布局教程：语法篇](https://juejin.im/post/5ac2329b6fb9a028bf057caf)
+>
+> [Flex-弹性布局原来如此简单！！](http://www.ruanyifeng.com/blog/2015/07/flex-grammar.html)
 
 ## Flex 布局是什么
 
@@ -62,7 +64,7 @@ flex-direction 属性决定主轴的方向（即项目的排列方向）。
 
 演示：
 
-![flex-direction](https://user-gold-cdn.xitu.io/2018/4/2/1628695cd0b76595?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![flex-direction](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2018/4/2/1628695cd0b76595~tplv-t2oaga2asx-zoom-in-crop-mark:1304:0:0:0.awebp)
 
 ### flex-wrap
 
@@ -80,7 +82,7 @@ flex-direction 属性决定主轴的方向（即项目的排列方向）。
 
 演示：
 
-![flex-wrap](https://user-gold-cdn.xitu.io/2018/4/2/1628695cb12db292?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![flex-wrap](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2018/4/2/1628695cb12db292~tplv-t2oaga2asx-zoom-in-crop-mark:1304:0:0:0.awebp)
 
 ### flex-flow
 
@@ -114,7 +116,7 @@ justify-content 属性定义了项目在主轴上的对齐方式及额外空间�
 
 演示：
 
-![justify-content](https://user-gold-cdn.xitu.io/2018/4/2/1628695cb20616af?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![justify-content](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2018/4/2/1628695cb20616af~tplv-t2oaga2asx-zoom-in-crop-mark:1304:0:0:0.awebp)
 
 ### align-items 属性
 
@@ -136,7 +138,7 @@ align-items 属性定义项目在交叉轴上的对齐方式。单行，多行�
 
 演示：
 
-![align-items](https://user-gold-cdn.xitu.io/2018/4/2/1628695cb18083e3?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![align-items](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2018/4/2/1628695cb18083e3~tplv-t2oaga2asx-zoom-in-crop-mark:1304:0:0:0.awebp)
 
 ### align-content
 
@@ -160,7 +162,7 @@ align-content 属性定义了多根轴线的对齐方式。如果项目只有一
 
 演示：
 
-![align-content](https://user-gold-cdn.xitu.io/2018/4/2/1628695cb17eb348?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![align-content](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2018/4/2/1628695cb17eb348~tplv-t2oaga2asx-zoom-in-crop-mark:1304:0:0:0.awebp)
 
 总结：
 
@@ -183,7 +185,7 @@ align-content 属性定义了多根轴线的对齐方式。如果项目只有一
 
 演示：
 
-![order](https://user-gold-cdn.xitu.io/2018/4/2/1628695cd362d2ce?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![order](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2018/4/2/1628695cd362d2ce~tplv-t2oaga2asx-zoom-in-crop-mark:1304:0:0:0.awebp)
 
 ### flex-grow
 
@@ -198,7 +200,7 @@ flex-grow 属性定义项目的放大比例，flex-grow 值是一个单位的正
 
 演示：
 
-![flex-grow](https://user-gold-cdn.xitu.io/2018/4/2/1628695cd4e13d3f?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![flex-grow](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2018/4/2/1628695cd4e13d3f~tplv-t2oaga2asx-zoom-in-crop-mark:1304:0:0:0.awebp)
 
 ### flex-shrink
 
@@ -213,7 +215,7 @@ flex-shrink 属性定义了项目的缩小比例，默认为 1，即如果空间
 如果所有项目的 flex-shrink 属性都为 1，当空间不足时，都将等比例缩小。如果一个项目的 flex-shrink 属性为 0，其他项目都为 1，则空间不足时，前者不缩小。
 
 演示：
-![flex-shrink](https://user-gold-cdn.xitu.io/2018/4/2/1628695ce473e24c?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![flex-shrink](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2018/4/2/1628695ce473e24c~tplv-t2oaga2asx-zoom-in-crop-mark:1304:0:0:0.awebp)
 
 ### flex-basis
 
@@ -233,7 +235,7 @@ flex-basis 属性定义项目在分配额外空间之前的缺省尺寸。属性
 
 演示：
 
-![flex-shrink](https://user-gold-cdn.xitu.io/2018/4/2/1628695cee00902d?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![flex-shrink](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2018/4/2/1628695cee00902d~tplv-t2oaga2asx-zoom-in-crop-mark:1304:0:0:0.awebp)
 
 ### flex
 
@@ -267,7 +269,7 @@ align-self 属性允许单个项目有与其他项目不一样的对齐方式，
 
 演示：
 
-![flex-shrink](https://user-gold-cdn.xitu.io/2018/4/2/1628695cf0a7bb39?imageView2/0/w/1280/h/960/format/webp/ignore-error/1)
+![flex-shrink](https://p1-jj.byteimg.com/tos-cn-i-t2oaga2asx/gold-user-assets/2018/4/2/1628695cf0a7bb39~tplv-t2oaga2asx-zoom-in-crop-mark:1304:0:0:0.awebp)
 
 ### justify-self
 
