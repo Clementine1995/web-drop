@@ -1,0 +1,28 @@
+# Vue-router
+
+- 安装：npm install vue-router。
+- 使用
+  - 创建 router 实例
+    - 定义路由组件，`import Home from '../views/HomePage.vue'`
+    - 定义一些路由，配置组件和路由的映射关系，`routes = [{ path: '/', name: 'Home', component: Home } ...]`
+    - 创建路由实例并传递 `routes` 配置，`const router = createRouter({history: createWebHashHistory(), routes })`
+  - 将 router 实例挂载到 vue 实例中，使用 use
+  - 使用路由，`<router-link>`该标签是一个 vue-router 中已经内置的组件，它会被渲染成一个`<a>`标签。`<router-view>`：该标签会根据当前的路径，动态渲染出不同的组件。
+- 路由模式：history 和 hash
+  - hash 模式是用 createWebHashHistory() 创建的，在 URL 之前使用了一个哈希字符 `#`，通过监听 hash 变化来达到路由跳转
+  - 用 createWebHistory() 创建 HTML5 的 history 模式，利用 history api
+- 如何进行路由跳转
+  - router-link 标签，最主要的属性 to：用于指定跳转的路径
+  - 使用代码的形式进行跳转。最常用的是 push，形式有下面三种。还有 go, replace 等
+    - `router.push('/xxx')`
+    - `router.push({ path: '/xxx' })`
+    - `router.push({ name: 'Xxx' })`
+- 动态路由，类似`{ path: '/users/:id', component: User },` 这种形式，路径参数用冒号 : 表示，像 `/users/johnny` 和 `/users/jolyne` 这样的 URL 都会映射到 User 这个路由
+- 路由懒加载：`const Home = () => import('../components/Home.vue')`，也就是只有当路由被访问时采取加载这个组件
+- 嵌套路由，使用路由中的 children 属性
+- 如何传递参数
+  - 通过调用 push 方法时带上 params 或者 query 属性，来传递参数
+  - 在到达的路由组件中，使用 $route 属性获取 params 或 query
+- 导航守卫
+  - 全局路由守卫：router.beforeEach 每一个路由进入前触发。router.afterEach 每一个路由进后前触发。
+  - 组件内路由守卫：beforeRouteEnter 当前路由进入前触发，beforeRouteUpdate 在当前路由改变，但是该组件被复用时调用，beforeRouteLeave 离开当前路由时触发
