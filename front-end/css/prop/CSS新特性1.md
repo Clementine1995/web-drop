@@ -364,6 +364,8 @@ vector-effect 主要用在 SVG 元素上，可以让 SVG 元素的描边不随�
 
 ## :focus-visible
 
+当元素匹配:focus 伪类并且客户端(UA)的启发式引擎决定焦点应当可见(在这种情况下很多浏览器默认显示“焦点框”)时，:focus-visible 伪类将生效。
+
 :focus-visible 可以有效解决 Chrome 浏览器下部分元素的焦点轮廓问题。可以让`<button>`，`<summary>`元素或者设置了 tabindex 的元素在点击时候没有焦点轮廓，键盘访问时候出现。这个选择器可以有效地根据用户的输入方式(鼠标 vs 键盘)展示不同形式的焦点。
 
 Firefox 通过较旧的前缀伪类 :-moz-focusring 支持类似的功能，而 Chrome 需要开启支持实现属性 css
