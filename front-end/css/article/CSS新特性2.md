@@ -257,3 +257,58 @@ button:focus-visible {
 ```
 
 这里体现的是兄弟结构，精确寻找对应的前置兄元素。
+
+## aspect-ratio
+
+aspect-ratio CSS 属性为 box 容器规定了一个期待的纵横比，这个纵横比可以用来计算自动尺寸以及为其他布局函数服务。当元素的宽高成一定比例时就可以使用该属性。
+
+语法：`aspect-ratio: auto | <ratio>`
+
+- auto：具有固有宽高比的替换元素将使用该宽高比，否则该内容框没有首选的宽高比
+- ratio：内容框首选的宽高比是通过 width / height 定义的。当为内容框定义 box-sizing 之后，尺寸的计算就可以通过指定宽高比来实现。
+
+```css
+/* 子元素垂直居中，并且该正方形的长度/宽度为父容器宽度(width)一半的正方形 */
+.container {
+  display: grid;
+  place-items: center;
+}
+.item {
+  width: 50%;
+  aspect-ratio: 1/1;
+}
+```
+
+### 测试 viewport 的宽高比
+
+aspect-ratio CSS 媒体属性 可以用来测试 viewport 的宽高比。可以使用 min-aspect-ratio 和 max-aspect-ratio 分别查询最小和最大的值。
+
+下面的例子通过不同的 viewport 视口宽高比应用不同的样式
+
+```html
+<div id="inner">
+  Watch this element as you resize your viewport's width and height.
+</div>
+<style>
+  /* 最小宽高比 */
+  @media (min-aspect-ratio: 8/5) {
+    div {
+      background: #9af; /* blue */
+    }
+  }
+
+  /* 最大宽高比 */
+  @media (max-aspect-ratio: 3/2) {
+    div {
+      background: #9ff; /* cyan */
+    }
+  }
+
+  /* 明确的宽高比, 放在最下部防止同时满足条件时的覆盖*/
+  @media (aspect-ratio: 1/1) {
+    div {
+      background: #f9a; /* red */
+    }
+  }
+</style>
+```
