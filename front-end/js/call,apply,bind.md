@@ -1,6 +1,10 @@
 # js 中的 call、apply、bind
 
-> 参考自[js 中 call、apply、bind 那些事](https://qianlongo.github.io/2016/04/26/js%E4%B8%ADcall%E3%80%81apply%E3%80%81bind%E9%82%A3%E4%BA%9B%E4%BA%8B/#more)，[this、apply、call、bind](https://juejin.im/post/59bfe84351882531b730bac2)，[JS 中的 call、apply、bind 方法](https://juejin.im/post/582bcd36d203090067edb8a0)
+> 参考[js 中 call、apply、bind 那些事](https://qianlongo.github.io/2016/04/26/js%E4%B8%ADcall%E3%80%81apply%E3%80%81bind%E9%82%A3%E4%BA%9B%E4%BA%8B/#more)
+>
+> 参考[this、apply、call、bind](https://juejin.im/post/59bfe84351882531b730bac2)
+>
+> 参考[JS 中的 call、apply、bind 方法](https://juejin.im/post/582bcd36d203090067edb8a0)
 
 ## 作用以及异同
 
