@@ -78,9 +78,9 @@ f() // global
 
 thisObj 的取值有以下 4 种情况：
 
-1. 不传，或者传 null,undefined， 函数中的 this 指向 window 对象
+1. 不传，或者传 null,undefined，非严格模式下，函数中的 this 指向 window 对象
 2. 传递另一个函数的函数名，函数中的 this 指向这个函数的引用
-3. 传递字符串、数值或布尔类型等基础类型，函数中的 this 指向其对应的包装对象，如 String、Number、Boolean
+3. 传递字符串、数值或布尔类型等基础类型，非严格模式下，函数中的 this 指向其对应的包装对象，如 String、Number、Boolean
 4. 传递一个对象，函数中的 this 指向这个对象
 
 ```js
