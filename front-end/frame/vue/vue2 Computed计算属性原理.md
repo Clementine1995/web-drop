@@ -47,7 +47,7 @@ initComputed 这段代码做了几件事
 
 1. 每个 computed 配发 watcher
 2. defineComputed 处理
-3. 收集所有 computed 的 watcher，存放到 vm.\_computedWatchers 中
+3. 收集所有 computed 的 watcher，存放到 `vm._computedWatchers` 中
 
 ### 每个 computed 配发 watcher
 
