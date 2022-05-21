@@ -14,6 +14,7 @@
     height: 180px;
     border: 2px solid #5b595b;
     background: linear-gradient(
+      30deg,
       rgba(229, 23, 49, 1),
       rgba(229, 23, 49, 0.9) 48%,
       transparent 55%
@@ -31,7 +32,7 @@
 这里，利用 `<feturbulence>` 滤镜简单处理一下上述图形：
 
 ```html
-<svg width="0">
+<svg id="blob" version="1.1" xmlns="http://www.w3.org/2000/svg">
   <filter id="filter">
     <feTurbulence
       id="turbulence"
