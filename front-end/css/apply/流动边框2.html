@@ -1,61 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
-  <style>
-    .box{
-      position: relative;
-      width:128px;
-      height: 128px;
-      overflow: hidden;
-    }
-    .content {
-      position: absolute;
-      left:1px;
-      top:1px;
-      right:1px;
-      bottom:1px;
-      background:#fff;
-    }
-    .box:after{
-      content:'';
-      position: absolute;
-      z-index: -1;
-      left:0;
-      bottom:0;
-      top:1px;
-      right:1px;
-      background: repeating-linear-gradient(135deg, transparent, transparent 3px, #000 3px, #fff 8px);
-      animation: shine 1s infinite linear;
-    }
-    .box:before{
-      content:'';
-      position: absolute;
-      z-index: -1;
-      left:1px;
-      bottom:1px;
-      top:0;
-      right:0;
-      background: repeating-linear-gradient(135deg, transparent, transparent 3px, #fff 3px, #000 8px);
-      animation: shine2 1s infinite linear;
-    }
-    @keyframes shine {
-      0% { background-position: -1px -1px;}
-      100% { background-position: -12px -12px;}
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      .box {
+        position: relative;
+        width: 128px;
+        height: 128px;
+        overflow: hidden;
+      }
+      .content {
+        position: absolute;
+        left: 1px;
+        top: 1px;
+        right: 1px;
+        bottom: 1px;
+        background: #fff;
+      }
+      .box:after {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        left: 0;
+        bottom: 0;
+        top: 1px;
+        right: 1px;
+        background: repeating-linear-gradient(
+          135deg,
+          transparent,
+          transparent 3px,
+          #000 3px,
+          #fff 8px
+        );
+        animation: shine 1s infinite linear;
+      }
+      .box:before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        left: 1px;
+        bottom: 1px;
+        top: 0;
+        right: 0;
+        background: repeating-linear-gradient(
+          135deg,
+          transparent,
+          transparent 3px,
+          #fff 3px,
+          #000 8px
+        );
+        animation: shine2 1s infinite linear;
+      }
+      @keyframes shine {
+        0% {
+          background-position: -1px -1px;
+        }
+        100% {
+          background-position: -12px -12px;
+        }
+      }
 
-    @keyframes shine2 {
-      0% { background-position: -12px -12px;}
-      100% { background-position: -1px -1px;}
-    }
-  </style>
-</head>
-<body>
-  <div class="box">
-    <div class="content">内容占位</div>
-  </div>
-</body>
+      @keyframes shine2 {
+        0% {
+          background-position: -12px -12px;
+        }
+        100% {
+          background-position: -1px -1px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <div class="content">内容占位</div>
+    </div>
+  </body>
 </html>
