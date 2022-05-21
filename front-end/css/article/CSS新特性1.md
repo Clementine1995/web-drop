@@ -55,20 +55,20 @@ CSS 属性 will-change 为 web 开发者提供了一种告知浏览器该元素�
 正确使用应该是通过 js 脚本来控制它
 
 ```js
-var el = document.getElementById("element");
+var el = document.getElementById("element")
 
 // 当鼠标移动到该元素上时给该元素设置 will-change 属性
-el.addEventListener("mouseenter", hintBrowser);
+el.addEventListener("mouseenter", hintBrowser)
 // 当 CSS 动画结束后清除 will-change 属性
-el.addEventListener("animationEnd", removeHint);
+el.addEventListener("animationEnd", removeHint)
 
 function hintBrowser() {
   // 填写上那些你知道的，会在 CSS 动画中发生改变的 CSS 属性名们
-  this.style.willChange = "transform, opacity";
+  this.style.willChange = "transform, opacity"
 }
 
 function removeHint() {
-  this.style.willChange = "auto";
+  this.style.willChange = "auto"
 }
 ```
 
@@ -589,7 +589,7 @@ CSS.registerProperty({
   syntax: "<color>",
   inherits: false,
   initialValue: "#c0ffee",
-});
+})
 ```
 
 ### 支持的 syntax 语法类型

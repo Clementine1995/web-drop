@@ -40,7 +40,7 @@ transition 产生动画的条件是 transition 设置的 property 发生变化�
 ## animation
 
 animation 是由多个 transition 的效果叠加，并且可操作性更强，能够做出复杂酷炫的效果
-语法：animation: name duration timing-function delay iteration-count direction play-state fill-mode;
+语法：`animation: name duration timing-function delay iteration-count direction fill-mode play-state;`
 
 | 值                 | 描述                                                                        |
 | ------------------ | --------------------------------------------------------------------------- |
@@ -68,6 +68,33 @@ animation 是由多个 transition 的效果叠加，并且可操作性更强，�
 - cubic-bezier-timing-function 三次贝塞尔曲线缓动函数。它支持一些默认的参数：ease，ease-in，ease-in，ease-in-out，linear。还可以使用 cubic-bezier() 方法自定义三次贝塞尔曲线。
 - step-timing-function 步骤缓动函数。主要用到的是 steps() 缓动函数。
 
+#### 三次贝塞尔曲线缓动函数
+
+这些函数定义了三次方贝塞尔曲线，由于这些曲线是连续的，因此它们通常用于平滑插值的开始和结束，也称为缓动函数。
+
+![cubic-bezier-example](https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function/cubic-bezier-example.png)
+
+三次方贝塞尔曲线由四个点 P0、P1、P2 和 P3 定义。P0 和 P3 是曲线的起点和终点，在 CSS 中，这些点是固定的，因为坐标是比率（横坐标是时间的比率，纵坐标是输出范围的比率）。P0 是并表示初始时间或位置和初始状态，P3 是并表示最终时间或位置和最终状态。`(0, 0)(1, 1)`。P1 和 P2 的横坐标都应该在范围 [0, 1] 内，这样的三次方贝塞尔曲线在 CSS 中才是有效的。
+
+P1 或 P2 纵坐标超出范围的三次方贝塞尔曲线可能会产生弹跳效应。
+
+语法：`cubic-bezier(x1, y1, x2, y2)`
+
+#### 步骤缓动函数
+
+步骤缓动函数，以等距步长划分输出值域，并不是整个动画过程分为设置的 number 帧数，而是每一步都会划分为设置的 number 帧数，比如 keyframes 中只有 from 和 to 两个状态，那么从 from 到 to 就会被分为 number 设置的帧数显示，如果设置了 from 50% to 三个状态，那么从 from 到 50% 会被分为 number 帧，50% 到 to 也会被分为 number 帧。
+
+语法：`steps(number_of_steps, direction)`
+
+- number_of_steps：正整数，表示步骤缓动函数的帧数
+- direction：表示函数是左连续还是右连续
+  - jump-start：表示左连续函数，第一步或跳转发生在插值开始时，具体效果就是会丢失第一帧。![jump-start](https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function/steps-2-start.png)
+  - jump-end：表示一个右连续函数，最后一步或跳转发生在插值结束时，具体效果就是会丢失最后一帧。![jump-end](https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function/steps-4-end.png)
+  - jump-both：表示左右连续函数，包括了在 0% 和 100% 标记处的暂停，在插值迭代期间有效地添加了一帧，具体效果就是丢失第一帧和最后一帧。![jump-both](https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function/step3both.png)
+  - jump-none：两端都没有跳跃。 相反，在 0% 标记和 100% 标记处都保持 1/n 的持续时间，具体效果就是第一帧和最后一帧都不会丢失。![jump-none](https://developer.mozilla.org/en-US/docs/Web/CSS/easing-function/step5none.png)
+  - start：相当于 jump-start
+  - end：相当于 jump-end
+
 ### direction
 
 - normal(按时间轴顺序)
@@ -75,9 +102,13 @@ animation 是由多个 transition 的效果叠加，并且可操作性更强，�
 - alternate(轮流，即来回往复进行)
 - alternate-reverse(动画先反运行再正方向运行，并持续交替运行)
 
+### duration
+
+animation-duration 属性指定一个动画周期的时长。默认值为 0s，表示无动画。单位为秒(s)或者毫秒(ms)，无单位值无效。
+
 ### iteration-count
 
-animation-iteration-count 控制动画运行的次数，可以是数字或者 infinite，注意，数字可以是小数。
+animation-iteration-count 控制动画运行的次数，可以是数字或者 infinite（无限循环播放动画）。注意，数字可以用小数定义循环，来播放动画周期的一部分：例如，0.5 将播放到动画周期的一半。不可为负值。
 
 ### fill-mode
 

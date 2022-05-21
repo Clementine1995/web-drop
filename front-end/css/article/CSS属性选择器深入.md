@@ -1,24 +1,24 @@
-# CSS属性选择器深入挖掘
+# CSS 属性选择器深入挖掘
 
->原文地址[CSS 属性选择器的深入挖掘](https://github.com/chokcoco/iCSS/issues/65)
+> 原文地址[CSS 属性选择器的深入挖掘](https://github.com/chokcoco/iCSS/issues/65)
 
 ## 简单的语法介绍
 
-+ [attr]：该选择器选择包含 attr 属性的所有元素，不论 attr 的值为何。
-+ [attr=val]：该选择器仅选择 attr 属性被赋值为 val 的所有元素。
-+ [attr~=val]：该选择器仅选择具有 attr 属性的元素，而且要求 val 值是 attr 值包含的被空格分隔的取值列表里中的一个，而不是取值列表中某个值包含它就可以。
-+ [attr|=val] : 选择attr属性的值是 val 或值以 val- 开头的元素（注意，这里的 “-” 不是一个错误，这是用来处理语言编码的）。
-+ [attr^=val] : 选择attr属性的值以 val 开头（包括 val）的元素。
-+ [attr$=val] : 选择attr属性的值以 val 结尾（包括 val）的元素。
-+ [attr*=val] : 选择attr属性的值中包含子字符串 val 的元素（一个子字符串就是一个字符串的一部分而已，例如，”cat“ 是 字符串 ”caterpillar“ 的子字符串。
+- [attr]：该选择器选择包含 attr 属性的所有元素，不论 attr 的值为何。
+- [attr=val]：该选择器仅选择 attr 属性被赋值为 val 的所有元素。
+- [attr~=val]：该选择器仅选择具有 attr 属性的元素，而且要求 val 值是 attr 值包含的被空格分隔的取值列表里中的一个，而不是取值列表中某个值包含它就可以。
+- [attr|=val] : 选择 attr 属性的值是 val 或值以 val- 开头的元素（注意，这里的 “-” 不是一个错误，这是用来处理语言编码的）。
+- [attr^=val] : 选择 attr 属性的值以 val 开头（包括 val）的元素。
+- [attr$=val] : 选择 attr 属性的值以 val 结尾（包括 val）的元素。
+- [attr*=val] : 选择 attr 属性的值中包含子字符串 val 的元素（一个子字符串就是一个字符串的一部分而已，例如，”cat“ 是 字符串 ”caterpillar“ 的子字符串。
 
 ## 复杂一点的用法
 
 层叠选择
 
 ```css
-div [href]{
-...
+div [href] {
+  ...;
 }
 ```
 
@@ -27,8 +27,8 @@ div [href]{
 选择一个 img 标签，它含有 title 属性，并且包含类名为 logo 的元素。
 
 ```css
-img[title][class~=logo]{
-...
+img[title][class~="logo"] {
+  ...;
 }
 ```
 
@@ -41,7 +41,7 @@ i 参数
 
 ```css
 p[class*="text" i] {
-...
+  ...;
 }
 ```
 
@@ -62,7 +62,7 @@ g 参数
 还有一种比较常用的场景就是搭配:not() 伪类，完成一些判断检测性的功能。譬如下面这个选择器，就可以选取所有没有 [href] 属性的 a 标签，添加一个红色边框。
 
 ```css
-a:not([href]){
+a:not([href]) {
   border: 1px solid red;
 }
 ```
@@ -70,7 +70,7 @@ a:not([href]){
 当然，复杂一点，我们可以搭配不仅仅一个 :not()伪类，像是这样，可以同时多个配合使用，选择一个 href, target, rel 属性都没有的 a 标签：
 
 ```css
-a:not([href]):not([target]):not([rel]){
+a:not([href]):not([target]):not([rel]) {
   border: 1px solid blue;
 }
 ```
@@ -86,16 +86,15 @@ a:not([href]):not([target]):not([rel]){
 所以，配合属性选择器，我们可以很容易的实现一些角标功能：
 
 ```css
-<div count="5">Message</div>
-div {
-    position: relative;
-    width: 200px;
-    height: 64px;
+<div count="5" > Message</div > div {
+  position: relative;
+  width: 200px;
+  height: 64px;
 }
 
 div::before {
-    content: attr(count);
-    ...
+  content: attr(count);
+  ...;
 }
 ```
 
@@ -108,7 +107,7 @@ div::before {
 我们都知道，如果给一个图片添加一个 title 属性，当 hover 到图片上面的时，会展示 title 属性里面附加的内容，类似这样：
 
 ```html
-<img src="xxxxxxxxx" title="风景图片">
+<img src="xxxxxxxxx" title="风景图片" />
 ```
 
 ![attributeselector](https://user-images.githubusercontent.com/8554143/59601663-3a893000-90f4-11e9-9051-7187533d25fe.gif)
@@ -123,13 +122,13 @@ div::before {
 <p class="title" popTitle="文字弹出">这是一段描述性文字</p>
 <p class="title" popTitle="标题A">这是一段描述性文字</p>
 <style>
-p[popTitle]:hover::before {
+  p[popTitle]:hover::before {
     content: attr(popTitle);
     position: absolute;
     color: red;
     border: 1px solid #000;
-    ...
-}
+    ...;
+  }
 </style>
 ```
 
@@ -137,7 +136,7 @@ p[popTitle]:hover::before {
 
 ![attributeselector2](https://user-images.githubusercontent.com/8554143/59602153-96a08400-90f5-11e9-9e6d-50aa06c13b5d.gif)
 
->浏览器自带的 title 属性延迟响应是添加一层防抖保护，避免频繁触发，这里也可以通过对伪元素添加一个100毫秒级的 transition-delay 实现延迟展示。
+> 浏览器自带的 title 属性延迟响应是添加一层防抖保护，避免频繁触发，这里也可以通过对伪元素添加一个 100 毫秒级的 transition-delay 实现延迟展示。
 
 ### 商品展示提示效果
 
@@ -151,27 +150,27 @@ p[popTitle]:hover::before {
 
 ```html
 <div class="g-wrap" desc1="商品描述AAA" desc2="商品描述BBB">
-    <img src="https://xx.baidu.com/timg?xxx" >
+  <img src="https://xx.baidu.com/timg?xxx" />
 </div>
 <style>
-[desc1]::before,
-[desc2]::after {
+  [desc1]::before,
+  [desc2]::after {
     position: absolute;
     opacity: 0;
-}
+  }
 
-[desc1]::before {
+  [desc1]::before {
     content: attr(desc1);
-}
+  }
 
-[desc2]::after {
+  [desc2]::after {
     content: attr(desc2);
-}
+  }
 
-[desc1]:hover::before,
-[desc2]:hover::after{
+  [desc1]:hover::before,
+  [desc2]:hover::after {
     opacity: 1;
-}
+  }
 </style>
 ```
 
@@ -188,16 +187,16 @@ p[popTitle]:hover::before {
 ```html
 <a href="https://www.xxx.com/logo.png" download="logo">logo</a>
 <style>
-[download] {
+  [download] {
     position: relative;
     color: hotpink;
-}
+  }
 
-[download]:hover::before {
+  [download]:hover::before {
     content: "点击可下载此资源！";
     position: absolute;
-    ...
-}
+    ...;
+  }
 </style>
 ```
 
@@ -211,33 +210,33 @@ p[popTitle]:hover::before {
 
 ```html
 <ul>
-    <li><a href="xxx.doc">Word File</a></li>
-    <li><a href="xxx.ppt">PPT File</a></li>
-    <li><a href="xxx.PDF">PDF File</a></li>
-    <li><a href="xxx.MP3">MP3 File</a></li>
-    <li><a href="xxx.avi">AVI File</a></li>
+  <li><a href="xxx.doc">Word File</a></li>
+  <li><a href="xxx.ppt">PPT File</a></li>
+  <li><a href="xxx.PDF">PDF File</a></li>
+  <li><a href="xxx.MP3">MP3 File</a></li>
+  <li><a href="xxx.avi">AVI File</a></li>
 </ul>
 <style>
-a[href$=".doc" i]::before {
+  a[href$=".doc" i]::before {
     content: "doc";
     background: #a9c4f5;
-}
-a[href$=".ppt" i]::before {
+  }
+  a[href$=".ppt" i]::before {
     content: "ppt";
     background: #f8e94f;
-}
-a[href$=".pdf" i]::before {
+  }
+  a[href$=".pdf" i]::before {
     content: "pdf";
     background: #fb807a;
-}
-a[href$=".mp3" i]::before {
+  }
+  a[href$=".mp3" i]::before {
     content: "mp3";
     background: #cb5cf5;
-}
-a[href$=".avi" i]::before {
+  }
+  a[href$=".avi" i]::before {
     content: "avi";
     background: #5f8ffc;
-}
+  }
 </style>
 ```
 
