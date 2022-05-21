@@ -220,34 +220,31 @@ translate 有一个最常见的应用，即当元素宽度高度不固定时，�
 
 代码示例：
 
-```css
-dom结构
-  <div
-  class="box"
-  > <div
-  class="item"
-  > center</div
-  > </div
-  > 样式设计
+```html
+<style>
   .box {
-  position: relative;
-  width: 300px;
-  height: 300px;
-  border: 1px solid;
-}
-.item {
-  position: absolute;
-  padding: 50px;
-  background-color: #fb3;
-  top: 50%; /*相对于父级*/
-  left: 50%;
+    position: relative;
+    width: 300px;
+    height: 300px;
+    border: 1px solid;
+  }
+  .item {
+    position: absolute;
+    padding: 50px;
+    background-color: #fb3;
+    top: 50%; /*相对于父级*/
+    left: 50%;
 
-  transform: translate(-50%, -50%); /*相对自身*/
+    transform: translate(-50%, -50%); /*相对自身*/
 
-  -ms-transform: translate(-50%, -50%);
-  -moz-transform: translate(-50%, -50%);
-  -webkit-transform: translate(-50%, -50%);
-}
+    -ms-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+  }
+</style>
+
+<div class="box"><div class="item">center</div></div>
+样式设计
 ```
 
 效果图：
@@ -347,33 +344,29 @@ scaleZ(): 指定Z轴的缩放倍数;
 
 负值的情况，代码示例：
 
-```css
-dom结构
-  <div
-  class="box"
-  > <div
-  class="item"
-  > Item</div
-  > </div
-  > 样式设计
+```html
+<style>
+  /* 样式设计 */
   .box {
-  width: 300px;
-  height: 300px;
-  border: 1px solid;
-}
-.item {
-  width: 100px;
-  height: 100px;
-  line-height: 100px;
-  text-align: center;
-  background-color: #fb3;
+    width: 300px;
+    height: 300px;
+    border: 1px solid;
+  }
+  .item {
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    text-align: center;
+    background-color: #fb3;
 
-  transform: scale(-1.2);
+    transform: scale(-1.2);
 
-  -ms-transform: scale(-1.2);
-  -moz-transform: scale(-1.2);
-  -webkit-transform: scale(-1.2);
-}
+    -ms-transform: scale(-1.2);
+    -moz-transform: scale(-1.2);
+    -webkit-transform: scale(-1.2);
+  }
+</style>
+<div class="box"><div class="item">Item</div></div>
 ```
 
 效果图：
@@ -437,7 +430,8 @@ perspective()与 perspective 属性区别
 
 ![效果图1](https://upload-images.jianshu.io/upload_images/1959053-7ad9c5e3b6d70c92.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/594)
 
-```css
+```html
+<style>
   .stage{ float: left; margin: 5px; perspective: 200px; }
   .container { transform-style: preserve-3d; }
   .image { backface-visibility: hidden; }
@@ -450,13 +444,15 @@ perspective()与 perspective 属性区别
   .stage:nth-child(5) .container{ transform: rotateY(120deg);
   .stage:nth-child(6) .container{ transform: rotateY(150deg); }
   .stage:nth-child(7) .container{ transform: rotateY(180deg); }
+</style>
 
-  <div class="stage"> //为节约篇幅该DOM请无脑复制7个
-    <div class="container">
-      <img class="image front" src="head75.png" />
-      <img class="image back" src="bg75.png" />
-    </div>
+<div class="stage">
+  <!-- 为节约篇幅该DOM请无脑复制7个 -->
+  <div class="container">
+    <img class="image front" src="head75.png" />
+    <img class="image back" src="bg75.png" />
   </div>
+</div>
 ```
 
 DOM 结构中就能看出，是两张图片（一正一反）叠在了一起。由于变形元素 img 设了 backface-visibility: hidden;，当 Y 轴旋转超过 90 度时（Y 轴旋转正好 90 度时，正中间图 4 为一片空白），正面的图片将不可见，底下的背面图片显示出来了。如果将 img 的 backface-visibility 属性去掉（默认为 visibility），效果如下图。Y 轴旋转超过 90 度时，将显示正面的图片的背部（所谓背部对屏幕来说其实就是图片矩阵的 X 轴值取反）：
@@ -482,20 +478,23 @@ DOM 结构中就能看出，是两张图片（一正一反）叠在了一起。�
 
 简单使用斜切代码：
 
-```css
-dom结构： <div class="btn" > Home</div > 样式设计： .btn {
-  width: 150px;
-  height: 40px;
-  text-align: center;
-  line-height: 40px;
-  background-color: #fb3;
+```html
+<style>
+  .btn {
+    width: 150px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    background-color: #fb3;
 
-  transform: skew(-45deg);
+    transform: skew(-45deg);
 
-  -moz-transform: skew(-45deg);
-  -ms-transform: skew(-45deg);
-  -webkit-transform: skew(-45deg);
-}
+    -moz-transform: skew(-45deg);
+    -ms-transform: skew(-45deg);
+    -webkit-transform: skew(-45deg);
+  }
+</style>
+<div class="btn">Home</div>
 ```
 
 确实实现了平行四边形的效果，但是里面的内容也被斜切了，并不完美。
@@ -508,66 +507,64 @@ dom结构： <div class="btn" > Home</div > 样式设计： .btn {
 
 代码：
 
-```css
-dom结构：
-  <div
-  class="box"
-  > <div
-  class="btn"
-  > home</div
-  > </div
-  > 样式设计：
+```html
+<style>
   .box {
-  width: 150px;
-  height: 40px;
-  text-align: center;
-  line-height: 40px;
-  background-color: #fb3;
+    width: 150px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+    background-color: #fb3;
 
-  transform: skew(-45deg);
+    transform: skew(-45deg);
 
-  -moz-transform: skew(-45deg);
-  -ms-transform: skew(-45deg);
-  -webkit-transform: skew(-45deg);
-}
-.btn {
-  transform: skew(45deg);
+    -moz-transform: skew(-45deg);
+    -ms-transform: skew(-45deg);
+    -webkit-transform: skew(-45deg);
+  }
+  .btn {
+    transform: skew(45deg);
 
-  -moz-transform: skew(45deg);
-  -ms-transform: skew(45deg);
-  -webkit-transform: skew(45deg);
-}
+    -moz-transform: skew(45deg);
+    -ms-transform: skew(45deg);
+    -webkit-transform: skew(45deg);
+  }
+</style>
+<div class="box"><div class="btn">home</div></div>
 ```
 
 第二种方法是使用伪元素，将斜切背景应用在伪元素上。
 
 代码：
 
-```css
-dom结构： <div class="btn" > home</div > 样式设计： .btn {
-  position: relative;
-  width: 150px;
-  height: 40px;
-  text-align: center;
-  line-height: 40px;
-}
-.btn:after {
-  position: absolute;
-  content: "";
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  background-color: #fb3;
+```html
+<style>
+  .btn {
+    position: relative;
+    width: 150px;
+    height: 40px;
+    text-align: center;
+    line-height: 40px;
+  }
+  .btn:after {
+    position: absolute;
+    content: "";
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: #fb3;
 
-  z-index: -1; /* 保证背景不会覆盖住文字 */
+    z-index: -1; /* 保证背景不会覆盖住文字 */
 
-  transform: skew(-45deg);
+    transform: skew(-45deg);
 
-  -moz-transform: skew(-45deg);
-  -ms-transform: skew(-45deg);
-  -webkit-transform: skew(-45deg);
-}
+    -moz-transform: skew(-45deg);
+    -ms-transform: skew(-45deg);
+    -webkit-transform: skew(-45deg);
+  }
+</style>
+<div class="btn">home</div>
 ```
 
 ##### 梯形
@@ -580,15 +577,18 @@ dom结构： <div class="btn" > home</div > 样式设计： .btn {
 
 代码：
 
-```css
-dom结构： <div class="box" > home</div > 基本样式 .box {
-  position: relative;
-  width: 200px;
-  height: 60px;
-  margin: 50px;
-  line-height: 60px;
-  text-align: center;
-}
+```html
+<style>
+  .box {
+    position: relative;
+    width: 200px;
+    height: 60px;
+    margin: 50px;
+    line-height: 60px;
+    text-align: center;
+  }
+</style>
+<div class="box">home</div>
 ```
 
 下面来说明一下如何实现梯形效果：
@@ -652,13 +652,13 @@ transform: perspective(20px) rotatex(5deg) scaley(1.3);
 代码如下[别忘记兼容性，加上浏览器前缀]：
 
 ```css
-  右侧直角
-  transform-origin: right;
-  transform: perspective(20px) rotatex(5deg);
+/* 右侧直角 */
+transform-origin: right;
+transform: perspective(20px) rotatex(5deg);
 
-  左侧直角
-  transform-origin: left;
-  transform: perspective(20px) rotatex(5deg);
+/* 左侧直角 */
+transform-origin: left;
+transform: perspective(20px) rotatex(5deg);
 ```
 
 ##### 菱形
@@ -667,28 +667,25 @@ transform: perspective(20px) rotatex(5deg) scaley(1.3);
 
 首先对父级进行旋转 代码：
 
-```css
-dom结构
-  <div
-  class="box"
-  > <img
-  src="img/test.png"
-  > </div
-  > 基本样式设计：
+```html
+<style>
   .box {
-  width: 200px;
-  height: 200px;
-  border: 1px solid;
-  overflow: hidden;
+    width: 200px;
+    height: 200px;
+    border: 1px solid;
+    overflow: hidden;
 
-  transform: rotate(45deg);
-  -mos-transform: rotate(45deg);
-  -mz-transform: rotate(45deg);
-  -webkit-transform: rotate(45deg);
-}
-.box img {
-  width: 100%;
-}
+    transform: rotate(45deg);
+    -mos-transform: rotate(45deg);
+    -mz-transform: rotate(45deg);
+    -webkit-transform: rotate(45deg);
+  }
+  .box img {
+    width: 100%;
+  }
+</style>
+
+<div class="box"><img src="img/test.png" /></div>
 ```
 
 效果图：
@@ -746,17 +743,20 @@ clip-path 语法：`clip-path: <clip-source> | [ <basic-shape> || <geometry-box>
 
 代码就不过多说明了,代码示例：
 
-```css
-dom结构 <div class="box" > </div > 基本样式 .box {
-  width: 200px;
-  height: 200px;
-  background-color: #58a; /*hack 回退*/
-  background: linear-gradient(225deg, transparent 20px, rgba(0, 0, 0, 0.7) 0),
-    linear-gradient(225deg, transparent 20px, yellowgreen 0);
-  background-size: 28px, 100%;
-  background-repeat: no-repeat;
-  background-position: right top, center;
-}
+```html
+<style>
+  .box {
+    width: 200px;
+    height: 200px;
+    background-color: #58a; /*hack 回退*/
+    background: linear-gradient(225deg, transparent 20px, rgba(0, 0, 0, 0.7) 0),
+      linear-gradient(225deg, transparent 20px, yellowgreen 0);
+    background-size: 28px, 100%;
+    background-repeat: no-repeat;
+    background-position: right top, center;
+  }
+</style>
+<div class="box"></div>
 ```
 
 不同角度的折角实现：
