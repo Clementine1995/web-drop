@@ -290,6 +290,7 @@ align-self 属性允许单个项目有与其他项目不一样的对齐方式，
 > If 'margin-top', or 'margin-bottom' are 'auto', their used value is 0.—CSS2 Visual formatting model details: 10.6.3
 
 在块格式化上下文中，如果 margin-left 和 margin-right 都是 auto，则它们的表达值相等，这将使元素相对于包含块的边缘水平居中。( 这里的计算值为元素剩余可用剩余空间的一半)
+
 而如果 margin-top 和 margin-bottom 都是 auto，则他们的值都为 0，当然也就无法造成垂直方向上的居中。
 
 #### 使用 FFC/GFC 使 margin: auto 在垂直方向上居中元素

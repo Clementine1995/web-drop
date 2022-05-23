@@ -169,17 +169,15 @@ watcher1 是父组件，watcher2 是子组件
 
 所以：当对象内部被修改的时候，会通知到父和子更新。
 
-```js
-data() {
-  return {
-    obj: { name: '11111' }
-  }
-}
+```vue
+data() { return { obj: { name: '11111' } } }
 
-<div>
-{{ obj }}
-<test :child_obj="obj"></test>
-</div>
+<template>
+  <div>
+    {{ obj }}
+    <test :child_obj="obj"></test>
+  </div>
+</template>
 ```
 
 定时修改父组件数据 obj.name ，可以看到是 obj.name 通知父子更新，当然，如果对象被整个替换了，而不是修改内部，那么跟基本类型一样
