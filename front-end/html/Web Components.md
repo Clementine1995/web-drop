@@ -22,7 +22,7 @@ Web Components 旨在解决这些问题 — 它由三项主要技术组成，它
 
 ## 使用 custom elements
 
-Web Components 标准非常重要的一个特性是，它使开发者能够将 HTML 页面的功能封装为 custom elements（自定义标签），而往常，开发者不得不写一大堆冗长、深层嵌套的标签来实现同样的页面功能。
+Web Components 标准非常重要的一个特性是，它使开发者能够将 HTML 页面的功能封装为 custom elements（自定义标签），而往常开发者不得不写一大堆冗长、深层嵌套的标签来实现同样的页面功能。
 
 ### custom elements 概述
 
@@ -74,5 +74,54 @@ class WordCount extends HTMLParagraphElement {
 如果需要在元素属性变化后，触发 attributeChangedCallback()回调函数，必须监听这个属性。这可以通过定义 observedAttributes() get 函数来实现，observedAttributes()函数体内包含一个 return 语句，返回一个数组，包含了需要监听的属性名称：`static get observedAttributes() {return ['w', 'l']; }`
 
 ## 使用 shadow DOM
+
+Web components 的一个重要属性是封装——可以将标记结构、样式和行为隐藏起来，并与页面上的其他代码相隔离，保证不同的部分不会混在一起，可使代码更加干净、整洁。其中，Shadow DOM 接口是关键所在，它可以将一个隐藏的、独立的 DOM 附加到一个元素上。
+
+Shadow DOM 允许将隐藏的 DOM 树附加到常规的 DOM 树中——它以 shadow root 节点为起始根节点，在这个根节点的下方，可以是任意元素，和普通的 DOM 元素一样。
+
+Shadow DOM 特有的术语：
+
+- Shadow host：一个常规 DOM 节点，Shadow DOM 会被附加到这个节点上。
+- Shadow tree：Shadow DOM 内部的 DOM 树。
+- Shadow boundary：Shadow DOM 结束的地方，也是常规 DOM 开始的地方。
+- Shadow root: Shadow tree 的根节点。
+
+可以使用同样的方式来操作 Shadow DOM，就和操作常规 DOM 一样，不同的是，Shadow DOM 内部的元素始终不会影响到它外部的元素。
+
+### shadow DOM 基本用法
+
+可以使用 `Element.attachShadow()` 方法来将一个 shadow root 附加到任何一个元素上。它接受一个配置对象作为参数，该对象有一个 mode 属性，值可以是 open 或者 closed：
+
+```js
+let shadow = elementRef.attachShadow({ mode: "open" })
+let shadow = elementRef.attachShadow({ mode: "closed" })
+
+// open 表示可以通过页面内的 JavaScript 方法来获取 Shadow DOM，例如使用 Element.shadowRoot 属性：
+let myShadowDom = myCustomElem.shadowRoot
+```
+
+如果将一个 Shadow root 附加到一个 Custom element 上，并且将 mode 设置为 closed，那么就不可以从外部获取 Shadow DOM 了，myCustomElem.shadowRoot 将会返回 null。浏览器中的某些内置元素就是如此，例如 `<video>`，包含了不可访问的 Shadow DOM。
+
+如果想将一个 Shadow DOM 附加到 custom element 上，可以在 custom element 的构造函数中添加如下实现（目前，这是 shadow DOM 最实用的用法）：
+
+```js
+let shadow = this.attachShadow({ mode: "open" })
+```
+
+#### 使用外部引入的样式
+
+可以使用行内 `<style>` 元素为 Shadow DOM 添加样式，但是完全可以通过 `<link>` 标签引用外部样式表来替代行内样式。
+
+```js
+// 将外部引用的样式添加到 Shadow DOM 上
+const linkElem = document.createElement("link")
+linkElem.setAttribute("rel", "stylesheet")
+linkElem.setAttribute("href", "style.css")
+
+// 将所创建的元素添加到 Shadow DOM 上
+shadow.appendChild(linkElem)
+```
+
+请注意， 因为 `<link>` 元素不会打断 shadow root 的绘制, 因此在加载样式表时可能会出现未添加样式内容（FOUC），导致闪烁。
 
 ## 使用 templates and slots
