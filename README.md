@@ -6,7 +6,7 @@
 
 > [iCSS](https://github.com/chokcoco/iCSS/issues)
 >
-> [日问](https://q.shanyue.tech/weekly/)
+> [日问](https://shanyue.tech)
 >
 > [webfansplz](https://github.com/webfansplz/article)
 >
