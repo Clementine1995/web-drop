@@ -1,30 +1,30 @@
-# 数组方法Reduce介绍
+# 数组方法 Reduce 介绍
 
->[Array.prototype.reduce 实用指南](https://juejin.im/post/5bab8a9c6fb9a05d0e2e6bf0)
+> [Array.prototype.reduce 实用指南](https://juejin.im/post/5bab8a9c6fb9a05d0e2e6bf0)
 >
->[精读《用 Reduce 实现 Promise 串行执行》](https://juejin.im/post/5bd65b98f265da0a91458ee6)
+> [精读《用 Reduce 实现 Promise 串行执行》](https://juejin.im/post/5bd65b98f265da0a91458ee6)
 >
->[JS进阶篇--JS数组reduce()方法详解及高级技巧](https://segmentfault.com/a/1190000010731933)
+> [JS 进阶篇--JS 数组 reduce()方法详解及高级技巧](https://segmentfault.com/a/1190000010731933)
 >
->[25个你不得不知道的数组reduce高级用法](https://juejin.im/post/5e44002c6fb9a07c9f3fd135)
+> [25 个你不得不知道的数组 reduce 高级用法](https://juejin.im/post/5e44002c6fb9a07c9f3fd135)
 
 ## 简单介绍
 
->reduce() 方法对数组中的每个元素执行一个由您提供的reducer函数(升序执行)，将其结果汇总为单个返回值。[MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)
+> reduce() 方法对数组中的每个元素执行一个由您提供的 reducer 函数(升序执行)，将其结果汇总为单个返回值。[MDN](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)
 
-上述是 MDN对该方法的描述，具体的语法是：`arr.reduce(callback[, initialValue])`
+上述是 MDN 对该方法的描述，具体的语法是：`arr.reduce(callback[, initialValue])`
 参数:
 
-+ callback 执行数组中每个值的函数，包含四个参数：
-  + accumulator 累计器累计回调的返回值; 它是上一次调用回调时返回的累积值，或initialValue（见于下方）。
-  + currentValue 数组中正在处理的元素。
-  + currentIndex 可选，数组中正在处理的当前元素的索引。 如果提供了initialValue，则起始索引号为0，否则为1。
-  + array 可选，调用reduce()的数组
-+ initialValue 可选，作为第一次调用 callback函数时的第一个参数的值。 如果没有提供初始值，则将使用数组中的第一个元素。 在没有初始值的空数组上调用 reduce 将报错。
+- callback 执行数组中每个值的函数，包含四个参数：
+  - accumulator 累计器累计回调的返回值; 它是上一次调用回调时返回的累积值，或 initialValue（见于下方）。
+  - currentValue 数组中正在处理的元素。
+  - currentIndex 可选，数组中正在处理的当前元素的索引。 如果提供了 initialValue，则起始索引号为 0，否则为 1。
+  - array 可选，调用 reduce()的数组
+- initialValue 可选，作为第一次调用 callback 函数时的第一个参数的值。 如果没有提供初始值，则将使用数组中的第一个元素。 在没有初始值的空数组上调用 reduce 将报错。
 
-具体描述：回调函数第一次执行时，accumulator 和currentValue的取值有两种情况：如果调用reduce()时提供了initialValue，accumulator取值为initialValue，currentValue取数组中的第一个值；如果没有提供 initialValue，那么accumulator取数组中的第一个值，currentValue取数组中的第二个值。
+具体描述：回调函数第一次执行时，accumulator 和 currentValue 的取值有两种情况：如果调用 reduce()时提供了 initialValue，accumulator 取值为 initialValue，currentValue 取数组中的第一个值；如果没有提供 initialValue，那么 accumulator 取数组中的第一个值，currentValue 取数组中的第二个值。
 
-注意：**如果没有提供initialValue，reduce 会从索引1的地方开始执行 callback 方法，跳过第一个索引。如果提供initialValue，从索引0开始**。
+注意：**如果没有提供 initialValue，reduce 会从索引 1 的地方开始执行 callback 方法，跳过第一个索引。如果提供 initialValue，从索引 0 开始**。
 
 其实这个方法并不难理解的，正如它名字所示，抓住它的核心：聚合。一般而言，如果需要把数组转换成其他元素，如字符串、数字、对象甚至是一个新数组的时候，若其他数组方法不太适用时，就可以考虑 reduce 方法，不熟悉这个方法的同学，尽管抛开上面的语法， 记住方法的核心是聚合即可。
 
@@ -54,24 +54,24 @@
 
 ```js
 function sum(arr) {
-  let sum = 0;
+  let sum = 0
   for (let i = 0, len = arr.length; i < len; i++) {
-    const { total } = arr[i];
-    sum += total;
+    const { total } = arr[i]
+    sum += total
   }
-  return sum;
+  return sum
 }
 ```
 
-这个函数可以完成上述需求，但我们精确地维护了数组索引，再精确地处理整个运算过程，是典型的命令式编程。同样的使用forof，forEach等循环也能完成这个需求，上文提及，只要涉及将数组转换为另外的数据体，就可以使用 reduce，它也可以这样写：
+这个函数可以完成上述需求，但我们精确地维护了数组索引，再精确地处理整个运算过程，是典型的命令式编程。同样的使用 forof，forEach 等循环也能完成这个需求，上文提及，只要涉及将数组转换为另外的数据体，就可以使用 reduce，它也可以这样写：
 
 ```js
 arr.reduce((sum, { total }) => {
-  return sum + total;
+  return sum + total
 }, 0)
 ```
 
-这样就完成了，sum 是此前累加的结果，它的初始值为 0。注意：此时的initialValue也就是初始值是必要的，如果没有reduce函数会将第一个元素直接作为sum的值，然后从第二个值开始取出total，虽然运行不会报错，但是最终结果不是我们想要的，这也与上面见到介绍中相吻合。
+这样就完成了，sum 是此前累加的结果，它的初始值为 0。注意：此时的 initialValue 也就是初始值是必要的，如果没有 reduce 函数会将第一个元素直接作为 sum 的值，然后从第二个值开始取出 total，虽然运行不会报错，但是最终结果不是我们想要的，这也与上面见到介绍中相吻合。
 
 ### 聚合为字符串
 
@@ -81,9 +81,8 @@ arr.reduce((sum, { total }) => {
 
 ```js
 arr.reduce((str, { id, type }) => {
-  return str + `id:${id},type:${type};`;
-}, '')
-
+  return str + `id:${id},type:${type};`
+}, "")
 ```
 
 注意给它提供初始值。
@@ -94,14 +93,14 @@ arr.reduce((str, { id, type }) => {
 
 ```js
 function changeToObj(arr) {
-  const res = {};
+  const res = {}
   arr.forEach(({ id, type, total }) => {
     res[id] = {
       type,
-      total
-    };
+      total,
+    }
   })
-  return res;
+  return res
 }
 ```
 
@@ -111,67 +110,67 @@ function changeToObj(arr) {
 arr.reduce((res, { id, type, total }) => {
   res[id] = {
     type,
-    total
-  };
-  return res;
+    total,
+  }
+  return res
 }, {})
 ```
 
 res 是最后返回的对象，通过遍历数组，不断往里面添加新的属性与值，最后达到聚合成对象的目的，代码还是相当简洁有力的。
 
-## MDN上的例子
+## MDN 上的例子
 
 ### 将二维数组转化为一维
 
 ```js
-var flattened = [[0, 1], [2, 3], [4, 5]].reduce(
- ( acc, cur ) => acc.concat(cur),
- []
-);
+var flattened = [
+  [0, 1],
+  [2, 3],
+  [4, 5],
+].reduce((acc, cur) => acc.concat(cur), [])
 ```
 
 ### 计算数组中每个元素出现的次数
 
 ```js
-var names = ['Alice', 'Bob', 'Tiff', 'Bruce', 'Alice'];
+var names = ["Alice", "Bob", "Tiff", "Bruce", "Alice"]
 
 var countedNames = names.reduce(function (allNames, name) {
   if (name in allNames) {
-    allNames[name]++;
+    allNames[name]++
+  } else {
+    allNames[name] = 1
   }
-  else {
-    allNames[name] = 1;
-  }
-  return allNames;
-}, {});
+  return allNames
+}, {})
 // countedNames is:
 // { 'Alice': 2, 'Bob': 1, 'Tiff': 1, 'Bruce': 1 }
 ```
 
-### 使用reduce实现数组方法map
+### 使用 reduce 实现数组方法 map
 
 ```js
 const arr1 = [
   {
-    name: '111',
-    age: 22
+    name: "111",
+    age: 22,
   },
   {
-    name: '222',
-    age: 33
-  }
+    name: "222",
+    age: 33,
+  },
 ]
 
 console.log(arr1)
 // [ { name: '111', age: 22 }, { name: '222', age: 33 } ]
 
-function handle (cur, index, me) {
+function handle(cur, index, me) {
   cur.age += 1
   return cur
 }
 
 const myMap = (cb, arr) => {
-  if (typeof cb !== 'function') throw 'error'
+  if (typeof cb !== "function") throw "error"
   return arr.reduce((acc, cur, index, me) => {
     let temp = cb(cur, index, me)
     return acc.concat(temp)
@@ -182,27 +181,27 @@ console.log(myMap(handle, arr1))
 // [ { name: '111', age: 23 }, { name: '222', age: 34 } ]
 ```
 
-### 按属性对object分类
+### 按属性对 object 分类
 
 ```js
 var people = [
-  { name: 'Alice', age: 21 },
-  { name: 'Max', age: 20 },
-  { name: 'Jane', age: 20 }
-];
+  { name: "Alice", age: 21 },
+  { name: "Max", age: 20 },
+  { name: "Jane", age: 20 },
+]
 
 function groupBy(objectArray, property) {
   return objectArray.reduce(function (acc, obj) {
-    var key = obj[property];
+    var key = obj[property]
     if (!acc[key]) {
-      acc[key] = [];
+      acc[key] = []
     }
-    acc[key].push(obj);
-    return acc;
-  }, {});
+    acc[key].push(obj)
+    return acc
+  }, {})
 }
 
-var groupedPeople = groupBy(people, 'age');
+var groupedPeople = groupBy(people, "age")
 // groupedPeople is:
 // {
 //   20: [
@@ -216,51 +215,58 @@ var groupedPeople = groupBy(people, 'age');
 ### 数组去重
 
 ```js
-let arr = [1,2,1,2,3,5,4,5,3,4,4,4,4];
-let result = arr.sort().reduce((init, current)=>{
-    if(init.length===0 || init[init.length-1]!==current){
-        init.push(current);
-    }
-    return init;
-}, []);
-console.log(result); //[1,2,3,4,5]
+let arr = [1, 2, 1, 2, 3, 5, 4, 5, 3, 4, 4, 4, 4]
+let result = arr.sort().reduce((init, current) => {
+  if (init.length === 0 || init[init.length - 1] !== current) {
+    init.push(current)
+  }
+  return init
+}, [])
+console.log(result) //[1,2,3,4,5]
 ```
 
 ### 字符串中每个字母出现的次数
 
 ```js
-var arrString = 'abcdaabc';
+var arrString = "abcdaabc"
 
-arrString.split('').reduce(function(res, cur) {
-    res[cur] ? res[cur] ++ : res[cur] = 1
-    return res;
+arrString.split("").reduce(function (res, cur) {
+  res[cur] ? res[cur]++ : (res[cur] = 1)
+  return res
 }, {})
 ```
 
-### 使用扩展运算符和initialValue绑定包含在对象数组中的数组
+### 使用扩展运算符和 initialValue 绑定包含在对象数组中的数组
 
 ```js
 // friends - 对象数组
 // where object field "books" - list of favorite books
-var friends = [{
-  name: 'Anna',
-  books: ['Bible', 'Harry Potter'],
-  age: 21
-}, {
-  name: 'Bob',
-  books: ['War and peace', 'Romeo and Juliet'],
-  age: 26
-}, {
-  name: 'Alice',
-  books: ['The Lord of the Rings', 'The Shining'],
-  age: 18
-}];
+var friends = [
+  {
+    name: "Anna",
+    books: ["Bible", "Harry Potter"],
+    age: 21,
+  },
+  {
+    name: "Bob",
+    books: ["War and peace", "Romeo and Juliet"],
+    age: 26,
+  },
+  {
+    name: "Alice",
+    books: ["The Lord of the Rings", "The Shining"],
+    age: 18,
+  },
+]
 
-// allbooks - list which will contain all friends' books +  
+// allbooks - list which will contain all friends' books +
 // additional list contained in initialValue
-var allbooks = friends.reduce(function(prev, curr) {
-  return [...prev, ...curr.books];
-}, ['Alphabet']);
+var allbooks = friends.reduce(
+  function (prev, curr) {
+    return [...prev, ...curr.books]
+  },
+  ["Alphabet"]
+)
 
 // allbooks = [
 //   'Alphabet', 'Bible', 'Harry Potter', 'War and peace',
@@ -269,7 +275,7 @@ var allbooks = friends.reduce(function(prev, curr) {
 // ]
 ```
 
-### 按顺序运行Promise
+### 按顺序运行 Promise
 
 ```js
 /**
@@ -283,101 +289,97 @@ function runPromiseInSequence(arr, input) {
   return arr.reduce(
     (promiseChain, currentFunction) => promiseChain.then(currentFunction),
     Promise.resolve(input)
-  );
+  )
 }
 
 // promise function 1
 function p1(a) {
   return new Promise((resolve, reject) => {
-    resolve(a * 5);
-  });
+    resolve(a * 5)
+  })
 }
 
 // promise function 2
 function p2(a) {
   return new Promise((resolve, reject) => {
-    resolve(a * 2);
-  });
+    resolve(a * 2)
+  })
 }
 
 // function 3  - will be wrapped in a resolved promise by .then()
 function f3(a) {
- return a * 3;
+  return a * 3
 }
 
 // promise function 4
 function p4(a) {
   return new Promise((resolve, reject) => {
-    resolve(a * 4);
-  });
+    resolve(a * 4)
+  })
 }
 
-const promiseArr = [p1, p2, f3, p4];
-runPromiseInSequence(promiseArr, 10)
-  .then(console.log);   // 1200
+const promiseArr = [p1, p2, f3, p4]
+runPromiseInSequence(promiseArr, 10).then(console.log) // 1200
 ```
 
-### 新建并返回一个obj对象中存在的keys的object对象
+### 新建并返回一个 obj 对象中存在的 keys 的 object 对象
 
 ```js
-var only = function(obj, keys){
-  obj = obj || {};
-  if ('string' == typeof keys) keys = keys.split(/ +/);
-  return keys.reduce(function(ret, key){
-    if (null == obj[key]) return ret;
-    ret[key] = obj[key];
-    return ret;
-  }, {});
-};
+var only = function (obj, keys) {
+  obj = obj || {}
+  if ("string" == typeof keys) keys = keys.split(/ +/)
+  return keys.reduce(function (ret, key) {
+    if (null == obj[key]) return ret
+    ret[key] = obj[key]
+    return ret
+  }, {})
+}
 
 var a = {
-    env : 'development',
-    proxy : false,
-    subdomainOffset : 2
+  env: "development",
+  proxy: false,
+  subdomainOffset: 2,
 }
-only(a,['env','proxy'])   // {env:'development',proxy : false}
+only(a, ["env", "proxy"]) // {env:'development',proxy : false}
 ```
 
 ### 完成目标对象多个属性的同时叠加
 
-将reduce函数第一个参数callback封装为一个数组，由数组中的每一个函数单独进行叠加并完成reduce操作。
+将 reduce 函数第一个参数 callback 封装为一个数组，由数组中的每一个函数单独进行叠加并完成 reduce 操作。
 
 ```js
-var reducers = {  
-  totalInEuros : function(state, item) {
-    return state.euros += item.price * 0.897424392;
+var reducers = {
+  totalInEuros: function (state, item) {
+    return (state.euros += item.price * 0.897424392)
   },
-  totalInYen : function(state, item) {
-    return state.yens += item.price * 113.852;
-  }
-};
+  totalInYen: function (state, item) {
+    return (state.yens += item.price * 113.852)
+  },
+}
 
-var manageReducers = function(reducers) {
-  return function(state, item) {
-    return Object.keys(reducers).reduce(
-      function(nextState, key) {
-        reducers[key](state, item);
-        return state;
-      },
-      {}
-    );
+var manageReducers = function (reducers) {
+  return function (state, item) {
+    return Object.keys(reducers).reduce(function (nextState, key) {
+      reducers[key](state, item)
+      return state
+    }, {})
   }
-};
+}
 
-var bigTotalPriceReducer = manageReducers(reducers);
-var initialState = {euros:0, yens: 0};
-var items = [{price: 10}, {price: 120}, {price: 1000}];
-var totals = items.reduce(bigTotalPriceReducer, initialState);
-console.log(totals);
+var bigTotalPriceReducer = manageReducers(reducers)
+var initialState = { euros: 0, yens: 0 }
+var items = [{ price: 10 }, { price: 120 }, { price: 1000 }]
+var totals = items.reduce(bigTotalPriceReducer, initialState)
+console.log(totals)
 ```
 
 ### 数组扁平
 
 ```js
 function flat(arr = []) {
-    return arr.reduce((t, v) => t.concat(Array.isArray(v) ? flat(v) : v), [])
+  return arr.reduce((t, v) => t.concat(Array.isArray(v) ? flat(v) : v), [])
 }
 
-const arr = [0, 1, [2, 3], [4, 5, [6, 7]], [8, [9, 10, [11, 12]]]];
-flat(arr); // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+const arr = [0, 1, [2, 3], [4, 5, [6, 7]], [8, [9, 10, [11, 12]]]]
+flat(arr) // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 ```
