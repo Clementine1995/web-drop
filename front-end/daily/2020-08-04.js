@@ -1,18 +1,17 @@
 // 第二个 Promise
 
-const PENDING = Symbol('PENDING')
-const RESOLVED = Symbol('RESOLVED')
-const REJECTED = Symbol('REJECTED')
+const PENDING = Symbol("PENDING")
+const RESOLVED = Symbol("RESOLVED")
+const REJECTED = Symbol("REJECTED")
 
 function custPromise(executor) {
-
   this.status = PENDING
 
   this.onResolvedCallbacks = []
   this.onRejectedCallbacks = []
 
   this.value = undefined
-  
+
   this.reason = undefined
 
   const resolve = (value) => {
@@ -21,7 +20,7 @@ function custPromise(executor) {
 
       this.value = value
 
-      this.onResolvedCallbacks.forEach(fn => fn())
+      this.onResolvedCallbacks.forEach((fn) => fn())
     }
   }
 
@@ -31,7 +30,7 @@ function custPromise(executor) {
 
       this.reason = reason
 
-      this.onRejectedCallbacks.forEach(fn => fn())
+      this.onRejectedCallbacks.forEach((fn) => fn())
     }
   }
 
@@ -43,51 +42,61 @@ function custPromise(executor) {
 }
 
 const resolvePromise = (promise, x, resolve, reject) => {
-  if (promise === x) { // 如果得到新的新值为执行 then 的那个 promise，抛错
-    return reject(new TypeError('Chaining cycle detected for promise #<promise>'))
+  if (promise === x) {
+    // 如果得到新的新值为执行 then 的那个 promise，抛错
+    return reject(
+      new TypeError("Chaining cycle detected for promise #<promise>")
+    )
   }
 
-  if ((typeof x === 'object' && x !== null) || typeof x === 'function') {
+  if ((typeof x === "object" && x !== null) || typeof x === "function") {
     // 防止多次调用成功或者失败
-    let called;
+    let called
     try {
       let then = x.then
-      if (typeof then === 'function') {
-        then.call(x, y => {
-          if (called) {
-            return
-          }
-          called = true
-          resolvePromise(promise, y, resolve, reject)
-        }, r => {
-          if (called) {
-            return
-          }
-          called = true
+      if (typeof then === "function") {
+        then.call(
+          x,
+          (y) => {
+            if (called) {
+              return
+            }
+            called = true
+            resolvePromise(promise, y, resolve, reject)
+          },
+          (r) => {
+            if (called) {
+              return
+            }
+            called = true
 
-          reject(r)
-        })
+            reject(r)
+          }
+        )
       } else {
         resolve(x)
       }
     } catch (error) {
       if (called) {
-				return
-			}
-			called = true
+        return
+      }
+      called = true
       reject(error)
     }
-    
   } else {
     resolve(x)
   }
 }
 
 custPromise.prototype.then = function (onFulfilled, onRejected) {
-  onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : value => value
-  onRejected = typeof onRejected === 'function' ? onRejected : reason => {
-    throw reason
-  }
+  onFulfilled =
+    typeof onFulfilled === "function" ? onFulfilled : (value) => value
+  onRejected =
+    typeof onRejected === "function"
+      ? onRejected
+      : (reason) => {
+          throw reason
+        }
 
   let promise = new custPromise((resolve, reject) => {
     if (this.status === RESOLVED) {
@@ -137,21 +146,23 @@ custPromise.prototype.then = function (onFulfilled, onRejected) {
   return promise
 }
 
-custPromise.prototype.catch = function(onRejected) {
+custPromise.prototype.catch = function (onRejected) {
   return this.then(null, onRejected)
 }
 
-
 custPromise.prototype.finally = function (callback) {
-  return this.then((value) => {
-    return custPromise.resolve(callback()).then(() => {
-      return value;
-    });
-  }, (err) => {
-    return custPromise.resolve(callback()).then(() => {
-      throw err;
-    });
-  });
+  return this.then(
+    (value) => {
+      return custPromise.resolve(callback()).then(() => {
+        return value
+      })
+    },
+    (err) => {
+      return custPromise.resolve(callback()).then(() => {
+        throw err
+      })
+    }
+  )
 }
 
 custPromise.defer = custPromise.deferred = function () {
@@ -182,7 +193,7 @@ custPromise.resolve = function (value) {
   }
 
   return new custPromise((resolve, reject) => {
-    if (value && value.then && typeof value.then === 'function') {
+    if (value && value.then && typeof value.then === "function") {
       setTimeout(() => {
         value.then(resolve, reject)
       })
@@ -192,13 +203,13 @@ custPromise.resolve = function (value) {
   })
 }
 
-custPromise.reject = function(reason) {
+custPromise.reject = function (reason) {
   return new custPromise((resolve, reject) => {
     reject(reason)
   })
 }
 
-custPromise.all = function(promises) {
+custPromise.all = function (promises) {
   return new custPromise((resolve, reject) => {
     let result = []
 
@@ -215,7 +226,7 @@ custPromise.all = function(promises) {
       }
       promises.forEach((current, i) => {
         if (current instanceof custPromise) {
-          current.then(data => {
+          current.then((data) => {
             processValue(i, data)
           }, reject)
         } else {
@@ -226,17 +237,17 @@ custPromise.all = function(promises) {
   })
 }
 
-custPromise.race = function(promises) {
+custPromise.race = function (promises) {
   if (!promises.length) {
     return
   }
   return new custPromise((resolve, reject) => {
-    promises.forEach(current => {
+    promises.forEach((current) => {
       custPromise.resolve(current).then(
-        value => {
+        (value) => {
           resolve(value)
         },
-        error => {
+        (error) => {
           reject(error)
         }
       )
@@ -250,24 +261,25 @@ const p1 = new custPromise((resolve, reject) => {
   }, 1000)
 })
 
-
-const p2 = p1.then(res => {
-  console.log(res)
-  return 222222
-}).then(res => {
-  console.log(res)
-}).finally(res => {
-  console.log('finally:', res)
-  return 111
-}).then(res => {
-  console.log('before finally', res)
-})
-
-
+const p2 = p1
+  .then((res) => {
+    console.log(res)
+    return 222222
+  })
+  .then((res) => {
+    console.log(res)
+  })
+  .finally((res) => {
+    console.log("finally:", res)
+    return 111
+  })
+  .then((res) => {
+    console.log("before finally", res)
+  })
 
 // 去重
 
-var array = [1, 1, '1', '1']
+var array = [1, 1, "1", "1"]
 
 // 双重循环
 function unique(array) {
@@ -281,7 +293,6 @@ function unique(array) {
     if (res.length === j) {
       res.push(array[i])
     }
-    
   }
   return res
 }
@@ -295,7 +306,6 @@ function unique2(array) {
     if (res.indexOf(array[i]) === -1) {
       res.push(array[i])
     }
-    
   }
   return res
 }
@@ -306,13 +316,13 @@ function unique3(array) {
 
   var sortArray = array.concat().sort()
   var seen
-  for (let index = 0; index < array.length; index++) {
-    if (!index || seen !== array[index]) {
-      res.push(array[index])
+  for (let index = 0; index < sortArray.length; index++) {
+    if (!index || seen !== sortArray[index]) {
+      res.push(sortArray[index])
     }
-    seen = array[index]
+    seen = sortArray[index]
   }
-  
+
   return res
 }
 
@@ -322,21 +332,23 @@ console.log(unique3(array))
 
 function unique4(array) {
   var res = array.filter((item, index, array) => {
-    return index == array.indexOf(item)
+    return index === array.indexOf(item)
   })
   return res
 }
 
 // filter + 排序
 function unique5(array) {
-  var res = array.concat().sort().filter((item, index, array) => {
-    return !index || item !== array[index - 1]
-  })
+  var res = array
+    .concat()
+    .sort()
+    .filter((item, index, array) => {
+      return !index || item !== array[index - 1]
+    })
   return res
 }
 
 // Object键值对，存在问题无法区分1 '1' 这种，因为对象的键值只能是字符串
-
 function unique6(array) {
   var obj = {}
   return array.filter((item, index, array) => {
@@ -348,7 +360,9 @@ function unique6(array) {
 function unique7(array) {
   var obj = {}
   return array.filter((item, index, array) => {
-    return obj.hasOwnProperty(typeof item + item) ? false : (obj[typeof item + item] = true)
+    return obj.hasOwnProperty(typeof item + item)
+      ? false
+      : (obj[typeof item + item] = true)
   })
 }
 // 再次改进使用序列化
@@ -356,19 +370,21 @@ function unique7(array) {
 function unique8(array) {
   var obj = {}
   return array.filter((item, index, array) => {
-    return obj.hasOwnProperty(typeof item + JSON.stringify(item)) ? false : (obj[typeof item + JSON.stringify(item)] = true)
+    return obj.hasOwnProperty(typeof item + JSON.stringify(item))
+      ? false
+      : (obj[typeof item + JSON.stringify(item)] = true)
   })
 }
 // ES6 set
 function unique9(array) {
   return Array.from(new Set(array))
 }
-const unique10 = array => [...new Set(array)]
+const unique10 = (array) => [...new Set(array)]
 // ES6 map + filter
 
 function unique11(array) {
   var res = new Map()
-  return array.filter(item => {
+  return array.filter((item) => {
     return !res.has(item) && res.set(item, 1)
   })
 }
