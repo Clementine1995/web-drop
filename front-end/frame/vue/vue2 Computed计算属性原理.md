@@ -271,12 +271,7 @@ function popTarget() {
 2. computed 被读取，createComputedGetter 包装的函数触发，第一次会进行计算，computed-watcher.evaluted 被调用，进而 computed-watcher.get 被调用，Dep.target 被设置为 computed-watcher，旧值页面 watcher 被缓存起来。
 3. computed 计算会读取 data，此时 data 就收集到 computed-watcher，同时 computed-watcher 也会保存到 data 的依赖收集器 dep 中。并且会把 data 的 dep 保存到 computed-watcher 的 deps 中，computed 计算完毕，释放 Dep.target，并且 Dep.target 恢复上一个 watcher（页面 watcher）
 4. 手动 watcher.depend，因为之前保存了 data 的 dep，让 data 再收集一次 Dep.target，于是 data 又收集到 恢复了的页面 watcher
-
-再额外记一个 data 改变后续流程
-
-综上，此时 data 的依赖收集器=【computed-watcher，页面 watcher】
-
-data 改变，正序遍历通知，computed 先更新，页面再更新，所以，页面才能读取到最新的 computed 值
+5. 综上，此时 data 的依赖收集器=【computed-watcher，页面 watcher】，data 改变，正序遍历通知，computed 先更新，页面再更新，所以，页面才能读取到最新的 computed 值
 
 ### 收集所有 computed 的 watcher
 
