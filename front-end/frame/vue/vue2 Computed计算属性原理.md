@@ -112,10 +112,8 @@ dirty 默认是 false 的，而 lazy 赋值给 dirty，就是给一个初始值�
 ```js
 function defineComputed(target, key, userDef) {
   // 设置 set 为默认值，避免 computed 并没有设置 set
-
   var set = function () {}
   //  如果用户设置了set，就使用用户的set
-
   if (userDef.set) set = userDef.set
 
   Object.defineProperty(target, key, {
@@ -128,7 +126,7 @@ function defineComputed(target, key, userDef) {
 
 源码已经被简短很多，但是意思是不变的
 
-1. 使用 Object.defineProperty 在 实例上 computed 属性，所以可以直接访问
+1. 使用 Object.defineProperty 在实例上关联 computed 属性，所以可以直接访问
 2. set 函数默认是空函数，如果用户设置，则使用用户设置
 3. createComputedGetter 包装返回 get 函数
 
@@ -183,7 +181,7 @@ Watcher.prototype.update = function () {
 }
 ```
 
-当通知 computed 更新的时候，就只是 把 dirty 设置为 true，从而 读取 comptued 时，便会调用 evalute 重新计算
+当通知 computed 更新的时候，就只是把 dirty 设置为 true，从而读取 comptued 时，便会调用 evalute 重新计算
 
 #### 牵线
 
@@ -209,6 +207,9 @@ if (Dep.target) {
 
 ```js
 Watcher.prototype.depend = function () {
+  // this.deps 里保存所有收集了当前 watch 的 dep
+  // 当 computed-watch 访问 data 中属性，会被 data 中属性对应的依赖收集器 dep 收集
+  // 此时 computed-watch 也会把这个 dep 保存到自己的 deps 中，这样可以反推回去
   var i = this.deps.length
 
   while (i--) {
@@ -266,19 +267,10 @@ function popTarget() {
 
 下面开始 牵线的 详细流程
 
-1、页面更新，读取 computed 的时候，Dep.target 会设置为 页面 watcher。
-
-2、computed 被读取，createComputedGetter 包装的函数触发，第一次会进行计算
-
-computed-watcher.evaluted 被调用，进而 computed-watcher.get 被调用，Dep.target 被设置为 computed-watcher，旧值 页面 watcher 被缓存起来。
-
-3、computed 计算会读取 data，此时 data 就收集到 computed-watcher
-
-同时 computed-watcher 也会保存到 data 的依赖收集器 deps 中。并且会把 data 的 deps 保存到 computed-watcher 的 deps 中
-
-computed 计算完毕，释放 Dep.target，并且 Dep.target 恢复上一个 watcher（页面 watcher）
-
-4、手动 watcher.depend，因为之前保存了 data 的 deps，让 data 再收集一次 Dep.target，于是 data 又收集到 恢复了的页面 watcher
+1. 页面更新，读取 computed 的时候，Dep.target 会设置为 页面 watcher。
+2. computed 被读取，createComputedGetter 包装的函数触发，第一次会进行计算，computed-watcher.evaluted 被调用，进而 computed-watcher.get 被调用，Dep.target 被设置为 computed-watcher，旧值页面 watcher 被缓存起来。
+3. computed 计算会读取 data，此时 data 就收集到 computed-watcher，同时 computed-watcher 也会保存到 data 的依赖收集器 dep 中。并且会把 data 的 dep 保存到 computed-watcher 的 deps 中，computed 计算完毕，释放 Dep.target，并且 Dep.target 恢复上一个 watcher（页面 watcher）
+4. 手动 watcher.depend，因为之前保存了 data 的 dep，让 data 再收集一次 Dep.target，于是 data 又收集到 恢复了的页面 watcher
 
 再额外记一个 data 改变后续流程
 
