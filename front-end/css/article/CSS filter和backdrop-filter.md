@@ -1,8 +1,10 @@
 # CSS 滤镜
 
+> 相关文章[深入探讨 filter 与 backdrop-filter 的异同](https://github.com/chokcoco/iCSS/issues/147)
+
 CSS 滤镜（filter）属提供的图形特效，像模糊，锐化或元素变色。过滤器通常被用于调整图片，背景和边界的渲染。
 
-## 语法
+## filter 语法
 
 ```css
 /* URL to SVG filter */
@@ -214,3 +216,52 @@ filter: contrast(175%) brightness(3%);
 ## 兼容性
 
 对浏览器版本要求比较高，chrome 需要 53 以上，火狐 35，而 IE 不支持，部分版本还需要加上-webkit 前缀才能使用。
+
+## backdrop-filter
+
+backdrop-filter 和 filter 所支持的滤镜种类是一模一样的。
+
+backdrop-filter 最常用的功能，就是用于实现毛玻璃效果。
+
+filter 和 backdrop-filter 使用上最明显的差异在于：
+
+- filter 作用于当前元素，并且它的后代元素也会继承这个属性
+- backdrop-filter 作用于元素背后的所有元素
+
+仔细区分理解，一个是当前元素和它的后代元素，一个是元素背后的所有元素。
+
+### 使用效果上的差异
+
+譬如，想实现这样一个图片的蒙版 Hover 效果：
+
+![img3](https://user-images.githubusercontent.com/8554143/140598990-6421640c-4f94-4b0f-a570-bda31102ce2f.gif)
+
+使用 backdrop-filter 可以轻松的胜任，因为它就是用于产生蒙版，作用于蒙版背后的元素
+
+![img4](https://user-images.githubusercontent.com/8554143/140599123-7488a3d0-8439-441b-a565-c657d01e4d5d.gif)
+
+如果使用 filter，如何实现上述的效果呢？比较麻烦，因为 filter 是作用于元素上的，所以，它只能是实现类似于这样的 Hover 效果：
+
+## Backdrop Root
+
+这一点 filter 和 backdrop-filter 都一样，那就是作用了 filter 和 backdrop-filter 的元素（值不为 none），都会生成 Backdrop Root。
+
+什么是 Backdrop Root 呢？（规范 [CSS 草案 -- Backdrop Root](https://drafts.fxtf.org/filter-effects-2/#BackdropRoot)）也就是我们常说的，生成了自己的堆叠上下文（Stacking Context）。
+
+它会造成什么问题：
+
+### 生成了 Backdrop Root 的元素会使 CSS 3D 失效
+
+有一个 3D 球的旋转动画，大概是这样：
+
+![img1](https://user-images.githubusercontent.com/8554143/50084389-cf889a80-0231-11e9-9f76-483375136a2c.gif)
+
+如果我们给上述动画的容器，添加一个 filter 或者 backdrop-filter：
+
+![img2](https://user-images.githubusercontent.com/8554143/50085117-19728000-0234-11e9-9184-218fb907fb88.gif)
+
+### 作用了 filter 和 backdrop-filter 的元素会使内部的 fixed 定位失效
+
+CSS 中 position: fixed 是相对于屏幕视口进行定位的。
+
+然而，作用了 filter 和 backdrop-filter 的元素的元素会使得其内部的 position: fixed 元素不再相对于屏幕视口进行定位，而是相对这个 Backdrop Root 元素进行定位，其表现就是 position: fixed 定位的元素退化为了 position: absolute。

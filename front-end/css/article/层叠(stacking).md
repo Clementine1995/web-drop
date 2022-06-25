@@ -23,6 +23,8 @@
 - isolation 属性被设置为 `isolate`的元素
 - 在 will-change 中指定了任意 CSS 属性，即便你没有直接指定这些属性的值
 - -webkit-overflow-scrolling 属性被设置 `touch`的元素
+- backdrop-filter 值不为“none”的元素
+- 设置了 contain: paint
 
 总结：
 
@@ -68,3 +70,19 @@ z-index 只适用于定位的元素，对非定位元素无效，它可以被设
 - 层叠上下文不会影响兄弟元素，只会影响后代元素。
 - 当元素的层叠水平一致、层叠顺序相同的时候，在 DOM 流中处于后面的元素会覆盖前面的元素。
 - 在同一层叠水平上时，有明显的 z-index 值，则值越大，谁在上。
+
+## 关于 fixed 定位失效
+
+> 相关文章 [fixed 定位失效 | 不受控制的 position:fixed](https://github.com/chokcoco/iCSS/issues/24)
+
+并不是所有能够生成层叠上下文的元素都会使得 position:fixed 失效，但也不止 transform 会使 position:fixed 失效。
+
+下述 7 种方式目前都会使得 position:fixed 定位的基准元素改变：
+
+- transform 属性值不为 none 的元素
+- 设置了 transform-style: preserve-3d 的元素
+- perspective 值不为 none 的元素
+- 在 will-change 中指定了任意 CSS 属性
+- 设置了 contain: paint
+- filter 值不为 none 的元素
+- backdrop-filter 值不为 none 的元素
