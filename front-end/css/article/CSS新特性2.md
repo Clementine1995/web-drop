@@ -457,3 +457,73 @@ content-visibility: auto 对于长文本、长列表功能的优化是显而易�
 如此之后，浏览器会给未被实际渲染的视口之外的 .paragraph 元素一个高度，避免出现滚动条抖动的现象：
 
 ![cv-img7](https://user-images.githubusercontent.com/8554143/171690415-0feb7451-f751-4d98-8f6e-8de0b00847ff.gif)
+
+## color-scheme
+
+color-scheme CSS 属性允许元素指示它可以轻松呈现的配色方案。操作系统配色方案的常见选择是“亮”和“暗”，或者是“白天模式”和“夜间模式”。当用户选择其中一种配色方案时，操作系统会对用户界面进行调整。
+
+语法：
+
+```css
+color-scheme: normal;
+color-scheme: light;
+color-scheme: dark;
+color-scheme: light dark;
+```
+
+- normal：表示元素未指定任何配色方案，因此应使用浏览器的默认配色方案呈现。
+- light：表示可以使用操作系统亮色配色方案渲染元素。
+- dark：表示可以使用操作系统深色配色方案渲染元素。
+
+## prefers-color-scheme
+
+prefers-color-scheme CSS 媒体特性用于检测用户是否有将系统的主题色设置为亮色或者暗色。
+
+语法：
+
+- no-preference：表示系统未得知用户在这方面的选项。
+- light：表示用户已告知系统他们选择使用浅色主题的界面。
+- dark：表示用户已告知系统他们选择使用暗色主题的界面。
+
+“未得知”可理解为：浏览器的宿主系统不支持设置主题色，或者支持主题色并默认为/被设为了未设置/无偏好。“已告知”为：浏览器的宿主系统支持设置主题色，且被设置为了亮色或者暗色。
+
+## accent-color
+
+CSS accent-color （强调色）属性可以在不改变浏览器默认表单组件基本样式的前提下重置组件的颜色。
+
+目前支持下面这些 HTML 控件元素：
+
+- 复选框：`<input type=”checkbox”>`
+- 单选框：`<input type=”radio”>`
+- 范围选择框：`<input type=”range”>`
+- 进度条：`<progress>`
+
+accent-color 属性具有继承性，只需要在对应表单控件元素的祖先元素上设置，响应的控件的颜色就会发生变化
+
+## mask-composite
+
+> 原文链接[高阶切图技巧！基于单张图片的任意颜色转换](https://github.com/chokcoco/iCSS/issues/189)
+
+如何通过单张 PNG/SVG 得到它的反向切图
+
+在运用 mask 对图片进行遮罩切割处理的同时，我们可以同时再运用到 mask-composite 属性。这个是非常有意思的元素。
+
+`-webkit-mask-composite`: 属性指定了将应用于同一元素的多个蒙版图像相互合成的方式。
+
+通俗点来说它的作用就是，当一个元素存在多重 mask 时，就可以运用 `-webkit-mask-composite` 进行效果叠加。
+
+可选取值：
+
+```css
+-webkit-mask-composite: clear; /*清除，不显示任何遮罩*/
+-webkit-mask-composite: copy; /*只显示上方遮罩，不显示下方遮罩*/
+-webkit-mask-composite: source-over;
+-webkit-mask-composite: source-in; /*只显示重合的地方*/
+-webkit-mask-composite: source-out; /*只显示上方遮罩，重合的地方不显示*/
+-webkit-mask-composite: source-atop;
+-webkit-mask-composite: destination-over;
+-webkit-mask-composite: destination-in; /*只显示重合的地方*/
+-webkit-mask-composite: destination-out; /*只显示下方遮罩，重合的地方不显示*/
+-webkit-mask-composite: destination-atop;
+-webkit-mask-composite: xor; /*只显示不重合的地方*/
+```
