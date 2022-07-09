@@ -1005,3 +1005,89 @@ this.$emit("update:title", newValue)
 ## 侦听数组
 
 非兼容: 当侦听一个数组时，只有当数组被替换时才会触发回调。如果需要在数组被改变时触发回调，必须指定 deep 选项。
+
+## 响应式计算和侦听
+
+### 调试 Computed
+
+computed 可接受一个带有 onTrack 和 onTrigger 选项的对象作为第二个参数：
+
+- onTrack 会在某个响应式 property 或 ref 作为依赖被追踪时调用。
+- onTrigger 会在侦听回调被某个依赖的修改触发时调用。
+
+### watchEffect
+
+watchEffect 是 3.x 版本新增的一个 API，使用上跟 React 的 useEffect 类似。
+
+watchEffect 根据响应式状态自动应用和重新应用副作用，它立即执行传入的一个函数，同时响应式追踪其依赖，并在其依赖变更时重新运行该函数。
+
+```js
+const count = ref(0)
+
+watchEffect(() => console.log(count.value))
+// -> logs 0
+
+setTimeout(() => {
+  count.value++
+  // -> logs 1
+}, 100)
+```
+
+#### 停止侦听
+
+当 watchEffect 在组件的 setup() 函数或生命周期钩子被调用时，侦听器会被链接到该组件的生命周期，并在组件卸载时自动停止。
+
+在一些情况下，也可以显式调用返回值以停止侦听：
+
+```js
+const stop = watchEffect(() => {
+  /* ... */
+})
+
+// later
+stop()
+```
+
+#### 清除副作用
+
+有时副作用函数会执行一些异步的副作用，这些响应需要在其失效时清除 (即完成之前状态已改变了) 。所以侦听副作用传入的函数可以接收一个 onInvalidate 函数作入参，用来注册清理失效时的回调。当以下情况发生时，这个失效回调会被触发：
+
+- 副作用即将重新执行时
+- 侦听器被停止 (如果在 setup() 或生命周期钩子函数中使用了 watchEffect，则在组件卸载时)
+
+```js
+watchEffect((onInvalidate) => {
+  const token = performAsyncOperation(id.value)
+  onInvalidate(() => {
+    // id has changed or watcher is stopped.
+    // invalidate previously pending async operation
+    token.cancel()
+  })
+})
+```
+
+这一点与 React 不同，React 的 useEffect 是通过返回一个函数来清除副作用。
+
+在执行数据请求时，副作用函数往往是一个异步函数：
+
+```js
+const data = ref(null)
+watchEffect(async (onInvalidate) => {
+  onInvalidate(() => {
+    /* ... */
+  }) // 我们在Promise解析之前注册清除函数
+  data.value = await fetchData(props.id)
+})
+```
+
+异步函数都会隐式地返回一个 Promise，但是清理函数必须要在 Promise 被 resolve 之前被注册。另外，Vue 依赖这个返回的 Promise 来自动处理 Promise 链上的潜在错误。
+
+#### 副作用刷新时机
+
+Vue 的响应性系统会缓存副作用函数，并异步地刷新它们，这样可以避免同一个“tick” 中多个状态改变导致的不必要的重复调用。在核心的具体实现中，组件的 update 函数也是一个被侦听的副作用。当一个用户定义的副作用函数进入队列时，默认情况下，会在所有的组件 update 前执行
+
+如果需要在组件更新(例如：当与模板引用一起)后重新运行侦听器副作用，可以传递带有 flush 选项的附加 options 对象 (默认为 'pre')。
+
+### watch 与 watchEffect 共享的行为
+
+watch 与 watchEffect 共享停止侦听，清除副作用 (相应地 onInvalidate 会作为回调的第三个参数传入)、副作用刷新时机和侦听器调试行为。
