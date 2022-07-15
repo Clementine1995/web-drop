@@ -1085,7 +1085,7 @@ function throwIfCancellationRequested(config) {
     config.cancelToken.throwIfRequested()
   }
 }
-// 抛出异常 用户 { message: '哎呀，我被若川取消了' }
+// 抛出异常 用户 { message: '哎呀，我被取消了' }
 CancelToken.prototype.throwIfRequested = function throwIfRequested() {
   if (this.reason) {
     throw this.reason
