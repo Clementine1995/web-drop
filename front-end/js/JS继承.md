@@ -140,7 +140,7 @@ if (typeof Object.create !== "function") {
 
 ### Object.setPrototypeOf ES6 提供的
 
-Object.setPrototypeOf() 方法设置一个指定的对象的原型 ( 即, 内部[[Prototype]]属性）到另一个对象或 null。 Object.setPrototypeOf(obj, prototype)
+Object.setPrototypeOf() 方法设置一个指定的对象的原型 (即, 内部[[Prototype]]属性）到另一个对象或 null。Object.setPrototypeOf(obj, prototype)
 
 ```js
 // ployfill
@@ -234,7 +234,7 @@ child.sayName() // my name is Child
 child.sayAge() // my age is 18
 ```
 
-我们完全可以把上述 ES6 的例子通过 babeljs 转码成 ES5 来查看，更严谨的实现。
+完全可以把上述 ES6 的例子通过 babeljs 转码成 ES5 来查看，更严谨的实现。
 
 ```js
 // 对转换后的代码进行了简要的注释
@@ -414,6 +414,6 @@ child.sayAge() // my age is 18
 
 继承对于 JS 来说就是父类拥有的方法和属性、静态方法等，子类也要拥有。子类中可以利用原型链查找，也可以在子类调用父类，或者从父类拷贝一份到子类等方案。 继承方法可以有很多，重点在于必须理解并熟 悉这些对象、原型以及构造器的工作方式，剩下的就简单了。寄生组合式继承是开发者使用比较多的。 回顾寄生组合式继承。主要就是三点：
 
-1. 子类构造函数的`__proto__`指向父类构造器，继承父类的静态方法。
-2. 子类构造函数的 prototype 的`__proto__`指向父类构造器的 prototype，继承父类的方法。
+1. 子类构造函数的 `__proto__` 指向父类构造器，继承父类的静态方法。
+2. 子类构造函数的 prototype 的 `__proto__` 指向父类构造器的 prototype，继承父类的方法。
 3. 子类构造器里调用父类构造器，继承父类的属性。
