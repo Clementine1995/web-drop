@@ -35,3 +35,5 @@
 > [poetries](https://github.com/poetries/FE-Interview-Questions)
 >
 > [hejialianghe](https://hejialianghe.gitee.io/)
+>
+> [kujian](https://github.com/kujian/frontendDaily)
