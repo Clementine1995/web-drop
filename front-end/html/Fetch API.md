@@ -658,6 +658,57 @@ let myResponse = new Response(body, init)
 
 例子：
 
+使用构造函数创建一个新的 Response 对象，传递一个新的 Blob 作为 body，和一个包含自定义 status 和 statusText 的 init 对象：
+
+```js
+var myBlob = new Blob()
+var init = { status: 200, statusText: "SuperSmashingGreat!" }
+var myResponse = new Response(myBlob, init)
+```
+
+#### Response 属性
+
+- Response.headers 只读：包含此 Response 所关联的 Headers 对象。
+- Response.ok 只读：包含了一个布尔值，标示该 Response 成功（HTTP 状态码的范围在 200-299）。
+- Response.redirected 只读：表示该 Response 是否来自一个重定向，如果是的话，它的 URL 列表将会有多个条目。
+  - 检测重定向：直接检测 response.redirected 这个属性即可
+  - 禁用重定向：当调用 fetch() 时在 init 参数中设置重定向模式为 "error"
+- Response.status 只读：包含 Response 的状态码（例如 200 表示成功）。
+- Response.statusText 只读：包含了与该 Response 状态码一致的状态信息（例如，OK 对应 200）。
+- Response.type 只读：包含 Response 的类型（例如，basic、cors）。
+  - basic: 标准值，同源响应，带有所有的头部信息除了“Set-Cookie” 和 “Set-Cookie2″.
+  - cors: Response 接收到一个有效的跨域请求。部分 headers 和 body 可以被访问。
+  - error: 网络错误。没有有用的描述错误的信息。响应的状态为 0，header 为空且不可变。从 Response.error()中获得的响应的类型。
+  - opaque: 响应 “no-cors” 的跨域请求。
+- Response.url 只读：包含 Response 的 URL。
+- Response.useFinalURL：包含了一个布尔值，来标示这是否是该 Response 的最终 URL。
+
+Response 实现了 Body 接口，所以以下属性亦可用：
+
+- Body.body 只读：一个简单的 getter，用于暴露一个 ReadableStream 类型的 body 内容。
+- Body.bodyUsed 只读：包含了一个布尔值来标示该 Response 是否读取过 Body。
+
+#### Response 方法
+
+- Response.clone()：创建一个 Response 对象的克隆。
+  - 语法：`var response2 = response1.clone();`
+  - clone() 存在的主要原因是允许多次使用 Body 对象 (当它们是一次性使用的时候)。
+- Response.error()：返回一个绑定了网络错误的新的 Response 对象。
+  - 语法：`var errorResponse = Response.error();`
+  - 一个“错误”的响应不会真正地暴露给脚本：对 fetch() 的“错误”响应将会返回 promise 的 reject 状态。
+- Response.redirect()：用另一个 URL 创建一个新的 Response。
+  - 语法：`var response = Response.redirect(url, status);`
+    - url：新响应的来源 URL。
+    - status：用于 response 的可选的状态码
+
+Response 实现了 Body 接口，所以以下方法同样可用：
+
+- Body.arrayBuffer()：读取 Response 对象并且将它设置为已读（因为 Responses 对象被设置为了 stream 的方式，所以它们只能被读取一次），并返回一个被解析为 ArrayBuffer 格式的 Promise 对象。
+- Body.blob()：读取 Response 对象并且将它设置为已读（因为 Responses 对象被设置为了 stream 的方式，所以它们只能被读取一次），并返回一个被解析为 Blob 格式的 Promise 对象。
+- Body.formData()：读取 Response 对象并且将它设置为已读（因为 Responses 对象被设置为了 stream 的方式，所以它们只能被读取一次），并返回一个被解析为 FormData 格式的 Promise 对象。
+- Body.json()：读取 Response 对象并且将它设置为已读（因为 Responses 对象被设置为了 stream 的方式，所以它们只能被读取一次），并返回一个被解析为 JSON 格式的 Promise 对象。
+- Body.text()：读取 Response 对象并且将它设置为已读（因为 Responses 对象被设置为了 stream 的方式，所以它们只能被读取一次），并返回一个被解析为 USVString 格式的 Promise 对象。
+
 ## 方法
 
 ### fetch()
