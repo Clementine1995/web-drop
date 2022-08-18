@@ -527,3 +527,57 @@ accent-color 属性具有继承性，只需要在对应表单控件元素的祖�
 -webkit-mask-composite: destination-atop;
 -webkit-mask-composite: xor; /*只显示不重合的地方*/
 ```
+
+## overflow: clip
+
+从 Chrome 90 开始，overflow 新增的一个新特性 -- overflow: clip，使用它可以轻松的对溢出方向进行控制。
+
+overflow: clip: 与 overflow: hidden 的表现形式极为类似，也是对元素的 padding-box 进行裁剪。
+
+但是，它们有两点不同：
+
+- 也就是 overflow: clip 内部完全禁止任何形式的滚动
+- overflow: clip 可以从 x，y 轴方向上对裁剪进行，控制，而 overflow: hidden 不行。
+
+### overflow: clip && overflow: hidden 的表现
+
+来看对于不区分方向，overflow: clip 与 overflow: hidden 的表现形式：
+
+```html
+<style>
+  .hidden {
+    overflow: hidden;
+  }
+  .clip {
+    overflow: clip;
+  }
+</style>
+<div>
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+</div>
+<div class="hidden">
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+</div>
+<div class="clip">
+  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+</div>
+```
+
+设置了 3 个 DIV 容器，其中一个不设置 overflow，另外两个分别设置 overflow: clip 与 overflow: hidden。效果如下：
+
+![clip-img1](https://user-images.githubusercontent.com/8554143/184637404-4708dda0-ed73-4884-a1bf-81e80d15e4e0.png)
+
+此时，overflow: clip 与 overflow: hidden 的表现是一致的。
+
+### overflow: clip 在 x/y 轴上可单独设置
+
+然而，overflow: clip 的与众不同之处在于，它可以单独设置给 x 轴或者 y 轴，使得容器拥有某一个方向上的裁剪能力，而相对的另外一个方向，允许溢出。
+
+看看这个 DEMO：
+
+![clip-img2](https://user-images.githubusercontent.com/8554143/184638976-f5b2f99c-e941-4677-825a-160081ecc4d6.png)
+
+这里的现象值得注意：
+
+- 单单设置 overflow-x: hidden 或者 overflow-y: hidden，表现形式都和 overflow: hidden 一致，是全方位的裁剪
+- 而水平 x 或竖直 y 方向的 overflow-x: clip/ overflow-y: clip 配合另一个方向的 overflow-x: visible，却能够实现一个方向允许溢出，一个方向实现裁剪
