@@ -974,6 +974,23 @@ this.$emit("update:title", newValue)
 <div id="red"></div>
 ```
 
+### v-bind 动态绑定多个值
+
+如果有像这样的一个包含多个 attribute 的 JavaScript 对象：
+
+```js
+data() {
+  return {
+    objectOfAttrs: {
+      id: 'container',
+      class: 'wrapper'
+    }
+  }
+}
+```
+
+通过不带参数的 v-bind，可以将它们绑定到单个元素上：`<div v-bind="objectOfAttrs"></div>`
+
 ## VNode 生命周期事件
 
 在 Vue 2 中，可以通过事件来监听组件生命周期中的关键阶段。这些事件名都是以 hook: 前缀开头，并跟随相应的生命周期钩子的名字。
@@ -1091,3 +1108,30 @@ Vue 的响应性系统会缓存副作用函数，并异步地刷新它们，这�
 ### watch 与 watchEffect 共享的行为
 
 watch 与 watchEffect 共享停止侦听，清除副作用 (相应地 onInvalidate 会作为回调的第三个参数传入)、副作用刷新时机和侦听器调试行为。
+
+## DOM 中的根组件模板
+
+当在未采用构建流程的情况下使用 Vue 时，我们可以在挂载容器中直接书写根组件模板：
+
+```html
+<div id="app">
+  <button @click="count++">{{ count }}</button>
+</div>
+```
+
+```js
+import { createApp } from 'vue'
+
+const app = createApp({
+  data() {
+    return {
+      count: 0
+    }
+  }
+})
+
+app.mount('#app')
+
+```
+
+当根组件没有设置 template 选项时，Vue 将自动使用容器的 innerHTML 作为模板。
