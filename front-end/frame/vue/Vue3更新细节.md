@@ -1135,3 +1135,19 @@ app.mount('#app')
 ```
 
 当根组件没有设置 template 选项时，Vue 将自动使用容器的 innerHTML 作为模板。
+
+## 在内联事件处理器中访问事件参数
+
+有时需要在内联事件处理器中访问原生 DOM 事件。可以向该处理器方法传入一个特殊的 $event 变量，或者使用内联箭头函数：
+
+```template
+<!-- 使用特殊的 $event 变量 -->
+<button @click="warn('Form cannot be submitted yet.', $event)">
+  Submit
+</button>
+
+<!-- 使用内联箭头函数 -->
+<button @click="(event) => warn('Form cannot be submitted yet.', event)">
+  Submit
+</button>
+```
