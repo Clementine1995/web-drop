@@ -732,3 +732,214 @@ const attrs = useAttrs()
   </template>
 </base-layout>
 ```
+
+### 作用域插槽
+
+在某些场景下插槽的内容可能想要同时使用父组件域内和子组件域内的数据，可以像对组件传递 props 那样，向一个插槽的出口上传递 attributes：
+
+```template
+<!-- <MyComponent> 的模板 -->
+<div>
+  <slot :text="greetingMessage" :count="1"></slot>
+</div>
+```
+
+当需要接收插槽 props 时，默认插槽和具名插槽的使用方式有一些小区别。下面将先展示默认插槽如何接受 props，通过子组件标签上的 v-slot 指令，直接接收到了一个插槽 props 对象：
+
+```template
+<MyComponent v-slot="slotProps">
+  {{ slotProps.text }} {{ slotProps.count }}
+</MyComponent>
+```
+
+子组件传入插槽的 props 作为了 v-slot 指令的值，可以在插槽内的表达式中访问。
+
+可以将作用域插槽类比为一个传入子组件的函数。子组件会将相应的 props 作为参数传给它：
+
+```js
+MyComponent({
+  // 类比默认插槽，将其想成一个函数
+  default: (slotProps) => {
+    return `${slotProps.text} ${slotProps.count}`
+  }
+})
+
+function MyComponent(slots) {
+  const greetingMessage = 'hello'
+  return `<div>${
+    // 在插槽函数调用时传入 props
+    slots.default({ text: greetingMessage, count: 1 })
+  }</div>`
+}
+```
+
+v-slot="slotProps" 可以类比这里的函数签名，和函数的参数类似，也可以在 v-slot 中使用解构
+
+#### 具名作用域插槽
+
+具名作用域插槽的工作方式也是类似的，插槽 props 可以作为 v-slot 指令的值被访问到：v-slot:name="slotProps"。当使用缩写时是这样：
+
+```template
+<MyComponent>
+  <template #header="headerProps">
+    {{ headerProps }}
+  </template>
+
+  <template #default="defaultProps">
+    {{ defaultProps }}
+  </template>
+
+  <template #footer="footerProps">
+    {{ footerProps }}
+  </template>
+</MyComponent>
+```
+
+向具名插槽中传入 props：
+
+```template
+<slot name="header" message="hello"></slot>
+```
+
+注意插槽上的 name 是一个 Vue 特别保留的 attribute，不会作为 props 传递给插槽。
+
+## 依赖注入
+
+通常情况下，当我们需要从父组件向子组件传递数据时，会使用 props。某个深层的子组件需要一个较远的祖先组件中的部分数据，使用 props 则必须将其沿着组件链逐级传递下去，这会非常麻烦。
+
+provide 和 inject 可以帮助解决这一问题。一个父组件相对于其所有的后代组件，会作为依赖提供者。任何后代的组件树，无论层级有多深，都可以注入由父组件提供给整条链路的依赖。
+
+### Provide (提供)
+
+要为组件后代提供数据，需要使用到 provide() 函数：
+
+```vue
+<script setup>
+import { provide } from 'vue'
+
+provide(/* 注入名 */ 'message', /* 值 */ 'hello!')
+</script>
+```
+
+如果不使用 `<script setup>`，请确保 provide() 是在 setup() 同步调用的
+
+provide() 函数接收两个参数。第一个参数被称为注入名，可以是一个字符串或是一个 Symbol。后代组件会用注入名来查找期望注入的值。一个组件可以多次调用 provide()，使用不同的注入名，注入不同的依赖值。
+
+第二个参数是提供的值，值可以是任意类型，包括响应式的状态，比如一个 ref，提供的响应式状态使后代组件可以由此和提供者建立响应式的联系。
+
+### 应用层 Provide
+
+除了在一个组件中提供依赖，还可以在整个应用层面提供依赖：
+
+```js
+import { createApp } from 'vue'
+
+const app = createApp({})
+
+app.provide(/* 注入名 */ 'message', /* 值 */ 'hello!')
+```
+
+### Inject (注入)
+
+要注入上层组件提供的数据，需使用 inject() 函数：
+
+```vue
+<script setup>
+import { inject } from 'vue'
+
+const message = inject('message')
+</script>
+```
+
+如果提供的值是一个 ref，注入进来的会是该 ref 对象，而不会自动解包为其内部的值。
+
+### 和响应式数据配合使用
+
+当提供 / 注入响应式的数据时，建议尽可能将任何对响应式状态的变更都保持在供给方组件中。这样可以确保所提供状态的声明和变更操作都内聚在同一个组件内，使其更容易维护。
+
+有的时候可能需要在注入方组件中更改数据。在这种情况下，推荐在供给方组件内声明并提供一个更改数据的方法函数：
+
+```vue
+<!-- 在供给方组件内 -->
+<script setup>
+import { provide, ref } from 'vue'
+
+const location = ref('North Pole')
+
+function updateLocation() {
+  location.value = 'South Pole'
+}
+
+provide('location', {
+  location,
+  updateLocation
+})
+</script>
+
+<!-- 在注入方组件 -->
+<script setup>
+import { inject } from 'vue'
+
+const { location, updateLocation } = inject('location')
+</script>
+
+<template>
+  <button @click="updateLocation">{{ location }}</button>
+</template>
+```
+
+### 使用 Symbol 作注入名
+
+如果你正在构建大型的应用，包含非常多的依赖提供，或者你正在编写提供给其他开发者使用的组件库，建议最好使用 Symbol 来作为注入名以避免潜在的冲突。通常推荐在一个单独的文件中导出这些注入名 Symbol
+
+## 异步组件
+
+在大型项目中，可能需要拆分应用为更小的块，并仅在需要时再从服务器加载相关组件。Vue 提供了 defineAsyncComponent 方法来实现此功能：
+
+```js
+import { defineAsyncComponent } from 'vue'
+
+const AsyncComp = defineAsyncComponent(() => {
+  return new Promise((resolve, reject) => {
+    // ...从服务器获取组件
+    resolve(/* 获取到的组件 */)
+  })
+})
+// ... 像使用其他一般组件一样使用 `AsyncComp`
+```
+
+defineAsyncComponent 方法接收一个返回 Promise 的加载函数。这个 Promise 的 resolve 回调方法应该在从服务器获得组件定义时调用。也可以调用 reject(reason) 表明加载失败。
+
+ES 模块动态导入也会返回一个 Promise，所以多数情况下我们会将它和 defineAsyncComponent 搭配使用。因此也可以用它来导入 Vue 单文件组件：
+
+```js
+import { defineAsyncComponent } from 'vue'
+
+const AsyncComp = defineAsyncComponent(() =>
+  import('./components/MyComponent.vue')
+)
+```
+
+最后得到的 AsyncComp 是一个外层包装过的组件，仅在页面需要它渲染时才会调用加载内部实际组件的函数。它会将接收到的 props 和插槽传给内部组件，所以可以使用这个异步的包装组件无缝地替换原始组件，同时实现延迟加载。
+
+### 加载与错误状态
+
+异步操作不可避免地会涉及到加载和错误状态，因此 defineAsyncComponent() 也支持在高级选项中处理这些状态：
+
+```js
+const AsyncComp = defineAsyncComponent({
+  // 加载函数
+  loader: () => import('./Foo.vue'),
+
+  // 加载异步组件时使用的组件
+  loadingComponent: LoadingComponent,
+  // 展示加载组件前的延迟时间，默认为 200ms
+  delay: 200,
+
+  // 加载失败后展示的组件
+  errorComponent: ErrorComponent,
+  // 如果提供了一个 timeout 时间限制，并超时了
+  // 也会显示这里配置的报错组件，默认值是：Infinity
+  timeout: 3000
+})
+```
