@@ -89,17 +89,17 @@ interface Deck {
   createCardPicker(this: Deck): () => Card;
 }
 let deck: Deck = {
-		suits: ["hearts", "spades", "clubs", "diamonds"],
-		cards: Array(52),
-		// NOTE: The function now explicitly specifies that its callee must be of type Deck
-		createCardPicker: function(this: Deck) {
-				return () => {
-						let pickedCard = Math.floor(Math.random() * 52);
-						let pickedSuit = Math.floor(pickedCard / 13);
+  suits: ["hearts", "spades", "clubs", "diamonds"],
+  cards: Array(52),
+  // NOTE: The function now explicitly specifies that its callee must be of type Deck
+  createCardPicker: function(this: Deck) {
+    return () => {
+      let pickedCard = Math.floor(Math.random() * 52);
+      let pickedSuit = Math.floor(pickedCard / 13);
 
-						return {suit: this.suits[pickedSuit], card: pickedCard % 13};
-				}
-		}
+      return {suit: this.suits[pickedSuit], card: pickedCard % 13};
+    }
+  }
 }
 
 let cardPicker = deck.createCardPicker();
@@ -121,17 +121,17 @@ let suits = ["hearts", "spades", "clubs", "diamonds"];
 function pickCard(x: {suit: string; card: number; }[]): number;
 function pickCard(x: number): {suit: string; card: number; };
 function pickCard(x): any {
-	// Check to see if we're working with an object/array
-	// if so, they gave us the deck and we'll pick the card
-	if (typeof x == "object") {
-		let pickedCard = Math.floor(Math.random() * x.length);
-		return pickedCard;
-	}
-	// Otherwise just let them pick the card
-	else if (typeof x == "number") {
-		let pickedSuit = Math.floor(x / 13);
-		return { suit: suits[pickedSuit], card: x % 13 };
-	}
+  // Check to see if we're working with an object/array
+  // if so, they gave us the deck and we'll pick the card
+  if (typeof x == "object") {
+    let pickedCard = Math.floor(Math.random() * x.length);
+    return pickedCard;
+  }
+  // Otherwise just let them pick the card
+  else if (typeof x == "number") {
+    let pickedSuit = Math.floor(x / 13);
+    return { suit: suits[pickedSuit], card: x % 13 };
+  }
 }
 
 let myDeck = [{ suit: "diamonds", card: 2 }, { suit: "spades", card: 10 }, { suit: "hearts", card: 4 }];
@@ -141,3 +141,21 @@ alert("card: " + pickedCard1.card + " of " + pickedCard1.suit);
 let pickedCard2 = pickCard(15);
 alert("card: " + pickedCard2.card + " of " + pickedCard2.suit);
 ```
+
+## 调用签名
+
+In JavaScript, functions can have properties in addition to being callable. However, the function type expression syntax doesn’t allow for declaring properties. If we want to describe something callable with properties, we can write a call signature in an object type:
+
+在 JS 中，函数除了可以调用之外，还可以拥有属性，然而函数类型表达式语法不允许声明属性，如果想要描述可调用的东西拥有某些属性，可以通过对象类型来编写调用签名。
+
+```ts
+type DescribableFunction = {
+  description: string;
+  (someArg: number): boolean;
+};
+function doSomething(fn: DescribableFunction) {
+  console.log(fn.description + " returned " + fn(6));
+}
+```
+
+> 注意，与函数类型表达式声明语法不同，调用签名在参数列表和返回值类型之间使用 `:` 而不是 `=>`
