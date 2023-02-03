@@ -2,7 +2,7 @@
 
 记录日常积累的知识
 
-## 几个很不错的博客
+## 一些很不错的博客
 
 > [iCSS](https://github.com/chokcoco/iCSS/issues)
 >
