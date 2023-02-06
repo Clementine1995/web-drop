@@ -353,11 +353,263 @@ watch([fooRef, barRef], ([foo, bar], [prevFoo, prevBar]) => {
 - destroyed -> onUnmounted
 - errorCaptured -> onErrorCaptured
 
-同时还新增了两个 onRenderTracked，onRenderTriggered
+同时还新增了五个 onRenderTracked，onRenderTriggered，onActivated，onDeactivated，onServerPrefetch
+
+### onMounted
+
+注册一个回调函数，在组件挂载完成后执行。
+
+```ts
+function onMounted(callback: () => void): void
+```
+
+组件在以下情况下被视为已挂载：
+
+- 其所有同步子组件都已经被挂载 (不包含异步组件或 `<Suspense>` 树内的组件)。
+- 其自身的 DOM 树已经创建完成并插入了父容器中。注意仅当根容器在文档中时，才可以保证组件 DOM 树也在文档中。
+
+这个钩子通常用于执行需要访问组件所渲染的 DOM 树相关的副作用，或是在服务端渲染应用中用于确保 DOM 相关代码仅在客户端执行。这个钩子在服务器端渲染期间不会被调用。
+
+### onUpdated
+
+注册一个回调函数，在组件因为响应式状态变更而更新其 DOM 树之后调用。
+
+```ts
+function onUpdated(callback: () => void): void
+```
+
+- 父组件的更新钩子将在其子组件的更新钩子之后调用。
+- 这个钩子会在组件的任意 DOM 更新后被调用，这些更新可能是由不同的状态变更导致的。如果你需要在某个特定的状态更改后访问更新后的 DOM，请使用 nextTick() 作为替代。
+
+这个钩子在服务器端渲染期间不会被调用。
+
+### onUnmounted
+
+注册一个回调函数，在组件实例被卸载之后调用。
+
+一个组件在以下情况下被视为已卸载：
+
+- 其所有子组件都已经被卸载。
+- 所有相关的响应式作用 (渲染作用以及 setup() 时创建的计算属性和侦听器) 都已经停止。
+
+可以在这个钩子中手动清理一些副作用，例如计时器、DOM 事件监听器或者与服务器的连接。这个钩子在服务器端渲染期间不会被调用。
+
+### onBeforeMount
+
+注册一个钩子，在组件被挂载之前被调用。
+
+- 当这个钩子被调用时，组件已经完成了其响应式状态的设置，但还没有创建 DOM 节点。它即将首次执行 DOM 渲染过程。
+
+这个钩子在服务器端渲染期间不会被调用。
+
+### onBeforeUpdate
+
+注册一个钩子，在组件即将因为响应式状态变更而更新其 DOM 树之前调用。
+
+- 这个钩子可以用来在 Vue 更新 DOM 之前访问 DOM 状态。在这个钩子中更改状态也是安全的。
+
+这个钩子在服务器端渲染期间不会被调用。
+
+### onBeforeUnmount
+
+注册一个钩子，在组件实例被卸载之前调用。
+
+- 当这个钩子被调用时，组件实例依然还保有全部的功能。
+
+这个钩子在服务器端渲染期间不会被调用。
+
+### onErrorCaptured
+
+注册一个钩子，在捕获了后代组件传递的错误时调用。
+
+```ts
+function onErrorCaptured(callback: ErrorCapturedHook): void
+
+type ErrorCapturedHook = (
+  err: unknown,
+  instance: ComponentPublicInstance | null,
+  info: string
+) => boolean | void
+```
+
+错误可以从以下几个来源中捕获：
+
+- 组件渲染
+- 事件处理器
+- 生命周期钩子
+- setup() 函数
+- 侦听器
+- 自定义指令钩子
+- 过渡钩子
+
+这个钩子带有三个实参：错误对象、触发该错误的组件实例，以及一个说明错误来源类型的信息字符串。
+
+可以在 errorCaptured() 中更改组件状态来为用户显示一个错误状态。注意不要让错误状态再次渲染导致本次错误的内容，否则组件会陷入无限循环。
+
+这个钩子可以通过返回 false 来阻止错误继续向上传递。
+
+#### 错误传递规则
+
+- 默认情况下，所有的错误都会被发送到应用级的 app.config.errorHandler (前提是这个函数已经定义)，这样这些错误都能在一个统一的地方报告给分析服务。
+- 如果组件的继承链或组件链上存在多个 errorCaptured 钩子，对于同一个错误，这些钩子会被按从底至上的顺序一一调用。这个过程被称为“向上传递”，类似于原生 DOM 事件的冒泡机制。
+- 如果 errorCaptured 钩子本身抛出了一个错误，那么这个错误和原来捕获到的错误都将被发送到 app.config.errorHandler。
+- errorCaptured 钩子可以通过返回 false 来阻止错误继续向上传递。即表示“这个错误已经被处理了，应当被忽略”，它将阻止其他的 errorCaptured 钩子或 app.config.errorHandler 因这个错误而被调用。
+
+### onRenderTracked
+
+注册一个调试钩子，当组件渲染过程中追踪到响应式依赖时调用。
+
+这个钩子仅在开发模式下可用，且在服务器端渲染期间不会被调用。
+
+```ts
+function onRenderTracked(callback: DebuggerHook): void
+
+type DebuggerHook = (e: DebuggerEvent) => void
+
+type DebuggerEvent = {
+  effect: ReactiveEffect
+  target: object
+  type: TrackOpTypes /* 'get' | 'has' | 'iterate' */
+  key: any
+}
+```
+
+### onRenderTriggered
+
+注册一个调试钩子，当响应式依赖的变更触发了组件渲染时调用。
+
+这个钩子仅在开发模式下可用，且在服务器端渲染期间不会被调用。
+
+```ts
+function onRenderTriggered(callback: DebuggerHook): void
+
+type DebuggerHook = (e: DebuggerEvent) => void
+
+type DebuggerEvent = {
+  effect: ReactiveEffect
+  target: object
+  type: TriggerOpTypes /* 'set' | 'add' | 'delete' | 'clear' */
+  key: any
+  newValue?: any
+  oldValue?: any
+  oldTarget?: Map<any, any> | Set<any>
+}
+```
+
+### onActivated
+
+注册一个回调函数，若组件实例是 `<KeepAlive>` 缓存树的一部分，当组件被插入到 DOM 中时调用。
+
+这个钩子在服务器端渲染期间不会被调用。
+
+```ts
+function onActivated(callback: () => void): void
+```
+
+### onDeactivated
+
+注册一个回调函数，若组件实例是 `<KeepAlive>` 缓存树的一部分，当组件从 DOM 中被移除时调用。
+
+这个钩子在服务器端渲染期间不会被调用。
+
+```ts
+function onDeactivated(callback: () => void): void
+```
+
+### onServerPrefetch（SSR only）
+
+注册一个异步函数，在组件实例在服务器上被渲染之前调用。
+
+```ts
+function onServerPrefetch(callback: () => Promise<any>): void
+```
+
+- 如果这个钩子返回了一个 Promise，服务端渲染会在渲染该组件前等待该 Promise 完成。
+- 这个钩子仅会在服务端渲染中执行，可以用于执行一些仅存在于服务端的数据抓取过程。
 
 ## 依赖注入
 
 provide 和 inject 提供依赖注入，与 2 版本的 api 类似，也只能在 setup 中调用。可以使用 ref 来保证 provided 和 injected 之间值的响应
+
+### provide()
+
+提供一个值，可以被后代组件注入。
+
+```ts
+function provide<T>(key: InjectionKey<T> | string, value: T): void
+```
+
+- provide() 接受两个参数：第一个参数是要注入的 key，可以是一个字符串或者一个 symbol，第二个参数是要注入的值。
+- 当使用 TypeScript 时，key 可以是一个被类型断言为 InjectionKey 的 symbol。InjectionKey 是一个 Vue 提供的工具类型，继承自 Symbol，可以用来同步 provide() 和 inject() 之间值的类型。
+- 与注册生命周期钩子的 API 类似，provide() 必须在组件的 setup() 阶段同步调用。
+
+```vue
+<script setup>
+import { ref, provide } from 'vue'
+import { fooSymbol } from './injectionSymbols'
+
+// 提供静态值
+provide('foo', 'bar')
+
+// 提供响应式的值
+const count = ref(0)
+provide('count', count)
+
+// 提供时将 Symbol 作为 key
+provide(fooSymbol, count)
+</script>
+```
+
+### inject()
+
+注入一个由祖先组件或整个应用 (通过 app.provide()) 提供的值。
+
+```ts
+// 没有默认值
+function inject<T>(key: InjectionKey<T> | string): T | undefined
+
+// 带有默认值
+function inject<T>(key: InjectionKey<T> | string, defaultValue: T): T
+
+// 使用工厂函数
+function inject<T>(
+  key: InjectionKey<T> | string,
+  defaultValue: () => T,
+  treatDefaultAsFactory: true
+): T
+```
+
+- 第一个参数是注入的 key。Vue 会遍历父组件链，通过匹配 key 来确定所提供的值。如果父组件链上多个组件对同一个 key 提供了值，那么离得更近的组件将会“覆盖”链上更远的组件所提供的值。如果没有能通过 key 匹配到值，inject() 将返回 undefined，除非提供了一个默认值。
+- 第二个参数是可选的，即在没有匹配到 key 时使用的默认值。它也可以是一个工厂函数，用来返回某些创建起来比较复杂的值。如果默认值本身就是一个函数，那么你必须将 false 作为第三个参数传入，表明这个函数就是默认值，而不是一个工厂函数。
+- 与注册生命周期钩子的 API 类似，inject() 必须在组件的 setup() 阶段同步调用。
+- 当使用 TypeScript 时，key 可以是一个类型为 InjectionKey 的 symbol。InjectionKey 是一个 Vue 提供的工具类型，继承自 Symbol，可以用来同步 provide() 和 inject() 之间值的类型。
+
+假设有一个父组件已经提供了一些值，如前面 provide() 的例子中所示：
+
+```vue
+<script setup>
+import { inject } from 'vue'
+import { fooSymbol } from './injectionSymbols'
+
+// 注入值的默认方式
+const foo = inject('foo')
+
+// 注入响应式的值
+const count = inject('count')
+
+// 通过 Symbol 类型的 key 注入
+const foo2 = inject(fooSymbol)
+
+// 注入一个值，若为空则使用提供的默认值
+const bar = inject('foo', 'default value')
+
+// 注入一个值，若为空则使用提供的工厂函数
+const baz = inject('foo', () => new Map())
+
+// 注入时为了表明提供的默认值是个函数，需要传入第三个参数
+const fn = inject('function', () => {}, false)
+</script>
+```
 
 ## 模板 Refs
 
