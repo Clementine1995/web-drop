@@ -4,4 +4,4 @@
 >
 >[「中高级前端面试」JavaScript手写代码无敌秘籍](https://juejin.im/post/6844903809206976520)
 >
->[12道vue高频原理面试题,你能答出几道?](https://juejin.im/post/6844904031983239181#heading-18)
+>[12道vue高频原理面试题,你能答出几道?](https://juejin.im/post/6844904031983239181)
