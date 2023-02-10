@@ -1,5 +1,7 @@
 # Pinia
 
+> [Pinia 文档](https://pinia.web3doc.top/introduction.html)
+
 Pinia 是一个与 Vuex 类似的全局状态管理库，同时支持 Vue2 与 Vue3，与 Vuex 相比它去掉了 mutation 的概念。
 
 ## 定义 Store
