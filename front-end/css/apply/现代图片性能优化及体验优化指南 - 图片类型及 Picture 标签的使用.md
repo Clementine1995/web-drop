@@ -103,3 +103,81 @@ JPEG XL 由联合图像专家组（开发原始 JPEG 标准的同一组织）于
 支持无损 JPEG 转码，减小约 20％ 文件大小。
 渐进式解码，专为支持不同显示分辨率的响应式加载
 开源免费：具有使用三条款版BSD许可证的开源参考实现的免版税格式
+
+看看同一张图片，相同质量下的大小表现：
+
+![img4](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/4a8ac2df5e1a4cd8a682396cd7e6f79a~tplv-k3u1fbpfcp-watermark.image?)
+
+JPEG XL 是目前而言，最有可能全面替代传统图片格式（Gif、PNG、JPEG）的下一代标准，当然，在今天，需要看看其兼容性：
+
+![img5](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5255a0b646f349fd94f2394287e107be~tplv-k3u1fbpfcp-watermark.image?)
+
+目前的兼容有点离谱。Chrome 从 91 版本开始已经实验室性质支持了 .jxl 格式的图片，需要通过 --enable-features=JXL 配置开启，遗憾的是，从 Chrome 110 开始，Chrome 又不再支持 JPEG XL 。
+
+>Chrome 从 110 版本开始中弃用了对 JPEG-XL 的支持，谷歌的回答是，人们对 JPEG-XL 没有足够的兴趣，并且与现有格式相比也没有足够的优势。谷歌之前一直对 JPEG 的支持都是实验性的性质的，他们认为 JPEG XL 缺乏生态系统支持，并且该格式没有足够多的好处（相对 WebP 和 AVIF）。也就是说，目前而言，Chrome 对 WebP 和 AVIF 等替代格式更感兴趣。
+
+#### AVIF
+
+AVIF 是由开放媒体联盟 (AOM) 开发并于 2019 年发布的另一种最新图像格式。该格式基于 AV1 视频编解码器，源自视频帧。其特点如下：
+
+- 同样的，与传统图像格式（例如JPEG、GIF和PNG）相比，有着更佳的效率与更丰富的功能
+- 支持 Alpha 通道，支持动态图像和动画
+- 支持有损、无损压缩。AVIF 文件在低保真有损图像压缩方面表现出色（比 JPEG XL 更优）。压缩的 AVIF 图像保留了很高的图片质量，避免了恼人的压缩伪影等问题
+- 相对而言，AVIF 的解码和编码速度不如 JPEG XL，它不支持渐进式渲染
+
+最后，再看看兼容性，目前（2023-02-05）它的兼容性介于 WebP 与 JPEG XL 之间，看看 CaniUse 的数据：
+
+![img6](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/edab3b4b171b4e118924a62ce640f5c1~tplv-k3u1fbpfcp-watermark.image?)
+
+下图是 WebP vs JPEG XL vs AVIF 三者在图片解码上的性能表现：
+
+![img7](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/c6e8f975037f4aab8ac81a73b6aaf5b3~tplv-k3u1fbpfcp-watermark.image?)
+
+从图中可以看到，对于解码性能的对比，结果居然是 WebP > AVIF > JPEG XL 。JPEG XL 的编解码性能并没有其描述的那么强大。
+
+### 图片格式总结
+
+总结一下，WebP、AVIF 和 JPEG XL 都是浏览器不广泛支持的新型图像格式。虽然 WebP、AVIF 已经存在很长时间，但到今天，影响它们大规模使用的依旧是兼容问题。它们各自有各自的特点与优势，谁能胜出仍未知晓。
+
+虽然 AVIF、JPEG XL 等新型图片格式未得到任何浏览器的完全支持，但是在新版本的 Chrome、Firefox 和 Edge Chromium，可以使用配置标志启用对应图像格式，配合 HTML 的 Picture 标签，我们还是可以一定程度上对我们的图片进行格式选择上的优化的。
+
+### Picture 元素的使用
+
+HTML5 规范新增了 Picture Element。那么 `<picture>` 元素的作用是什么呢？
+
+`<picture>` 元素通过包含零或多个 `<source>` 元素和一个 `<img>` 元素来为不同的显示/设备场景提供图像版本。浏览器会选择最匹配的子 `<source>` 元素，如果没有匹配的，就选择 `<img>` 元素的 src 属性中的 URL。然后，所选图像呈现在 `<img>` 元素占据的空间中。
+
+怎么使用 `<picture>` 元素呢？
+
+假设，没有 `<picture>` ，只有 `<img>` 元素，我们想尽可能在支持一些现代图片格式的浏览器上使用类似于上述我们提到的 WebP、AVIF 和 JPEG XL 等图片格式，而不支持的浏览器回退使用常规的 JPEG、PNG 等。没错，就是一种渐进增强的思想，该怎么办呢？
+
+只能是 JavaScript 去写对应的逻辑，通过 JS 脚本进行特性查询，动态赋值给 `<img>` 的 src。
+
+而有了 `<picture>` 后，浏览器将原生支持上述的一些列操作，来看看对应的语法：
+
+```html
+<picture>
+  <!-- 可能是一些对兼容性有要求的，但是性能表现更好的现代图片格式-->
+  <source src="image.avif" type="image/avif">
+  <source src="image.jxl" type="image/jxl">
+  <source src="image.webp" type="image/webp">
+   <!-- 最终的兜底方案-->
+  <img src="image.jpg" type="image/jpeg">
+</picture> 
+```
+
+上述代码的含义是：
+
+- 第 1 个 source 元素指向新 AVIF 格式的图像。如果浏览器支持 AVIF 图像，那么它会选择该图像文件。否则，它将移动到下一个 source 元素。
+- 第 2个 source 元素指向新 JPEG XL 格式的图像。如果浏览器支持 JPEG XL 图像，那么它会选择该图像文件。否则，它将移动到下一个 source 元素。
+- 第 3 个 source 元素指向一张WebP 格式的图像。如果浏览器能够渲染 WebP 图像，它将使用该图像文件。
+- 否则浏览器将回退到使用 img 元素 src 属性中的图像文件。img 元素指向的是 JPEG 格式的图片，它是最终的兜底方案。
+
+这意味着现在我们可以在不牺牲向后兼容性的情况下开始使用新的图像格式。
+
+简而言之，`<picture>` 元素的作用：
+
+1. 通过 `<source>` 给出一系列对兼容性有所要求的现代图片格式选项
+2. 通过 `<img>` 给出兜底的高兼容性图片格式选项
+3. 浏览器通过对给出的图片格式做特性检测，要决定加载哪个 URL，user agent 检查每个 `<source>` 的 srcset、media 和 type 属性，来选择最匹配页面当前布局、显示设备特征等的兼容图像。
+4. 最终，所选图像呈现在 `<img>` 元素占据的空间中
