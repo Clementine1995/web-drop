@@ -1,8 +1,8 @@
 # 现代图片性能优化及体验优化指南 - 图片类型及 Picture 标签的使用
 
-> 原文[现代图片性能优化及体验优化指南 - 图片类型及 Picture 标签的使用](https://www.cnblogs.com/coco1s/p/17107807.html)
+> 原文 [现代图片性能优化及体验优化指南 - 图片类型及 Picture 标签的使用](https://www.cnblogs.com/coco1s/p/17107807.html)
 >
-> 参考[图像文件类型与格式指南](https://developer.mozilla.org/zh-CN/docs/Web/Media/Formats/Image_types)
+> 参考 [图像文件类型与格式指南](https://developer.mozilla.org/zh-CN/docs/Web/Media/Formats/Image_types)
 
 图片资源，在业务中可谓是占据了非常大头的一环，尤其是其对带宽的消耗是十分巨大的。
 
