@@ -212,6 +212,7 @@ column-break-before、column-break-after、column-break-inside 三个属性都�
 ## writing-mode
 
 writing-mode 属性定义了文本在水平或垂直方向上如何排布，这个属性属于多列布局，但是它也可以实现某些多列布局的效果。
+
 语法：`writing-mode: horizontal-tb | vertical-rl | vertical-lr | sideways-rl | sideways-lr`
 
 - horizontal-tb：水平方向自上而下的书写方式。即 left-right-top-bottom
