@@ -61,3 +61,12 @@ div {
 	left: 10px;
 }
 ```
+
+## -webkit-text-stroke
+
+CSS 属性 `-webkit-text-stroke` 指定了文本字符的笔触宽度和笔触颜色。此属性为全称属性 `-webkit-text-stroke-width` 和 `-webkit-text-stroke-color` 的简写属性。
+
+语法：`-webkit-text-stroke: <length> <color>;`
+
+- length：笔触宽度。
+- color：笔触颜色。
