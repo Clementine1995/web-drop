@@ -12,11 +12,10 @@
 
 ```css
 .card {
-    color: red;
-
-    & h2 {
-        color: blue;
-    }
+	color: red;
+	& h2 {
+		color: blue;
+	}
 }
 ```
 
@@ -24,27 +23,41 @@
 
 ```css
 div {
-    border: 1px solid #000;
-    
-    h3 {
-        color: red;
-        
-        span {
-            color: blue;
-        }
-    }
+	border: 1px solid #000;
+	h3 {
+		color: red;
+		span {
+			color: blue;
+		}
+	}
 }
 /*嵌套规则是不会生效的，此时，我们需要在标签名称选择器前，加上 & 符合：*/
 
 div {
-    border: 1px solid #000;
+	border: 1px solid #000;
+	& h3 {
+		color: red;
+	
+		& span {
+			color: blue;
+		}
+	}
+}
+```
 
-    & h3 {
-          color: red;
-    
-    & span {
-          color: blue;
-      }
-    }
+## inset 属性
+
+CSS 属性 inset 为简写属性，对应于 top、right、bottom 和 left 属性。其与 margin 简写属性具有相同的多值语法。
+
+```css
+div {
+	inset: 20px 40px 30px 10px;
+}
+/* 相当于 */
+div {
+	top: 20px;
+	right: 40px;
+	bottom: 30px;
+	left: 10px;
 }
 ```
