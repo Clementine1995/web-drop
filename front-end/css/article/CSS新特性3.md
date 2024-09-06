@@ -74,3 +74,13 @@ CSS 属性 `-webkit-text-stroke` 指定了文本字符的笔触宽度和笔触�
 ## text-wrap
 
 text-wrap 属性控制元素内文本的换行方式
+
+## align-content
+
+align-content 属性现在不仅可以调整 flex 布局和 grid 布局中元素沿交叉轴的对齐方式，也支持了块级元素中的垂直方向对齐方式。
+
+```css
+<div style="align-content: center; height: 100px;">
+  <code>align-content</code> 就是这么简单！
+</div>
+```
