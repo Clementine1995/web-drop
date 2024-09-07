@@ -1,6 +1,8 @@
 # Rust
 
 > [Rust 语言圣经](https://book.rust.team/into-rust.html)
+>
+> [Rust 语言圣经](https://course.rs/about-book.html)
 
 ## 认识 Cargo
 

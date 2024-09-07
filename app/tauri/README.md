@@ -1,3 +1,3 @@
 # Tauri
 
-> [Tauri官方文档](https://tauri.app/zh-cn/)
+> [Tauri v2官方文档](https://v2.tauri.app/zh-cn/)
