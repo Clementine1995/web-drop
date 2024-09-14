@@ -13,3 +13,5 @@
 > 相关链接 [三年前端还不会配置Nginx？刷完这篇就够了](https://juejin.cn/post/7270153705877241890)
 >
 > 相关链接 [从原理到实战，彻底搞懂Nginx（高级篇）](https://juejin.cn/post/6844904046789132301)
+>
+> 相关链接 [一文理清 nginx 中的 rewrite 配置](https://segmentfault.com/a/1190000022407797)
